@@ -1,0 +1,28 @@
+Package: SignallingSingleCell
+Type: Package
+Title: Network Analysis for single cell RNA sequencing Data (sc-RNASeq)
+Version: 1.0
+Author: Kyle Gellatly, UMASS Medical School, Garber Lab
+Maintainer: Kyle Gellatly <kyle.gellatly@umassmed.edu>
+Description: Preprocessing, Normalization, Dimensionality Reduction, Clustering, and Network Analysis for single cell RNA Sequencing Data
+License: What license is it under?
+Encoding: UTF-8
+LinkingTo: Rcpp
+LazyData: true
+Depends:
+    monocle,
+    scran,
+    fastICA,
+    kknn,
+    Rtsne,
+    reshape2,
+    ggplot2,
+    MASS,
+    cowplot,
+    igraph,
+    pheatmap
+VignetteBuilder: knitr
+Roxygen: list(wrap = FALSE)
+RoxygenNote: 6.0.1.9000
+Suggests: knitr,
+    rmarkdown
