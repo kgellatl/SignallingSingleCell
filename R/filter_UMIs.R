@@ -9,11 +9,15 @@
 #' filter_UMIs()
 filter_UMIs <- function(input, minUMI, maxUMI, threshold, minCells){
   cSum <- apply(input,2,sum)
+  range(cSum)
+  hist(cSum)
   Index <- which(cSum < minUMI)
   input_minUMI <- input[,-Index]
   cSum <- apply(input_minUMI,2,sum)
   Index <- which(cSum > maxUMI)
   input_minUMI_maxUMI <- input_minUMI[,-Index]
+  cSum <- apply(input_minUMI_maxUMI,2,sum)
+  hist(cSum)
   compThresh <- threshold
   gCount <- apply(input_minUMI_maxUMI,1,function(x) length(which(x>compThresh)))
   input_filtered <- input_minUMI_maxUMI[(which(gCount > minCells)),]
