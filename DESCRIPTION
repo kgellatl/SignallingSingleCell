@@ -1,7 +1,7 @@
 Package: SignallingSingleCell
 Type: Package
 Title: Network Analysis for single cell RNA sequencing Data (sc-RNASeq)
-Version: 0.1
+Version: 0.01
 Author: Kyle Gellatly, UMASS Medical School, Garber Lab
 Maintainer: Kyle Gellatly <kyle.gellatly@umassmed.edu>
 Description: Preprocessing, Normalization, Dimensionality Reduction, Clustering, and Network Analysis for single cell RNA Sequencing Data
