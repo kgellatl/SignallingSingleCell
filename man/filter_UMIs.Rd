@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_UMIs.R
 \name{filter_UMIs}
 \alias{filter_UMIs}
-\title{This function will filter based on min number of UMIs, max number of UMIs, and genes based on expression across all cells.}
+\title{Filter Cells based on Expression}
 \usage{
 filter_UMIs(input, minUMI, maxUMI, threshold, minCells)
 }
@@ -18,7 +18,9 @@ filter_UMIs(input, minUMI, maxUMI, threshold, minCells)
 \description{
 This function will filter based on min number of UMIs, max number of UMIs, and genes based on expression across all cells.
 }
-\examples{
-filter_UMIs()
+\details{
+When processing the data, low quality cells may contain very few UMIs, while some overrepresented cell barcodes may indicate barcode bleedover or celll doublets. Filtering out both low and high UMI count cells is recommended before normalization.
 }
-\keyword{cats}
+\examples{
+filtered_data <- filter_UMIs(input = mDC_0hr_1hr_4hr_CLEAN, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
+}
