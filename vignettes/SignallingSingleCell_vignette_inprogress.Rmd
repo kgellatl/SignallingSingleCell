@@ -20,12 +20,38 @@ library("SignallingSingleCell")
 load("~/Documents/Work/Garber/Data/inDrop/mDC_UMIClean/1-RawFiles/mDC_0hr_1hr_4hr_CLEAN.Rdata")
 ```
 
-## Preprocessing
+# Preprocessing
 
-The first step is to filter your data to remove low quality cells.
+## Filtering
 
-```{r, include=TRUE, cache=FALSE}
+The first step is to filter your data to remove low quality cells. Often creating a histogram of the values and assigning cutoffs is simple and effective. Typically we remove all cells lower than 1000 UMIs / cell.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 dim(mDC_0hr_1hr_4hr_CLEAN)
+sums_pre <- apply(mDC_0hr_1hr_4hr_CLEAN,2,sum)
+qplot(sums_pre, geom = "histogram")
 filtered_data <- filter_UMIs(input = mDC_0hr_1hr_4hr_CLEAN, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
 dim(filtered_data)
+sums_post <- apply(filtered_data,2,sum)
+qplot(sums_post, geom = "histogram")
+```
+
+## Initial Dimension reduction
+
+Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+prelim_dims <- dim_reduce(input = filtered_data, threshold = 5, minCells = 50, nComp_ICA = 10, tSNE_perp = 30)
+```
+
+From this we can map on our UMI counts before normalization to view if there is any bias.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+prelim_dims_tsne <- as.data.frame(prelim_dims[,c("x", "y")])
+prelim_dims_tsne$UMIs <- sums_post
+ggplot(prelim_dims_tsne) + 
+  geom_point(aes(x = x, y = y, col = UMIs)) +
+  scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
+  theme_classic() + 
+  labs(title= "Initial Positions", x = "tSNE[1]", y = "tSNE[2]")
 ```

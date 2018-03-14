@@ -2,6 +2,7 @@
 #'
 #' This function will filter based on min number of UMIs, max number of UMIs, and genes based on expression across all cells.
 #'
+#' @param input the input data matrix
 #' @param minUMI min number of UMIs per cell
 #' @param maxUMI max number of UMIs per cell
 #' @param threshold UMI threshold for gene detection
@@ -12,19 +13,22 @@
 #' @examples
 #' filtered_data <- filter_UMIs(input = mDC_0hr_1hr_4hr_CLEAN, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
 
-filter_UMIs <- function(input, minUMI, maxUMI, threshold, minCells){
+filter_UMIs <- function(input, minUMI, maxUMI=NA, threshold=NA, minCells=NA){
   cSum <- apply(input,2,sum)
-  range(cSum)
-  hist(cSum, main = "UMI distribution pre Filter")
   Index <- which(cSum < minUMI)
-  input_minUMI <- input[,-Index]
-  cSum <- apply(input_minUMI,2,sum)
-  Index <- which(cSum > maxUMI)
-  input_minUMI_maxUMI <- input_minUMI[,-Index]
-  cSum <- apply(input_minUMI_maxUMI,2,sum)
-  hist(cSum, main = "UMI distribution post Filter")
-  compThresh <- threshold
-  gCount <- apply(input_minUMI_maxUMI,1,function(x) length(which(x>compThresh)))
-  input_filtered <- input_minUMI_maxUMI[(which(gCount > minCells)),]
-  return(input_filtered)
+  input <- input[,-Index]
+  if(is.na(maxUMI) != TRUE){
+    cSum <- apply(input,2,sum)
+    Index <- which(cSum > maxUMI)
+    input <- input[,-Index]
+  }
+  cSum <- apply(input,2,sum)
+  if(is.na(threshold) != TRUE){
+    if(is.na(threshold) != TRUE){
+    }
+    compThresh <- threshold
+    gCount <- apply(input,1,function(x) length(which(x>compThresh)))
+    input <- input[(which(gCount > minCells)),]
+  }
+  return(input)
 }

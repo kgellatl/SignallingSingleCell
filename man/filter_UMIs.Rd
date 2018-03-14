@@ -4,9 +4,11 @@
 \alias{filter_UMIs}
 \title{Filter Cells based on Expression}
 \usage{
-filter_UMIs(input, minUMI, maxUMI, threshold, minCells)
+filter_UMIs(input, minUMI, maxUMI = NA, threshold = NA, minCells = NA)
 }
 \arguments{
+\item{input}{the input data matrix}
+
 \item{minUMI}{min number of UMIs per cell}
 
 \item{maxUMI}{max number of UMIs per cell}
