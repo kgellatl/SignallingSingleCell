@@ -41,7 +41,7 @@ qplot(sums_post, geom = "histogram")
 Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-prelim_dims <- dim_reduce(input = filtered_data, threshold = 5, minCells = 50, nComp_ICA = 10, tSNE_perp = 30)
+prelim_dims <- dim_reduce(input = filtered_data, threshold = 5, minCells = 50, nComp_ICA = 10, tSNE_perp = 30, print_progress = TRUE)
 ```
 
 From this we can map on our UMI counts before normalization to view if there is any bias.
@@ -54,4 +54,17 @@ ggplot(prelim_dims_tsne) +
   scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
   theme_classic() + 
   labs(title= "Initial Positions", x = "tSNE[1]", y = "tSNE[2]")
+```
+
+After viewing a large UMI bias we can now use spectral clustering for intial clustering before normalization. It looks as though there are about 5 clusters.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+prelim_dims_ICA <- as.data.frame(prelim_dims[,grep("ICA", colnames(prelim_dims))])
+spec <- kknn::specClust(prelim_dims_ICA, centers = 5, method = 'random-walk')
+prelim_dims_tsne$Cluster <- paste0("Cluster", spec$cluster)
+
+ggplot(prelim_dims_tsne) + 
+  geom_point(aes(x = x, y = y, col = Cluster)) +
+  theme_classic() + 
+  labs(title= "Initial Clusters", x = "tSNE[1]", y = "tSNE[2]")
 ```

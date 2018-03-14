@@ -10,17 +10,15 @@ Encoding: UTF-8
 LinkingTo: Rcpp
 LazyData: true
 Depends:
-    monocle,
-    scran,
+    R (>= 2.10.0),
+    methods,
+    Matrix (>= 1.2-6),
+    Biobase,
+    ggplot2 (>= 1.0.0),
+Imports:
     fastICA,
-    kknn,
     Rtsne,
-    reshape2,
-    ggplot2,
-    MASS,
-    cowplot,
-    igraph,
-    pheatmap
+    kknn
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1.9000

@@ -2,10 +2,10 @@
 % Please edit documentation in R/dim_reduce.R
 \name{dim_reduce}
 \alias{dim_reduce}
-\title{Initial Dimension Reduction and Clustering}
+\title{Initial Dimension Reduction}
 \usage{
 dim_reduce(input, threshold, minCells, nComp_ICA, tSNE_perp,
-  print_progress = TRUE)
+  print_progress = FALSE)
 }
 \arguments{
 \item{input}{the input data matrix}
@@ -25,5 +25,5 @@ This function will do a preliminary dimension reduction. This is necessary becau
 Before normalization preliminary clustering is needed in order to normalize internally within a cluster before normalizing across clusters. The minCells will be highly dependent on the number of cells in your dataset. In general aim to include genes expressed in no less than 1:100 cells, unless you have extremely rare cell types below that threshold.
 }
 \examples{
-filtered_data <- initial_dim_reduce(input = filtered_data, threshold = 5, minCells = 50, nComp_ICA = 10, tSNE_perp = 30)
+filtered_data <- initial_dim_reduce(input = filtered_data, threshold = 5, minCells = 50, nComp_ICA = 10, tSNE_perp = 30, print_progress=TRUE)
 }
