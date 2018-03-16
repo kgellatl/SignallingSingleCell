@@ -17,11 +17,8 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 
 ```{r, include=FALSE, cache=FALSE}
 library("SignallingSingleCell")
-# load("~/Documents/Work/Garber/Data/inDrop/mDC_UMIClean/1-RawFiles/mDC_0hr_1hr_4hr_CLEAN.Rdata")
-load("~/Documents/Work/Garber/Data/inDrop/Vitiligo/1_17_18/Vitiligo_1_17_18_1000UMI_MASTER.Rdata")
-master_data <- as.data.frame(master_data)
-master_data[is.na(master_data)] <- 0
-sc_dat <- master_data
+load("~/Documents/Work/Garber/Data/inDrop/mDC_UMIClean/1-RawFiles/mDC_0hr_1hr_4hr_CLEAN.Rdata")
+sc_dat <- mDC_0hr_1hr_4hr_CLEAN
 ```
 
 # Preprocessing
@@ -33,12 +30,14 @@ The first step is to filter your data to remove low quality cells. Often creatin
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 dim(sc_dat)
 sums_pre <- apply(sc_dat,2,sum)
+range(sums_pre)
 qplot(sums_pre, geom = "histogram")
 
-filtered_data <- filter_UMIs(input = sc_dat, minUMI = 1000, maxUMI = 100000, threshold = 1, minCells = 10)
+filtered_data <- filter_UMIs(input = sc_dat, minUMI = 1000, maxUMI = 7500, threshold = 1, minCells = 10)
 
 dim(filtered_data)
 sums_post <- apply(filtered_data,2,sum)
+range(sums_post)
 qplot(sums_post, geom = "histogram")
 ```
 

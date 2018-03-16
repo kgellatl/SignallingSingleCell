@@ -14,6 +14,14 @@
 #' filtered_data <- filter_UMIs(input = mDC_0hr_1hr_4hr_CLEAN, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
 
 filter_UMIs <- function(input, minUMI, maxUMI=NA, threshold=NA, minCells=NA){
+  if(is.na(threshold) != TRUE){
+    if(is.na(minCells) != TRUE){
+    }
+    print("Filtering Genes")
+    gCount <- apply(input,1,function(x) length(which(x>=threshold)))
+    input <- input[(which(gCount >= minCells)),]
+  }
+  print("Filtering Low Cells")
   cSum <- apply(input,2,sum)
   if(minUMI < min(cSum)){
     stop("minUMI is less than minimum number of UMIs in data")
@@ -23,18 +31,11 @@ filter_UMIs <- function(input, minUMI, maxUMI=NA, threshold=NA, minCells=NA){
     if(maxUMI > max(cSum)){
       stop("maxUMI is greater than maximum number of UMIs in data")
     }
+    print("Filtering High Cells")
     high_c <- which(cSum > maxUMI)
     input <- input[,-c(low_c, high_c)]
-  }
-  input <- input[,-low_c]
-  if(is.na(threshold) != TRUE){
-    if(is.na(threshold) != TRUE){
-    }
-    compThresh <- threshold
-    gCount <- apply(input,1,function(x) length(which(x>compThresh)))
-    input <- input[(which(gCount > minCells)),]
-  }
+  } else (
+    input <- input[,-low_c]
+  )
   return(input)
 }
-
-filtered_data <- filter_UMIs(input = sc_dat, minUMI = 2000, maxUMI = 10000, threshold = 1, minCells = 10)
