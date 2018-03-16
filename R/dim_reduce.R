@@ -1,18 +1,17 @@
 #' Initial Dimension Reduction
 #'
-#' This function will do a preliminary dimension reduction. This is necessary because normalization across cell types requires preliminary clusters.
+#' This function will do dimensionality reduction.
 #'
-#' @param input the input data matrix
-#' @param threshold UMI threshold for gene detection
-#' @param pre_reduce the algorithm choice for reduction before tSNE
-#' @param minCells number of cells expressed above threshold for a given gene
-#' @param nComp the number of components to reduce too before tSNE, 5-20 recommended
-#' @param tSNE_perp number of cells expressed above threshold for a given gene, 10-100 recommended
+#' @param input the input data matrix.
+#' @param threshold UMI threshold for gene detection.
+#' @param pre_reduce the algorithm choice for reduction before tSNE (either "ICA", "PCA", "iPCA").
+#' @param minCells number of cells expressed above threshold for a given gene.
+#' @param nComp the number of components to reduce too before tSNE, 5-20 recommended.
+#' @param tSNE_perp number of cells expressed above threshold for a given gene, 10-100 recommended.
+#' @param print_progress Print to the terminal progress information.
 #' @export
 #' @details
-#' Before normalization preliminary clustering is needed in order to normalize internally within a cluster before normalizing across clusters.
 #' The minCells will be highly dependent on the number of cells in your dataset. In general aim to include genes expressed in no less than 1:100 cells, unless you have extremely rare cell types below that threshold.
-#' Possible pre_reduce algorithms are ICA, PCA, iPCA, and sPCA.
 #' @examples
 #' filtered_data <- dim_reduce(input = filtered_data, threshold = 5, minCells = 50, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
 

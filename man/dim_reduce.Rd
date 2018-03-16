@@ -4,26 +4,30 @@
 \alias{dim_reduce}
 \title{Initial Dimension Reduction}
 \usage{
-dim_reduce(input, threshold, minCells, nComp_ICA, tSNE_perp,
-  print_progress = FALSE)
+dim_reduce(input, threshold = 5, minCells = 50, pre_reduce = "ICA",
+  nComp = 10, tSNE_perp = 30, print_progress = TRUE)
 }
 \arguments{
-\item{input}{the input data matrix}
+\item{input}{the input data matrix.}
 
-\item{threshold}{UMI threshold for gene detection}
+\item{threshold}{UMI threshold for gene detection.}
 
-\item{minCells}{number of cells expressed above threshold for a given gene}
+\item{minCells}{number of cells expressed above threshold for a given gene.}
 
-\item{nComp_ICA}{the number of ICA components to reduce too, 5-20 recommended}
+\item{pre_reduce}{the algorithm choice for reduction before tSNE (either "ICA", "PCA", "iPCA").}
 
-\item{tSNE_perp}{number of cells expressed above threshold for a given gene, 10-100 recommended}
+\item{nComp}{the number of components to reduce too before tSNE, 5-20 recommended.}
+
+\item{tSNE_perp}{number of cells expressed above threshold for a given gene, 10-100 recommended.}
+
+\item{print_progress}{Print to the terminal progress information.}
 }
 \description{
-This function will do a preliminary dimension reduction. This is necessary because normalization across cell types requires preliminary clusters.
+This function will do dimensionality reduction.
 }
 \details{
-Before normalization preliminary clustering is needed in order to normalize internally within a cluster before normalizing across clusters. The minCells will be highly dependent on the number of cells in your dataset. In general aim to include genes expressed in no less than 1:100 cells, unless you have extremely rare cell types below that threshold.
+The minCells will be highly dependent on the number of cells in your dataset. In general aim to include genes expressed in no less than 1:100 cells, unless you have extremely rare cell types below that threshold.
 }
 \examples{
-filtered_data <- initial_dim_reduce(input = filtered_data, threshold = 5, minCells = 50, nComp_ICA = 10, tSNE_perp = 30, print_progress=TRUE)
+filtered_data <- dim_reduce(input = filtered_data, threshold = 5, minCells = 50, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
 }
