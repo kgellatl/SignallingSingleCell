@@ -16,6 +16,7 @@ Depends:
     Biobase,
     ggplot2 (>= 1.0.0),
 Imports:
+    irlba,
     fastICA,
     Rtsne,
     kknn
