@@ -64,8 +64,8 @@ head(pData(ex_sc_example))
 Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters. First we can subset the genes, and then use these feature selected genes for dimension reduction.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-gene_subset <- subset_genes(exprs(ex_sc_example), threshold = 1, minCells = 10)
-prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], threshold = 5, minCells = 50, pre_reduce = "iPCA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
+gene_subset <- subset_genes(exprs(ex_sc_example), threshold = 5, minCells = 50)
+prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
 pData(ex_sc_example) <- cbind(pData(ex_sc_example), prelim_dims)
 head(pData(ex_sc_example))
 ```
@@ -73,16 +73,17 @@ head(pData(ex_sc_example))
 From this we can map on our UMI counts before normalization to view if there is any bias. We can also look at a gene of interest. To accomplish these we will take advantage of the ex_sc set once again.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-prelim_dims_tsne <- as.data.frame(prelim_dims[,c("x", "y")])
-prelim_dims_tsne$UMIs <- sums_post
+prelim_dims_tsne <- pData(ex_sc_example)[,c("x", "y")]
+prelim_dims_tsne$UMI_sum <- pData(ex_sc_example)$UMI_sum
 ggplot(prelim_dims_tsne) + 
-  geom_point(aes(x = x, y = y, col = UMIs)) +
+  geom_point(aes(x = x, y = y, col = UMI_sum)) +
   scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
   theme_classic() + 
   labs(title= "Initial Positions", x = "tSNE[1]", y = "tSNE[2]")
 
 gene <- "Lcn2"
 prelim_dims_tsne$gene <- log2(filtered_data[gene,]+2)-1
+prelim_dims_tsne <- prelim_dims_tsne[with(prelim_dims_tsne, order(prelim_dims_tsne[,"gene"])), ]
 
 ggplot(prelim_dims_tsne) + 
   geom_point(aes(x = x, y = y, col = gene)) +
@@ -93,8 +94,11 @@ ggplot(prelim_dims_tsne) +
 
 After viewing a large UMI bias we can now use spectral clustering for intial clustering before normalization. It looks as though there are about 5 clusters.
 
+## Initial Spectral Clustering
+
+
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-prelim_dims_ICA <- as.data.frame(prelim_dims[,grep("ICA", colnames(prelim_dims))])
+prelim_dims_ICA <- as.data.frame(prelim_dims[,grep("IC", colnames(pData(ex_sc_example)))])
 spec <- kknn::specClust(prelim_dims_ICA, centers = 5, method = 'random-walk')
 prelim_dims_tsne$Cluster <- paste0("Cluster", spec$cluster)
 
