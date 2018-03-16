@@ -46,7 +46,7 @@ qplot(sums_post, geom = "histogram")
 Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-prelim_dims <- dim_reduce(input = filtered_data, threshold = 5, minCells = 50, nComp_ICA = 10, tSNE_perp = 30, print_progress = TRUE)
+prelim_dims <- dim_reduce(input = filtered_data, threshold = 5, minCells = 50, pre_reduce = "iPCA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
 ```
 
 From this we can map on our UMI counts before normalization to view if there is any bias.
