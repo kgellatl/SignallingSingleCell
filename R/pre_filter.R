@@ -13,7 +13,7 @@
 #' @examples
 #' filtered_data <- filter_UMIs(input = mDC_0hr_1hr_4hr_CLEAN, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
 
-filter_UMIs <- function(input, minUMI, maxUMI=NA, threshold=NA, minCells=NA){
+pre_filter <- function(input, minUMI, maxUMI=NA, threshold=NA, minCells=NA){
   if(is.na(threshold) != TRUE){
     if(is.na(minCells) != TRUE){
     }
