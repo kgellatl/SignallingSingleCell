@@ -29,16 +29,16 @@ The first step is to filter your data to remove low quality cells. Often creatin
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 dim(sc_dat)
-sums_pre <- apply(sc_dat,2,sum)
-range(sums_pre)
-qplot(sums_pre, geom = "histogram")
+UMI_sum <- apply(sc_dat,2,sum)
+range(UMI_sum)
+qplot(UMI_sum, geom = "histogram")
 
-filtered_data <- filter_UMIs(input = sc_dat, minUMI = 1000, maxUMI = 7500, threshold = 1, minCells = 10)
+filtered_data <- pre_filter(input = sc_dat, minUMI = 1000, maxUMI = 7500, threshold = 1, minCells = 10)
 
 dim(filtered_data)
-sums_post <- apply(filtered_data,2,sum)
-range(sums_post)
-qplot(sums_post, geom = "histogram")
+UMI_sum <- apply(filtered_data,2,sum)
+range(UMI_sum)
+qplot(UMI_sum, geom = "histogram")
 ```
 
 ## Constructing the ExpressionSet Class
@@ -51,20 +51,26 @@ fData(ex_sc) is gene information, where rows are genes and columns are metadata
 ncol(exprs(ex_sc)) == nrow(pData(ex_sc))
 nrow(exprs(ex_sc)) == nrow(fData(ex_sc))
 
+Now that we have our first information (UMI counts per cell) we can write that into the pData.
 
 ```{r, include=FALSE, cache=FALSE}
 ex_sc_example <- construct_ex_sc(filtered_data)
+pData(ex_sc_example) <- cbind(pData(ex_sc_example), UMI_sum)
+head(pData(ex_sc_example))
 ```
 
 ## Initial Dimension reduction
 
-Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters.
+Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters. First we can subset the genes, and then use these feature selected genes for dimension reduction.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-prelim_dims <- dim_reduce(input = exprs(ex_sc_example), threshold = 5, minCells = 50, pre_reduce = "iPCA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
+gene_subset <- subset_genes(exprs(ex_sc_example), threshold = 1, minCells = 10)
+prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], threshold = 5, minCells = 50, pre_reduce = "iPCA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
+pData(ex_sc_example) <- cbind(pData(ex_sc_example), prelim_dims)
+head(pData(ex_sc_example))
 ```
 
-From this we can map on our UMI counts before normalization to view if there is any bias. We can also look at a gene of interest.
+From this we can map on our UMI counts before normalization to view if there is any bias. We can also look at a gene of interest. To accomplish these we will take advantage of the ex_sc set once again.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 prelim_dims_tsne <- as.data.frame(prelim_dims[,c("x", "y")])

@@ -3,9 +3,7 @@
 #' This function will do dimensionality reduction.
 #'
 #' @param input the input data matrix.
-#' @param threshold UMI threshold for gene detection.
 #' @param pre_reduce the algorithm choice for reduction before tSNE (either "ICA", "PCA", "iPCA").
-#' @param minCells number of cells expressed above threshold for a given gene.
 #' @param nComp the number of components to reduce too before tSNE, 5-20 recommended.
 #' @param tSNE_perp number of cells expressed above threshold for a given gene, 10-100 recommended.
 #' @param print_progress Print to the terminal progress information.
@@ -15,10 +13,8 @@
 #' @examples
 #' filtered_data <- dim_reduce(input = filtered_data, threshold = 5, minCells = 50, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
 
-dim_reduce <- function(input, threshold = 5, minCells = 50, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, print_progress=TRUE){
-  gCount <- apply(input,1,function(x) length(which(x>=threshold)))
-  gene_subset <- rownames(input[(which(gCount >= minCells)),])
-  input_scale <- scale(log2(input[gene_subset,]+2)-1)
+dim_reduce <- function(input, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, print_progress=TRUE){
+  input_scale <- scale(log2(input[,]+2)-1)
   if(pre_reduce == "ICA"){
     if(print_progress == TRUE){
       print("Starting ICA")
