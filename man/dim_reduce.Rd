@@ -4,15 +4,11 @@
 \alias{dim_reduce}
 \title{Initial Dimension Reduction}
 \usage{
-dim_reduce(input, threshold = 5, minCells = 50, pre_reduce = "ICA",
-  nComp = 10, tSNE_perp = 30, print_progress = TRUE)
+dim_reduce(input, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30,
+  print_progress = TRUE)
 }
 \arguments{
 \item{input}{the input data matrix.}
-
-\item{threshold}{UMI threshold for gene detection.}
-
-\item{minCells}{number of cells expressed above threshold for a given gene.}
 
 \item{pre_reduce}{the algorithm choice for reduction before tSNE (either "ICA", "PCA", "iPCA").}
 

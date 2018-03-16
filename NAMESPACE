@@ -3,3 +3,4 @@
 export(construct_ex_sc)
 export(dim_reduce)
 export(pre_filter)
+export(subset_genes)
