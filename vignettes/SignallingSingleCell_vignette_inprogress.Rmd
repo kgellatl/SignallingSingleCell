@@ -104,8 +104,8 @@ After viewing a large UMI bias we can now use spectral clustering for intial clu
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 prelim_dims_PCA <- as.data.frame(pData(ex_sc_example)[,grep("PC", colnames(pData(ex_sc_example)))])
-spec <- kknn::specClust(prelim_dims_PCA, centers = 6, method = 'random-walk')
-pData(ex_sc_example)$Cluster <- paste0("Cluster", spec$cluster)
+clusters <- cluster_sc(input = prelim_dims_PCA, method = "spectral", num_clust = 6)
+pData(ex_sc_example)$Cluster <- paste0("Cluster", clusters)
 
 ggplot(pData(ex_sc_example)) + 
   geom_point(aes(x = x, y = y, col = Cluster)) +
