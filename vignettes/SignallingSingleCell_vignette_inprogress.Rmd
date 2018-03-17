@@ -3,11 +3,20 @@ title: "SignallingSingleCell"
 geometry: margin=2cm
 author: "Kyle Gellatly"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output:
+  html_document:
+    highlight: tango
+    theme: cerulean
+    toc: yes
+    toc_float : yes
+# pdf_document:
+#   highlight: tango
+#   toc: yes
+# output: rmarkdown::html_vignette
+# vignette: >
+#   %\VignetteIndexEntry{Vignette Title}
+#   %\VignetteEngine{knitr::rmarkdown}
+#   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE, warning=FALSE, error=FALSE}
@@ -41,15 +50,15 @@ range(UMI_sum)
 qplot(UMI_sum, geom = "histogram")
 ```
 
-## Constructing the ExpressionSet Class, MANDATORY
+## Constructing the ExpressionSet Class, MANDATORY  
 
-The ExpressionSet class (ex_sc) is an extremely convienient data structure that contains 3 dataframes. Now that we have a filtered dataset it can be stored in this format.
+The ExpressionSet class (ex_sc) is an extremely convienient data structure that contains 3 dataframes. Now that we have a filtered dataset it can be stored in this format.  
 
-exprs(ex_sc) is the expression data
-pData(ex_sc) is cell information, where rows are cells and columns are metadata
-fData(ex_sc) is gene information, where rows are genes and columns are metadata
-ncol(exprs(ex_sc)) == nrow(pData(ex_sc))
-nrow(exprs(ex_sc)) == nrow(fData(ex_sc))
+exprs(ex_sc) is the expression data  
+pData(ex_sc) is cell information, where rows are cells and columns are metadata  
+fData(ex_sc) is gene information, where rows are genes and columns are metadata  
+ncol(exprs(ex_sc)) == nrow(pData(ex_sc))  
+nrow(exprs(ex_sc)) == nrow(fData(ex_sc))  
 
 Now that we have our first information (UMI counts per cell) we can write that into the pData.
 
@@ -64,8 +73,8 @@ head(pData(ex_sc_example))
 Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters. First we can subset the genes, and then use these feature selected genes for dimension reduction.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-gene_subset1 <- subset_genes(input = exprs(ex_sc_example), threshold = 3, minCells = 30, method = "CV", cutoff = 0.5)
-prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=TRUE)
+gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "Expression", threshold = 5, minCells = 50)
+prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=FALSE)
 pData(ex_sc_example) <- cbind(pData(ex_sc_example), prelim_dims)
 head(pData(ex_sc_example))
 ```
@@ -89,7 +98,7 @@ ggplot(prelim_dims_tsne) +
   labs(title= gene, x = "tSNE[1]", y = "tSNE[2]")
 ```
 
-After viewing a large UMI bias we can now use spectral clustering for intial clustering before normalization. It looks as though there are about 5 clusters.
+After viewing a large UMI bias we can now use spectral clustering for intial clustering before normalization. It looks as though there are about 6 clusters.
 
 ## Initial Clustering, MANDATORY
 
