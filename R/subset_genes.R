@@ -5,13 +5,39 @@
 #' @param input the input data matrix.
 #' @param threshold UMI threshold for gene detection
 #' @param minCells number of cells expressed above threshold for a given gene
+#' @param method can either be "CV" or "PCA"
+#' @param nComp if method = PCA, the number of components to keep
+#' @param cutoff the percentile of genes by coefficient of variation or PCA loadings to keep
+
 #' @export
 #' @details
 #' This selects genes.
 #' @examples
-#' gene_subset <- subset_genes(exprs(ex_sc_example), threshold = 1, minCells = 10)
+#' gene_subset <- subset_genes(input = exprs(ex_sc_example), threshold = 3, minCells = 30, method = "CV", nComp = 15, cutoff = 0.5)
 
-subset_genes <- function(input, threshold, minCells){
-  gCount <- apply(input,1,function(x) length(which(x>=threshold)))
-  gene_subset <- rownames(input[(which(gCount >= minCells)),])
+subset_genes <- function(input, threshold, minCells, method, nComp, cutoff){
+  if(method == "CV"){
+    gCount <- apply(input,1,function(x) length(which(x>=threshold)))
+    gene_subset <- rownames(input[(which(gCount >= minCells)),])
+    g_exp <- log2(input[gene_subset,]+2)-1
+    gmeans <- apply(g_exp,1,mean)
+    gsd <- apply(g_exp,1,sd)
+    CV <- gsd / gmeans
+    CV <- CV[order(CV)]
+    gene_subset <- names(CV[round(length(CV)*cutoff):length(CV)])
+  }
+  if(method == "PCA"){
+    gCount <- apply(input,1,function(x) length(which(x>=threshold)))
+    gene_subset <- rownames(input[(which(gCount >= minCells)),])
+    input_scale <- scale(log2(input[gene_subset,]+2)-1)
+    pc <- irlba::prcomp_irlba(t(input_scale), 30, center = F)
+    rownames(pc$rotation) <- gene_subset
+    d <- mahalanobis(pc$rotation[,1:nComp], center=rep(0, nComp), cov = cov(pc$rotation[,1:nComp]))
+    dThresh <- quantile(d,cutoff)
+    gene_subset <- names(which(d>dThresh))
+  }
+  return(gene_subset)
 }
+
+
+

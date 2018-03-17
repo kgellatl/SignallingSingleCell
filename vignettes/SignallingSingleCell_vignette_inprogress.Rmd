@@ -10,12 +10,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, warning=FALSE, error=FALSE}
 knitr::opts_chunk$set(echo = TRUE, comment = "")
 ```
 
 
-```{r, include=FALSE, cache=FALSE}
+```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
 library("SignallingSingleCell")
 load("~/Documents/Work/Garber/Data/inDrop/mDC_UMIClean/1-RawFiles/mDC_0hr_1hr_4hr_CLEAN.Rdata")
 sc_dat <- mDC_0hr_1hr_4hr_CLEAN
@@ -23,7 +23,7 @@ sc_dat <- mDC_0hr_1hr_4hr_CLEAN
 
 # Preprocessing
 
-## Filtering
+## Filtering, OPTIONAL
 
 The first step is to filter your data to remove low quality cells. Often creating a histogram of the values and assigning cutoffs is simple and effective. Typically we remove all cells lower than 1000 UMIs / cell.
 
@@ -41,7 +41,7 @@ range(UMI_sum)
 qplot(UMI_sum, geom = "histogram")
 ```
 
-## Constructing the ExpressionSet Class
+## Constructing the ExpressionSet Class, MANDATORY
 
 The ExpressionSet class (ex_sc) is an extremely convienient data structure that contains 3 dataframes. Now that we have a filtered dataset it can be stored in this format.
 
@@ -53,19 +53,19 @@ nrow(exprs(ex_sc)) == nrow(fData(ex_sc))
 
 Now that we have our first information (UMI counts per cell) we can write that into the pData.
 
-```{r, include=FALSE, cache=FALSE}
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- construct_ex_sc(filtered_data)
 pData(ex_sc_example) <- cbind(pData(ex_sc_example), UMI_sum)
 head(pData(ex_sc_example))
 ```
 
-## Initial Dimension reduction
+## Initial Dimension reduction, MANDATORY
 
 Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters. First we can subset the genes, and then use these feature selected genes for dimension reduction.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 gene_subset <- subset_genes(exprs(ex_sc_example), threshold = 5, minCells = 50)
-prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
+prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=FALSE)
 pData(ex_sc_example) <- cbind(pData(ex_sc_example), prelim_dims)
 head(pData(ex_sc_example))
 ```
@@ -73,8 +73,7 @@ head(pData(ex_sc_example))
 From this we can map on our UMI counts before normalization to view if there is any bias. We can also look at a gene of interest. To accomplish these we will take advantage of the ex_sc set once again.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-prelim_dims_tsne <- pData(ex_sc_example)[,c("x", "y")]
-prelim_dims_tsne$UMI_sum <- pData(ex_sc_example)$UMI_sum
+prelim_dims_tsne <- pData(ex_sc_example)[,c("x", "y", "UMI_sum")]
 ggplot(prelim_dims_tsne) + 
   geom_point(aes(x = x, y = y, col = UMI_sum)) +
   scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
@@ -83,8 +82,6 @@ ggplot(prelim_dims_tsne) +
 
 gene <- "Lcn2"
 prelim_dims_tsne$gene <- log2(filtered_data[gene,]+2)-1
-prelim_dims_tsne <- prelim_dims_tsne[with(prelim_dims_tsne, order(prelim_dims_tsne[,"gene"])), ]
-
 ggplot(prelim_dims_tsne) + 
   geom_point(aes(x = x, y = y, col = gene)) +
   scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
@@ -94,15 +91,14 @@ ggplot(prelim_dims_tsne) +
 
 After viewing a large UMI bias we can now use spectral clustering for intial clustering before normalization. It looks as though there are about 5 clusters.
 
-## Initial Spectral Clustering
-
+## Initial Clustering, MANDATORY
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-prelim_dims_ICA <- as.data.frame(prelim_dims[,grep("IC", colnames(pData(ex_sc_example)))])
-spec <- kknn::specClust(prelim_dims_ICA, centers = 5, method = 'random-walk')
-prelim_dims_tsne$Cluster <- paste0("Cluster", spec$cluster)
+prelim_dims_PCA <- as.data.frame(pData(ex_sc_example)[,grep("PC", colnames(pData(ex_sc_example)))])
+spec <- kknn::specClust(prelim_dims_PCA, centers = 6, method = 'random-walk')
+pData(ex_sc_example)$Cluster <- paste0("Cluster", spec$cluster)
 
-ggplot(prelim_dims_tsne) + 
+ggplot(pData(ex_sc_example)) + 
   geom_point(aes(x = x, y = y, col = Cluster)) +
   theme_classic() + 
   labs(title= "Initial Clusters", x = "tSNE[1]", y = "tSNE[2]")
