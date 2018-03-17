@@ -11,8 +11,13 @@
 #' clusters <- cluster_sc(input = exprs(ex_sc_example), method = "spectral", num_clust)
 
 cluster_sc <- function(input, method, num_clust){
-  spec <- kknn::specClust(prelim_dims_PCA, centers = num_clust, method = 'random-walk')
-  return(spec$cluster)
+  if(method == "spectral"){
+    spec <- kknn::specClust(prelim_dims_PCA, centers = num_clust, method = 'random-walk')
+    cluster <- spec$cluster
+  }
+  if(method == "density"){
+  }
+  return(cluster)
 }
 
 
