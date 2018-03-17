@@ -5,7 +5,7 @@
 #' @param input the input data matrix.
 #' @param threshold UMI threshold for gene detection
 #' @param minCells number of cells expressed above threshold for a given gene
-#' @param method can either be "CV" or "PCA"
+#' @param method can either be "Expression", CV", or "PCA"
 #' @param nComp if method = PCA, the number of components to keep
 #' @param cutoff the percentile of genes by coefficient of variation or PCA loadings to keep
 
@@ -13,9 +13,13 @@
 #' @details
 #' This selects genes.
 #' @examples
-#' gene_subset <- subset_genes(input = exprs(ex_sc_example), threshold = 3, minCells = 30, method = "CV", nComp = 15, cutoff = 0.5)
+#' gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "CV", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.5)
 
-subset_genes <- function(input, threshold, minCells, method, nComp, cutoff){
+subset_genes <- function(input, method, threshold, minCells, nComp, cutoff){
+  if(method == "Expression"){
+    gCount <- apply(input,1,function(x) length(which(x>=threshold)))
+    gene_subset <- rownames(input[(which(gCount >= minCells)),])
+  }
   if(method == "CV"){
     gCount <- apply(input,1,function(x) length(which(x>=threshold)))
     gene_subset <- rownames(input[(which(gCount >= minCells)),])

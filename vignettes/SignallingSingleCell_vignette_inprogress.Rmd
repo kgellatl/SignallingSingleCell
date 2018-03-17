@@ -64,8 +64,8 @@ head(pData(ex_sc_example))
 Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters. First we can subset the genes, and then use these feature selected genes for dimension reduction.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-gene_subset <- subset_genes(exprs(ex_sc_example), threshold = 5, minCells = 50)
-prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=FALSE)
+gene_subset1 <- subset_genes(input = exprs(ex_sc_example), threshold = 3, minCells = 30, method = "CV", cutoff = 0.5)
+prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=TRUE)
 pData(ex_sc_example) <- cbind(pData(ex_sc_example), prelim_dims)
 head(pData(ex_sc_example))
 ```

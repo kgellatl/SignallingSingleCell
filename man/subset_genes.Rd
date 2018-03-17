@@ -4,16 +4,16 @@
 \alias{subset_genes}
 \title{Select Genes}
 \usage{
-subset_genes(input, threshold, minCells, method, nComp, cutoff)
+subset_genes(input, method, threshold, minCells, nComp, cutoff)
 }
 \arguments{
 \item{input}{the input data matrix.}
 
+\item{method}{can either be "Expression", CV", or "PCA"}
+
 \item{threshold}{UMI threshold for gene detection}
 
 \item{minCells}{number of cells expressed above threshold for a given gene}
-
-\item{method}{can either be "CV" or "PCA"}
 
 \item{nComp}{if method = PCA, the number of components to keep}
 
@@ -26,5 +26,5 @@ This will select genes based on minimum expression and coefficient of variation,
 This selects genes.
 }
 \examples{
-gene_subset <- subset_genes(input = exprs(ex_sc_example), threshold = 3, minCells = 30, method = "CV", nComp = 15, cutoff = 0.5)
+gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "CV", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.5)
 }
