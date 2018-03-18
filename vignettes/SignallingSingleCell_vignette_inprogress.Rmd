@@ -40,9 +40,9 @@ The first step is to filter your data to remove low quality cells. Often creatin
 dim(sc_dat)
 UMI_sum <- apply(sc_dat,2,sum)
 range(UMI_sum)
-qplot(UMI_sum, geom = "histogram")
+qplot(UMI_sum, geom = "histogram")  
 
-filtered_data <- pre_filter(input = sc_dat, minUMI = 1000, maxUMI = 7500, threshold = 1, minCells = 10)
+filtered_data <- pre_filter(input = sc_dat, minUMI = 1000, maxUMI = 7500, threshold = 1, minCells = 10)  
 
 dim(filtered_data)
 UMI_sum <- apply(filtered_data,2,sum)
@@ -63,7 +63,8 @@ nrow(exprs(ex_sc)) == nrow(fData(ex_sc))
 Now that we have our first information (UMI counts per cell) we can write that into the pData.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc_example <- construct_ex_sc(filtered_data)
+ex_sc_example <- construct_ex_sc(filtered_data)  
+
 pData(ex_sc_example) <- cbind(pData(ex_sc_example), UMI_sum)
 head(pData(ex_sc_example))
 ```
@@ -73,8 +74,10 @@ head(pData(ex_sc_example))
 Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters. First we can subset the genes, and then use these feature selected genes for dimension reduction.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "Expression", threshold = 5, minCells = 50)
-prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=FALSE)
+gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "Expression", threshold = 5, minCells = 50)  
+
+prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=FALSE)  
+
 pData(ex_sc_example) <- cbind(pData(ex_sc_example), prelim_dims)
 head(pData(ex_sc_example))
 ```
@@ -87,7 +90,7 @@ ggplot(prelim_dims_tsne) +
   geom_point(aes(x = x, y = y, col = UMI_sum)) +
   scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
   theme_classic() + 
-  labs(title= "Initial Positions", x = "tSNE[1]", y = "tSNE[2]")
+  labs(title= "Initial Positions", x = "tSNE[1]", y = "tSNE[2]")  
 
 gene <- "Lcn2"
 prelim_dims_tsne$gene <- log2(filtered_data[gene,]+2)-1
@@ -104,8 +107,9 @@ After viewing a large UMI bias we can now use spectral clustering for intial clu
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 prelim_dims_PCA <- as.data.frame(pData(ex_sc_example)[,grep("PC", colnames(pData(ex_sc_example)))])
-clusters <- cluster_sc(input = prelim_dims_PCA, method = "spectral", num_clust = 6)
-pData(ex_sc_example)$Cluster <- paste0("Cluster", clusters)
+clusters <- cluster_sc(input = prelim_dims_PCA, method = "spectral", num_clust = 6)  
+
+pData(ex_sc_example)$Cluster <- paste0("Cluster", clusters)  
 
 ggplot(pData(ex_sc_example)) + 
   geom_point(aes(x = x, y = y, col = Cluster)) +
