@@ -26,8 +26,11 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 
 ```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
 library("SignallingSingleCell")
-load("~/Documents/Work/Garber/Data/inDrop/mDC_UMIClean/1-RawFiles/mDC_0hr_1hr_4hr_CLEAN.Rdata")
-sc_dat <- mDC_0hr_1hr_4hr_CLEAN
+# load("~/Documents/Work/Garber/Data/inDrop/mDC_UMIClean/1-RawFiles/mDC_0hr_1hr_4hr_CLEAN.Rdata")
+# sc_dat <- mDC_0hr_1hr_4hr_CLEAN
+
+load("/Users/KGellatly/Documents/Work/Garber/Data/inDrop/Vitiligo/1_29_18/Vitiligo_1_29_18_1000UMI_MASTER.Rdata")
+sc_dat <- master_data
 ```
 
 # Preprocessing
@@ -42,14 +45,9 @@ fData(ex_sc) is gene information, where rows are genes and columns are metadata
 ncol(exprs(ex_sc)) == nrow(pData(ex_sc))  
 nrow(exprs(ex_sc)) == nrow(fData(ex_sc))  
 
-Now that we have our first information (UMI counts per cell) we can write that into the pData.
-
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc_example <- construct_ex_sc(filtered_data) 
+ex_sc_example <- construct_ex_sc(sc_dat) 
 ex_sc_example
-
-pData(ex_sc_example) <- cbind(pData(ex_sc_example), UMI_sum)
-head(pData(ex_sc_example))
 ```
 
 ## Filtering
@@ -57,16 +55,12 @@ head(pData(ex_sc_example))
 The first step is to filter your data to remove low quality cells. Often creating a histogram of the values and assigning cutoffs is simple and effective. Typically we remove all cells lower than 1000 UMIs / cell.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-UMI_sum <- apply(sc_dat,2,sum)
-range(UMI_sum)
-qplot(UMI_sum, geom = "histogram")  
+ex_sc_example <- calc_libsize(ex_sc_example)
+draw_density(input = ex_sc_example, val = "UMIs", statistic = "mean")  
 
-filtered_data <- pre_filter(input = sc_dat, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 10000)  
-
-UMI_sum <- apply(filtered_data,2,sum)
-range(UMI_sum)
-qplot(UMI_sum, geom = "histogram")
-dim(filtered_data)
+ex_sc_example <- pre_filter(input = ex_sc_example, threshold = 1, minCells = 10, minUMI = 1010, maxUMI = 10000)  
+ex_sc_example <- calc_libsize(ex_sc_example)
+draw_density(input = ex_sc_example, val = "UMIs", statistic = "mean")
 ```
 
 
@@ -77,30 +71,10 @@ Before normalization preliminary dimensionality reduction is necessary to form p
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 gene_subset <- subset_genes(input = ex_sc_example, method = "PCA", threshold = 3, minCells = 30, nComp = 10, cutoff = 0.75)  
 
-ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=TRUE)  
+ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  
 
 head(pData(ex_sc_example))
-```
 
-From this we can map on our UMI counts before normalization to view if there is any bias. We can also look at a gene of interest. To accomplish these we will take advantage of the ex_sc set once again.
-
-```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-prelim_dims_tsne <- pData(ex_sc_example)[,c("x", "y", "UMI_sum")]  
-
-ggplot(prelim_dims_tsne) + 
-  geom_point(aes(x = x, y = y, col = log10(UMI_sum))) +
-  scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
-  theme_classic() + 
-  labs(title= "Initial Positions", x = "tSNE[1]", y = "tSNE[2]")  
-
-gene <- "Ccl22"
-prelim_dims_tsne$gene <- log2(filtered_data[gene,]+2)-1  
-
-ggplot(prelim_dims_tsne) + 
-  geom_point(aes(x = x, y = y, col = gene)) +
-  scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
-  theme_classic() + 
-  labs(title= gene, x = "tSNE[1]", y = "tSNE[2]")
 ```
 
 ## Initial Clustering
@@ -110,12 +84,22 @@ After viewing a large UMI bias we can now use spectral clustering for intial clu
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- cluster_sc(input = ex_sc_example, dimension = "Comp", method = "spectral", num_clust = 6)  
 
-### Make a plot clusters function!!!
-
 ggplot(pData(ex_sc_example)) + 
   geom_point(aes(x = x, y = y, col = Cluster)) +
   theme_classic() + 
   labs(title= "Initial Clusters", x = "tSNE[1]", y = "tSNE[2]")
+# ggplot2::ggsave("Vitiligo_Clusters.pdf", width = 6, height = 6, useDingbats = F)
+
+ggplot(pData(ex_sc_example)) + 
+  scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
+  geom_point(aes(x = x, y = y, col = log10(UMI_sum))) +
+  theme_classic() + 
+  labs(title= "Initial Clusters", x = "tSNE[1]", y = "tSNE[2]")
+# ggplot2::ggsave("Vitiligo_tSNE_UMI.pdf", width = 6, height = 6, useDingbats = F)
+
+draw_density(input = ex_sc_example, val = "UMIs", var1 = "Cluster", statistic = "mean")
+#  ggplot2::ggsave("Vitiligo_density_UMI.pdf", width = 6, height = 6, useDingbats = F)
+
 ```
 
 ## Identify markers and reference genes
@@ -124,9 +108,18 @@ For normalization and cluster id a function is provided that will id both marker
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- id_markers(input = ex_sc_example, num_markers = 50, num_reference = 1000)
+rownames(fData(ex_sc_example))[which(fData(ex_sc_example)$Markers == "Cluster5")]
 
-### Make a plot markers function!!!
-rownames(fData(ex_sc_example))[which(fData(ex_sc_example)$Markers == "Cluster6")]
+gene <- "JCHAIN"
+gene_Dat <- pData(ex_sc_example)[,c("x", "y")]
+gene_Dat$gene <- log2(exprs(ex_sc_example)[gene,]+2)-1
+gene_Dat <- gene_Dat[with(gene_Dat, order(gene_Dat[,c("gene")])), ]
+
+ggplot(gene_Dat) + 
+  scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
+  geom_point(aes(x = x, y = y, col = gene)) +
+  theme_classic() + 
+  labs(title= gene, x = "tSNE[1]", y = "tSNE[2]", col = paste0("log2(", gene, ")"))
 ```
 
 

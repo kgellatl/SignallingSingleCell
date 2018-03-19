@@ -7,7 +7,7 @@
 pre_filter(input, minUMI, maxUMI = NA, threshold = NA, minCells = NA)
 }
 \arguments{
-\item{input}{the input data matrix}
+\item{input}{the input data}
 
 \item{minUMI}{min number of UMIs per cell}
 
@@ -24,5 +24,5 @@ This function will filter based on min number of UMIs, max number of UMIs, and g
 When processing the data, low quality cells may contain very few UMIs, while some overrepresented cell barcodes may indicate barcode bleedover or celll doublets. Filtering out both low and high UMI count cells is recommended before normalization.
 }
 \examples{
-filtered_data <- filter_UMIs(input = mDC_0hr_1hr_4hr_CLEAN, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
+filtered_data <- filter_UMIs(input = ex_sc_example, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
 }

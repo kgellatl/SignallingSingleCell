@@ -25,9 +25,8 @@ subset_genes <- function(input, method, threshold, minCells, nComp, cutoff){
     gCount <- apply(input,1,function(x) length(which(x>=threshold)))
     gene_subset <- rownames(input[(which(gCount >= minCells)),])
     g_exp <- log2(input[gene_subset,]+2)-1
-    gmeans <- apply(g_exp,1,mean)
     gsd <- apply(g_exp,1,sd)
-    CV <- gsd / gmeans
+    CV = sqrt((exp(gsd))^2-1)
     CV <- CV[order(CV)]
     gene_subset <- names(CV[round(length(CV)*cutoff):length(CV)])
   }

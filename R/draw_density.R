@@ -21,14 +21,14 @@ draw_density <- function(input, val, var1 = "NA", statistic = "mean"){
       gpd$group <- "All"
       clustermean <- aggregate(gpd[,"UMI_sum"], list(group=gpd[,"group"]), statistic)
       clustermean$x = round(clustermean$x)
-      ggplot(gpd, aes_string(UMI_sum)) +
+      ggplot(gpd, aes(UMI_sum)) +
         geom_density(alpha=0.1, lwd=1) +
         scale_x_log10() +
         xlab("UMIs per cell") +
         geom_vline(data=clustermean, aes(xintercept=x),
                    linetype="dashed", size=0.5) +
         annotate("text",x=clustermean$x, y=0.1,label=clustermean$x, angle = 45) +
-        ggtitle(paste0("log2(", val, ")")) +
+        ggtitle(paste0("log10(", val, ")")) +
         theme_classic()
     } else {
       gpd <- log2(exprs(input)[val,]+2)-1
@@ -46,7 +46,7 @@ draw_density <- function(input, val, var1 = "NA", statistic = "mean"){
         theme_classic() +
         ggtitle(paste0("log2(", val, ")"))
     }
-  }else {
+  } else {
     gg_color_hue <- function(n) {
       hues = seq(15, 375, length = n + 1)
       hcl(h = hues, l = 65, c = 100)[1:n]
@@ -56,7 +56,7 @@ draw_density <- function(input, val, var1 = "NA", statistic = "mean"){
       gpd <- pData(input)[,c("UMI_sum", var1)]
       clustermean <- aggregate(gpd[,"UMI_sum"], list(group=gpd[,var1]), statistic)
       clustermean$x = round(clustermean$x)
-      ggplot(gpd, aes_string(UMI_sum, colour=var1, fill=var1)) +
+      ggplot(gpd, aes_string("UMI_sum", colour=var1, fill=var1)) +
         geom_density(alpha=0.1, lwd=1) +
         scale_x_log10() +
         xlab("log10(UMIs)") +
