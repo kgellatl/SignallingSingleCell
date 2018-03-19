@@ -1,17 +1,17 @@
-#' Select Genes
+#' Subset Genes
 #'
 #' This will select genes based on minimum expression and coefficient of variation, or by a preliminary PCA that selects genes based on malhanobis distance from the center.
 #'
 #' @param input the input data matrix.
 #' @param threshold UMI threshold for gene detection
 #' @param minCells number of cells expressed above threshold for a given gene
-#' @param method can either be "Expression", CV", or "PCA"
+#' @param method can either be "Expression", CV", or "PCA". PCA is recommended
 #' @param nComp if method = PCA, the number of components to keep
-#' @param cutoff the percentile of genes by coefficient of variation or PCA loadings to keep
+#' @param cutoff the percentile of genes to keep
 
 #' @export
 #' @details
-#' This selects genes.
+#' If the method is expression, this will filter genes by subsetting to genes that are expressed above the threshold in more than minCells. If the method is CV, it will first subset the genes based on the expression cutoffs, then find the coefficient of variation across all genes. Next it will select the percentile of genes (cutoff) based on their coefficient of variation. The last method will perform PCA on the cells, and then look at the loadings of each gene. By finding genes that are off center (via malhanoobis distance) we can filter to include only genes that contribute significant variance to the data.
 #' @examples
 #' gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "PCA", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.75)
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/dim_reduce.R
 \name{dim_reduce}
 \alias{dim_reduce}
-\title{Initial Dimension Reduction}
+\title{Dimension Reduction}
 \usage{
 dim_reduce(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15,
   tSNE_perp = 30, print_progress = TRUE)
@@ -22,7 +22,7 @@ dim_reduce(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15,
 This function will do dimensionality reduction.
 }
 \details{
-The minCells will be highly dependent on the number of cells in your dataset. In general aim to include genes expressed in no less than 1:100 cells, unless you have extremely rare cell types below that threshold.
+If the method is ICA, independent component analysis will be performed, and then tSNE will do the final dimension reduction. If PCA is selected, PCA will be performed before on the expression matrix transpose before tSNE. This PCA will use the cells positions on the principal components. If iPCA is selected, PCA will be be performed but without transposing the data. This will create "meta cells" instead of meta genes created in the typical PCA. Then tSNE will be performed on each cells contribution (loading) to the meta cell. We find that iPCA is much more robust and leads to cleaner clusters than traditional PCA.
 }
 \examples{
 filtered_data <- dim_reduce(input = filtered_data, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=TRUE)

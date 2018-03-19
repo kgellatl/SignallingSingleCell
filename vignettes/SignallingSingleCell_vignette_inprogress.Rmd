@@ -32,26 +32,9 @@ sc_dat <- mDC_0hr_1hr_4hr_CLEAN
 
 # Preprocessing
 
-## Filtering
-
-The first step is to filter your data to remove low quality cells. Often creating a histogram of the values and assigning cutoffs is simple and effective. Typically we remove all cells lower than 1000 UMIs / cell.
-
-```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-UMI_sum <- apply(sc_dat,2,sum)
-range(UMI_sum)
-qplot(UMI_sum, geom = "histogram")  
-
-filtered_data <- pre_filter(input = sc_dat, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 7500)  
-
-UMI_sum <- apply(filtered_data,2,sum)
-range(UMI_sum)
-qplot(UMI_sum, geom = "histogram")
-dim(filtered_data)
-```
-
 ## Constructing the ExpressionSet Class  
 
-The ExpressionSet class (ex_sc) is an extremely convienient data structure that contains 3 dataframes. Now that we have a filtered dataset it can be stored in this format.  
+The ExpressionSet class (ex_sc) is an extremely convienient data structure that contains 3 dataframes. These dataframes contain expression data, cell information, and gene information respectivelty. 
 
 exprs(ex_sc) is the expression data  
 pData(ex_sc) is cell information, where rows are cells and columns are metadata  
@@ -62,11 +45,30 @@ nrow(exprs(ex_sc)) == nrow(fData(ex_sc))
 Now that we have our first information (UMI counts per cell) we can write that into the pData.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc_example <- construct_ex_sc(filtered_data)  
+ex_sc_example <- construct_ex_sc(filtered_data) 
+ex_sc_example
 
 pData(ex_sc_example) <- cbind(pData(ex_sc_example), UMI_sum)
 head(pData(ex_sc_example))
 ```
+
+## Filtering
+
+The first step is to filter your data to remove low quality cells. Often creating a histogram of the values and assigning cutoffs is simple and effective. Typically we remove all cells lower than 1000 UMIs / cell.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+UMI_sum <- apply(sc_dat,2,sum)
+range(UMI_sum)
+qplot(UMI_sum, geom = "histogram")  
+
+filtered_data <- pre_filter(input = sc_dat, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 10000)  
+
+UMI_sum <- apply(filtered_data,2,sum)
+range(UMI_sum)
+qplot(UMI_sum, geom = "histogram")
+dim(filtered_data)
+```
+
 
 ## Initial Dimension reduction
 
@@ -86,12 +88,12 @@ From this we can map on our UMI counts before normalization to view if there is 
 prelim_dims_tsne <- pData(ex_sc_example)[,c("x", "y", "UMI_sum")]  
 
 ggplot(prelim_dims_tsne) + 
-  geom_point(aes(x = x, y = y, col = log2(UMI_sum))) +
+  geom_point(aes(x = x, y = y, col = log10(UMI_sum))) +
   scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
   theme_classic() + 
   labs(title= "Initial Positions", x = "tSNE[1]", y = "tSNE[2]")  
 
-gene <- "Actb"
+gene <- "Ccl22"
 prelim_dims_tsne$gene <- log2(filtered_data[gene,]+2)-1  
 
 ggplot(prelim_dims_tsne) + 
@@ -124,7 +126,7 @@ For normalization and cluster id a function is provided that will id both marker
 ex_sc_example <- id_markers(input = ex_sc_example, num_markers = 50, num_reference = 1000)
 
 ### Make a plot markers function!!!
-rownames(fData(ex_sc_example))[which(fData(ex_sc_example)$Markers == "Cluster1")]
+rownames(fData(ex_sc_example))[which(fData(ex_sc_example)$Markers == "Cluster6")]
 ```
 
 
