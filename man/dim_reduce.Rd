@@ -4,8 +4,8 @@
 \alias{dim_reduce}
 \title{Initial Dimension Reduction}
 \usage{
-dim_reduce(input, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30,
-  print_progress = TRUE)
+dim_reduce(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15,
+  tSNE_perp = 30, print_progress = TRUE)
 }
 \arguments{
 \item{input}{the input data matrix.}
@@ -25,5 +25,5 @@ This function will do dimensionality reduction.
 The minCells will be highly dependent on the number of cells in your dataset. In general aim to include genes expressed in no less than 1:100 cells, unless you have extremely rare cell types below that threshold.
 }
 \examples{
-filtered_data <- dim_reduce(input = filtered_data, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
+filtered_data <- dim_reduce(input = filtered_data, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=TRUE)
 }

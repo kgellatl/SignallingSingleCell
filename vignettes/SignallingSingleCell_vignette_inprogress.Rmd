@@ -32,25 +32,24 @@ sc_dat <- mDC_0hr_1hr_4hr_CLEAN
 
 # Preprocessing
 
-## Filtering, OPTIONAL
+## Filtering
 
 The first step is to filter your data to remove low quality cells. Often creating a histogram of the values and assigning cutoffs is simple and effective. Typically we remove all cells lower than 1000 UMIs / cell.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-dim(sc_dat)
 UMI_sum <- apply(sc_dat,2,sum)
 range(UMI_sum)
 qplot(UMI_sum, geom = "histogram")  
 
-filtered_data <- pre_filter(input = sc_dat, minUMI = 1000, maxUMI = 7500, threshold = 1, minCells = 10)  
+filtered_data <- pre_filter(input = sc_dat, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 7500)  
 
-dim(filtered_data)
 UMI_sum <- apply(filtered_data,2,sum)
 range(UMI_sum)
 qplot(UMI_sum, geom = "histogram")
+dim(filtered_data)
 ```
 
-## Constructing the ExpressionSet Class, MANDATORY  
+## Constructing the ExpressionSet Class  
 
 The ExpressionSet class (ex_sc) is an extremely convienient data structure that contains 3 dataframes. Now that we have a filtered dataset it can be stored in this format.  
 
@@ -69,31 +68,32 @@ pData(ex_sc_example) <- cbind(pData(ex_sc_example), UMI_sum)
 head(pData(ex_sc_example))
 ```
 
-## Initial Dimension reduction, MANDATORY
+## Initial Dimension reduction
 
 Before normalization preliminary dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters. First we can subset the genes, and then use these feature selected genes for dimension reduction.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "Expression", threshold = 5, minCells = 50)  
+gene_subset <- subset_genes(input = ex_sc_example, method = "PCA", threshold = 3, minCells = 30, nComp = 10, cutoff = 0.75)  
 
-prelim_dims <- dim_reduce(input = exprs(ex_sc_example)[gene_subset,], pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=FALSE)  
+ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=TRUE)  
 
-pData(ex_sc_example) <- cbind(pData(ex_sc_example), prelim_dims)
 head(pData(ex_sc_example))
 ```
 
 From this we can map on our UMI counts before normalization to view if there is any bias. We can also look at a gene of interest. To accomplish these we will take advantage of the ex_sc set once again.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-prelim_dims_tsne <- pData(ex_sc_example)[,c("x", "y", "UMI_sum")]
+prelim_dims_tsne <- pData(ex_sc_example)[,c("x", "y", "UMI_sum")]  
+
 ggplot(prelim_dims_tsne) + 
-  geom_point(aes(x = x, y = y, col = UMI_sum)) +
+  geom_point(aes(x = x, y = y, col = log2(UMI_sum))) +
   scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
   theme_classic() + 
   labs(title= "Initial Positions", x = "tSNE[1]", y = "tSNE[2]")  
 
-gene <- "Lcn2"
-prelim_dims_tsne$gene <- log2(filtered_data[gene,]+2)-1
+gene <- "Actb"
+prelim_dims_tsne$gene <- log2(filtered_data[gene,]+2)-1  
+
 ggplot(prelim_dims_tsne) + 
   geom_point(aes(x = x, y = y, col = gene)) +
   scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
@@ -101,18 +101,36 @@ ggplot(prelim_dims_tsne) +
   labs(title= gene, x = "tSNE[1]", y = "tSNE[2]")
 ```
 
-After viewing a large UMI bias we can now use spectral clustering for intial clustering before normalization. It looks as though there are about 6 clusters.
+## Initial Clustering
 
-## Initial Clustering, MANDATORY
+After viewing a large UMI bias we can now use spectral clustering for intial clustering before normalization. It looks as though there are about 6 clusters.  
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-prelim_dims_PCA <- as.data.frame(pData(ex_sc_example)[,grep("PC", colnames(pData(ex_sc_example)))])
-clusters <- cluster_sc(input = prelim_dims_PCA, method = "spectral", num_clust = 6)  
+ex_sc_example <- cluster_sc(input = ex_sc_example, dimension = "Comp", method = "spectral", num_clust = 6)  
 
-pData(ex_sc_example)$Cluster <- paste0("Cluster", clusters)  
+### Make a plot clusters function!!!
 
 ggplot(pData(ex_sc_example)) + 
   geom_point(aes(x = x, y = y, col = Cluster)) +
   theme_classic() + 
   labs(title= "Initial Clusters", x = "tSNE[1]", y = "tSNE[2]")
+```
+
+## Identify markers and reference genes
+
+For normalization and cluster id a function is provided that will id both marker genes and reference genes.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+ex_sc_example <- id_markers(input = ex_sc_example, num_markers = 50, num_reference = 1000)
+
+### Make a plot markers function!!!
+rownames(fData(ex_sc_example))[which(fData(ex_sc_example)$Markers == "Cluster1")]
+```
+
+
+## Normalization
+
+Now that the data has preliminary clusters, we can normalize. CPM and TMM normalization will not utilize these clusters, however the much more powerful SCRAN normalization will first normalize internally in clusters, before normalizing across clusters. Once the data is normalized we can run the same steps as above before visualization.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ```

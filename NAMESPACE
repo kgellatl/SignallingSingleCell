@@ -3,5 +3,7 @@
 export(cluster_sc)
 export(construct_ex_sc)
 export(dim_reduce)
+export(id_markers)
+export(normalize_sc)
 export(pre_filter)
 export(subset_genes)

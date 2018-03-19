@@ -5,10 +5,12 @@
 \title{Cluster_sc
 This will perform clustering on your single cell data.}
 \usage{
-cluster_sc(input, method, num_clust)
+cluster_sc(input, dimension, method, num_clust)
 }
 \arguments{
 \item{input}{the input data matrix.}
+
+\item{dimension}{either "Comp" or "2d"}
 
 \item{method}{can either be "spectral" or "density"}
 
@@ -19,8 +21,8 @@ Cluster_sc
 This will perform clustering on your single cell data.
 }
 \details{
-This selects genes.
+This will perform clustering on either the high dimensional PCA / ICA components or on the final 2d result from tsne
 }
 \examples{
-clusters <- cluster_sc(input = exprs(ex_sc_example), method = "spectral", num_clust)
+ex_sc_example <- cluster_sc(input = ex_sc_example, dimension = "Comp", method = "spectral", num_clust = 6)
 }

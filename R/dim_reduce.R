@@ -11,9 +11,10 @@
 #' @details
 #' The minCells will be highly dependent on the number of cells in your dataset. In general aim to include genes expressed in no less than 1:100 cells, unless you have extremely rare cell types below that threshold.
 #' @examples
-#' filtered_data <- dim_reduce(input = filtered_data, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, print_progress=TRUE)
+#' filtered_data <- dim_reduce(input = filtered_data, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=TRUE)
 
-dim_reduce <- function(input, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, print_progress=TRUE){
+dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, print_progress=TRUE){
+  input <- exprs(input)[genelist,]
   input_scale <- scale(log2(input[,]+2)-1)
   if(pre_reduce == "ICA"){
     if(print_progress == TRUE){
@@ -29,7 +30,7 @@ dim_reduce <- function(input, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, pr
     tSNE_result <- Rtsne::Rtsne(ica$S, dims = 2, perplexity = tSNE_perp, theta = 0.5, check_duplicates = F, pca = F, max_iter = 1000, verbose = print_progress)
     tSNE_result <- tSNE_result$Y
     row.names(tSNE_result) <- rownames(ica$S)
-    colnames(ica$S) <- paste0("IC", seq(1:ncol(ica$S)))
+    colnames(ica$S) <- paste0("Comp", seq(1:ncol(ica$S)))
     colnames(tSNE_result) <- c("x", "y")
     tSNE_result[,"x"] <-  abs(min(tSNE_result[,"x"]))+tSNE_result[,"x"]
     tSNE_result[,"x"] <-  tSNE_result[,"x"]/max(tSNE_result[,"x"])
@@ -43,6 +44,7 @@ dim_reduce <- function(input, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, pr
     }
     PCA <- irlba::prcomp_irlba(t(input_scale), nComp, center = F)
     rownames(PCA$x) <- colnames(input)
+    colnames(PCA$x) <- paste0("Comp", seq(1:ncol(PCA$x)))
     set.seed(100)
     if(print_progress == TRUE){
       print("Starting tSNE")
@@ -63,6 +65,8 @@ dim_reduce <- function(input, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, pr
     }
     iPCA <- irlba::prcomp_irlba(input_scale, nComp, center = F)
     rownames(iPCA$rotation) <- colnames(input)
+    colnames(iPCA$rotation) <- paste0("Comp", seq(1:ncol(iPCA$rotation)))
+
     set.seed(100)
     if(print_progress == TRUE){
       print("Starting tSNE")
@@ -75,8 +79,10 @@ dim_reduce <- function(input, pre_reduce = "ICA", nComp = 10, tSNE_perp = 30, pr
     tSNE_result[,"x"] <-  tSNE_result[,"x"]/max(tSNE_result[,"x"])
     tSNE_result[,"y"] <-  abs(min(tSNE_result[,"y"]))+tSNE_result[,"y"]
     tSNE_result[,"y"] <-  tSNE_result[,"y"]/max(tSNE_result[,"y"])
-    dim_reduce <- cbind(tSNE_result, iPCA$rotation)
+    prelim_dims <- cbind(tSNE_result, iPCA$rotation)
   }
-  return(dim_reduce)
+  pData(ex_sc_example) <- cbind(pData(ex_sc_example), prelim_dims)
+
+  return(ex_sc_example)
 }
 

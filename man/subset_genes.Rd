@@ -26,5 +26,5 @@ This will select genes based on minimum expression and coefficient of variation,
 This selects genes.
 }
 \examples{
-gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "CV", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.5)
+gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "PCA", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.75)
 }
