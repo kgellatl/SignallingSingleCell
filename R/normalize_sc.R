@@ -2,6 +2,7 @@
 #' This will perform normalization on your single cell data.
 #'
 #' @param input the input data matrix.
+#' @param method either "CPM", "TMM", "SCRAN", "scNORM"
 #' @export
 #' @details
 #' This normalizes data with one of three methods.

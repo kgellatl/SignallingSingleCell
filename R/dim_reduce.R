@@ -3,6 +3,7 @@
 #' This function will do dimensionality reduction.
 #'
 #' @param input the input data matrix.
+#' @param genelist the subset of genes to perform dimensionality reduction on
 #' @param pre_reduce the algorithm choice for reduction before tSNE (either "ICA", "PCA", "iPCA").
 #' @param nComp the number of components to reduce too before tSNE, 5-20 recommended.
 #' @param tSNE_perp number of cells expressed above threshold for a given gene, 10-100 recommended.

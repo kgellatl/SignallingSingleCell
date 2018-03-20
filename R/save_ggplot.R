@@ -4,7 +4,6 @@
 #'
 #' @param filename The file name to be written
 #' @param format File extension can be "pdf", "svg", "tiff", "png", "jpg"
-#' @param dpi resolution for raste output types
 #' @param dingbats FALSE or TRUE (for pdf only)
 #' @param h The height
 #' @param w The Width

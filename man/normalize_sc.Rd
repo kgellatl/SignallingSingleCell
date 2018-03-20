@@ -9,6 +9,8 @@ normalize_sc(input, method)
 }
 \arguments{
 \item{input}{the input data matrix.}
+
+\item{method}{either "CPM", "TMM", "SCRAN", "scNORM"}
 }
 \description{
 normalize_sc

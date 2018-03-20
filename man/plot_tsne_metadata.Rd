@@ -4,8 +4,8 @@
 \alias{plot_tsne_metadata}
 \title{tSNE Plot on metadata}
 \usage{
-plot_tsne_metadata(input, title, color_by, size = 1, colors = "NA",
-  facet_by = "NA", ncol = "NA")
+plot_tsne_metadata(input, title, color_by, facet_by = "NA", ncol = "NA",
+  size = 1, colors = "NA")
 }
 \arguments{
 \item{input}{The input data}
@@ -14,11 +14,13 @@ plot_tsne_metadata(input, title, color_by, size = 1, colors = "NA",
 
 \item{color_by}{What to color points by, either "UMI_sum" or pData categorial variable}
 
-\item{colors}{What colors to utilize for categorial data. Be sure it is of the proper length!}
-
 \item{facet_by}{What to break the plots by}
 
 \item{ncol}{How many columns if faceting}
+
+\item{size}{The size of the points}
+
+\item{colors}{What colors to utilize for categorial data. Be sure it is of the proper length!}
 }
 \description{
 This will plot information onto a 2d tsne plot

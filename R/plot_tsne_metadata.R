@@ -5,9 +5,10 @@
 #' @param input The input data
 #' @param title The title
 #' @param color_by What to color points by, either "UMI_sum" or pData categorial variable
-#' @param colors What colors to utilize for categorial data. Be sure it is of the proper length!
 #' @param facet_by What to break the plots by
 #' @param ncol How many columns if faceting
+#' @param size The size of the points
+#' @param colors What colors to utilize for categorial data. Be sure it is of the proper length!
 
 #' @export
 #' @details
@@ -15,7 +16,7 @@
 #' @examples
 #' plot_tsne_metadata(input, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_tsne_metadata <- function(input, title, color_by, size = 1, colors = "NA", facet_by = "NA", ncol = "NA"){
+plot_tsne_metadata <- function(input, title, color_by, facet_by = "NA", ncol = "NA", size = 1, colors = "NA"){
   g <- ggplot(pData(ex_sc_example))
   g <- g + theme_classic()
   g <- g + labs(title= title, x = "tSNE[1]", y = "tSNE[2]")

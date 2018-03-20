@@ -10,6 +10,8 @@ dim_reduce(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15,
 \arguments{
 \item{input}{the input data matrix.}
 
+\item{genelist}{the subset of genes to perform dimensionality reduction on}
+
 \item{pre_reduce}{the algorithm choice for reduction before tSNE (either "ICA", "PCA", "iPCA").}
 
 \item{nComp}{the number of components to reduce too before tSNE, 5-20 recommended.}
