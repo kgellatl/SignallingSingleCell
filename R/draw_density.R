@@ -29,7 +29,9 @@ draw_density <- function(input, val, var1 = "NA", statistic = "mean"){
                    linetype="dashed", size=0.5) +
         annotate("text",x=clustermean$x, y=0.1,label=clustermean$x, angle = 45) +
         ggtitle(paste0("log10(", val, ")")) +
-        theme_classic()
+        theme_classic() +
+        theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10)) +
+        theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
     } else {
       gpd <- log2(exprs(input)[val,]+2)-1
       gpd <- as.data.frame(gpd)
@@ -44,6 +46,8 @@ draw_density <- function(input, val, var1 = "NA", statistic = "mean"){
         annotate("text",x=clustermean$x, y=0.1,label=clustermean$x, angle = 45) +
         xlab(paste0("log2(", val, ")")) +
         theme_classic() +
+        theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10)) +
+        theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5)) +
         ggtitle(paste0("log2(", val, ")"))
     }
   } else {
@@ -64,7 +68,9 @@ draw_density <- function(input, val, var1 = "NA", statistic = "mean"){
         geom_vline(data=clustermean, aes(xintercept=x, colour=group),
                    linetype="dashed", size=0.5) +
         annotate("text",x=clustermean$x, y=0.1,label=clustermean$x, angle = 45, colour = cols) +
-        theme_classic()
+        theme_classic() +
+        theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10)) +
+        theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
     } else {
       gg_color_hue <- function(n) {
         hues = seq(15, 375, length = n + 1)
@@ -83,6 +89,8 @@ draw_density <- function(input, val, var1 = "NA", statistic = "mean"){
         annotate("text",x=clustermean$x, y=0.1,label=clustermean$x, angle = 45, colour = cols) +
         xlab(paste0("log2(", val, ")")) +
         theme_classic() +
+        theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10)) +
+        theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5)) +
         ggtitle(paste0("log2(", val, ") across ", var1))
     }
   }

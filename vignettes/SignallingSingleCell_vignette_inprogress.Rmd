@@ -48,7 +48,6 @@ nrow(exprs(ex_sc)) == nrow(fData(ex_sc))
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- construct_ex_sc(sc_dat) 
 ex_sc_example
-rm(sc_dat)
 ```
 
 ## Filtering
@@ -57,11 +56,13 @@ The first step is to filter your data to remove low quality cells. Often creatin
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- calc_libsize(ex_sc_example)
-draw_density(input = ex_sc_example, val = "UMIs", statistic = "mean")  
+draw_density(ex_sc_example, val = "UMIs", statistic = "mean")  
 
-ex_sc_example <- pre_filter(input = ex_sc_example, threshold = 1, minCells = 10, minUMI = 1010, maxUMI = 10000)  
+ex_sc_example <- pre_filter(ex_sc_example, threshold = 1, minCells = 10, minUMI = 1010, maxUMI = 10000)  
 ex_sc_example <- calc_libsize(ex_sc_example)
-draw_density(input = ex_sc_example, val = "UMIs", statistic = "mean")
+draw_density(ex_sc_example, val = "UMIs", statistic = "mean")  
+
+save_ggplot(filename = "Density", format = "pdf") # Plots can be quickly and easily saved!
 ```
 
 ## Dimension reduction
@@ -69,9 +70,9 @@ draw_density(input = ex_sc_example, val = "UMIs", statistic = "mean")
 Before normalization dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters. First we can subset the genes, and then use these feature selected genes for dimension reduction.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-gene_subset <- subset_genes(input = ex_sc_example, method = "PCA", threshold = 3, minCells = 30, nComp = 10, cutoff = 0.75)  
+gene_subset <- subset_genes(ex_sc_example, method = "PCA", threshold = 3, minCells = 30, nComp = 10, cutoff = 0.75)  
 
-ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  
+ex_sc_example <- dim_reduce(ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  
 
 head(pData(ex_sc_example))
 
@@ -82,23 +83,32 @@ head(pData(ex_sc_example))
 Now that we have dimension reduced data we can try clustering it!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc_example <- cluster_sc(input = ex_sc_example, dimension = "Comp", method = "spectral", num_clust = 6)  
+ex_sc_example <- cluster_sc(ex_sc_example, dimension = "Comp", method = "spectral", num_clust = 6)  
 
-ggplot(pData(ex_sc_example)) + 
-  geom_point(aes(x = x, y = y, col = Cluster)) +
-  theme_classic() + 
-  labs(title= "Initial Clusters", x = "tSNE[1]", y = "tSNE[2]")
-# ggplot2::ggsave("Vitiligo_Clusters.pdf", width = 6, height = 6, useDingbats = F)
+plot_tsne_metadata(ex_sc_example, color_by = "Cluster", title = "Clusters")
 
-ggplot(pData(ex_sc_example)) + 
-  scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
-  geom_point(aes(x = x, y = y, col = log10(UMI_sum))) +
-  theme_classic() + 
-  labs(title= "UMI Totals", x = "tSNE[1]", y = "tSNE[2]")
-# ggplot2::ggsave("Vitiligo_tSNE_UMI.pdf", width = 6, height = 6, useDingbats = F)
+plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMIs per cluster")
 
-draw_density(input = ex_sc_example, val = "UMIs", var1 = "Cluster", statistic = "mean")
-#  ggplot2::ggsave("Vitiligo_density_UMI.pdf", width = 6, height = 6, useDingbats = F)
+draw_density(ex_sc_example, val = "UMIs", var1 = "Cluster", statistic = "mean")
+
+```
+
+## Data Annotation
+
+Often we have metadata about the experiment that can be valuable in the analysis! Writing that information now may be appropriate. Our experiment consists of a time course with LPS stimulation. Now we can begin to take advantage of our faceting!
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+pData(ex_sc_example)$Timepoint <- NA
+
+pData(ex_sc_example)[grep("0hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "0hr"
+pData(ex_sc_example)[grep("1hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "1hr"
+pData(ex_sc_example)[grep("4hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "4hr"
+
+draw_density(ex_sc_example, val = "UMIs", var1 = "Timepoint", statistic = "mean")  
+
+plot_tsne_metadata(ex_sc_example, color_by = "Timepoint", title = "Clusters over Time", facet_by = "Cluster", size = 0.2)
+
+# From this we can see that some clusters are forming based on timepoint, while others contain multiple timepoints.
 
 ```
 
@@ -107,7 +117,7 @@ draw_density(input = ex_sc_example, val = "UMIs", var1 = "Cluster", statistic = 
 For normalization and cluster id a function is provided that will id both marker genes and reference genes.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc_example <- id_markers(input = ex_sc_example, num_markers = 10, num_reference = 1000)
+ex_sc_example <- id_markers(ex_sc_example, num_markers = 10, num_reference = 1000)
 marker_list <- return_markers(ex_sc_example)
 
 gene <- marker_list[[6]][2]
