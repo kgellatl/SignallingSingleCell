@@ -9,7 +9,7 @@ subset_genes(input, method, threshold, minCells, nComp, cutoff)
 \arguments{
 \item{input}{the input data matrix.}
 
-\item{method}{can either be "Expression", CV", or "PCA". PCA is recommended}
+\item{method}{can either be "Expression", CV", or "PCA".}
 
 \item{threshold}{UMI threshold for gene detection}
 
@@ -20,7 +20,7 @@ subset_genes(input, method, threshold, minCells, nComp, cutoff)
 \item{cutoff}{the percentile of genes to keep}
 }
 \description{
-This will select genes based on minimum expression and coefficient of variation, or by a preliminary PCA that selects genes based on malhanobis distance from the center.
+This will select genes based on minimum expression, coefficient of variation, or by a preliminary PCA.
 }
 \details{
 If the method is expression, this will filter genes by subsetting to genes that are expressed above the threshold in more than minCells. If the method is CV, it will first subset the genes based on the expression cutoffs, then find the coefficient of variation across all genes. Next it will select the percentile of genes (cutoff) based on their coefficient of variation. The last method will perform PCA on the cells, and then look at the loadings of each gene. By finding genes that are off center (via malhanoobis distance) we can filter to include only genes that contribute significant variance to the data.

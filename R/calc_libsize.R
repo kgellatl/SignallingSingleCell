@@ -7,7 +7,7 @@
 #' @details
 #' This will calculate library sizes
 #' @examples
-#' draw_density(input = ex_sc_example)
+#' ex_sc_example <- calc_libsize(ex_sc_example)
 
 calc_libsize <- function(input){
   libsizes <- apply(exprs(input),2,sum)

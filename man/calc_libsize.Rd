@@ -16,5 +16,5 @@ This function will count the number of reads / UMIs per cell
 This will calculate library sizes
 }
 \examples{
-draw_density(input = ex_sc_example)
+ex_sc_example <- calc_libsize(ex_sc_example)
 }

@@ -1,11 +1,11 @@
 #' Subset Genes
 #'
-#' This will select genes based on minimum expression and coefficient of variation, or by a preliminary PCA that selects genes based on malhanobis distance from the center.
+#' This will select genes based on minimum expression, coefficient of variation, or by a preliminary PCA.
 #'
 #' @param input the input data matrix.
 #' @param threshold UMI threshold for gene detection
 #' @param minCells number of cells expressed above threshold for a given gene
-#' @param method can either be "Expression", CV", or "PCA". PCA is recommended
+#' @param method can either be "Expression", CV", or "PCA".
 #' @param nComp if method = PCA, the number of components to keep
 #' @param cutoff the percentile of genes to keep
 

@@ -18,10 +18,10 @@ pre_filter(input, minUMI, maxUMI = NA, threshold = NA, minCells = NA)
 \item{minCells}{number of cells expressed above threshold for a given gene}
 }
 \description{
-This function will filter based on min number of UMIs, max number of UMIs, and genes based on expression across all cells.
+This function will filter the data to remove cells and/or cells.
 }
 \details{
-When processing the data, low quality cells may contain very few UMIs, while some overrepresented cell barcodes may indicate barcode bleedover or celll doublets. Filtering out both low and high UMI count cells is recommended before normalization.
+When processing the data, low quality cells may contain very few UMIs, while some overrepresented cell barcodes may indicate barcode bleedover or cell doublets. Filtering out both low and high UMI count cells is recommended before normalization.
 }
 \examples{
 filtered_data <- filter_UMIs(input = ex_sc_example, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
