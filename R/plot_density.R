@@ -1,4 +1,4 @@
-#' Draw Density
+#' Plot Density
 #'
 #' This function will draw a UMI distribution
 #'
@@ -12,7 +12,7 @@
 #' @examples
 #' draw_density(input = ex_sc_example, val = "UMIs", var1 = "Cluster", statistic = "mean")
 
-draw_density <- function(input, val, var1 = "NA", statistic = "mean"){
+plot_density <- function(input, val, var1 = "NA", statistic = "mean"){
   if(var1 == "NA"){
     if(val == "UMIs"){
       gpd <- pData(input)$UMI_sum
