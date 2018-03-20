@@ -60,11 +60,11 @@ The first step is to filter your data to remove low quality cells. Often creatin
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- calc_libsize(ex_sc_example) # sums counts for each cell
-draw_density(ex_sc_example, val = "UMIs", statistic = "mean") # density function 
+plot_density(ex_sc_example, val = "UMIs", statistic = "mean") # density function 
 
-ex_sc_example <- pre_filter(ex_sc_example, threshold = 1, minCells = 10, minUMI = 1010, maxUMI = 10000) # filters cells and genes
+ex_sc_example <- pre_filter(ex_sc_example, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 10000) # filters cells and genes
 ex_sc_example <- calc_libsize(ex_sc_example)
-draw_density(ex_sc_example, val = "UMIs", statistic = "mean")  
+plot_density(ex_sc_example, val = "UMIs", statistic = "mean")  
 
 # save_ggplot(filename = "Density", format = "pdf") # Plots can be quickly and easily saved!
 ```
@@ -93,7 +93,7 @@ plot_tsne_metadata(ex_sc_example, color_by = "Cluster", title = "Clusters") # th
 
 plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMIs per cluster")
 
-draw_density(ex_sc_example, val = "UMIs", var1 = "Cluster", statistic = "mean")
+plot_density(ex_sc_example, val = "UMIs", var1 = "Cluster", statistic = "mean")
 ```
 
 ## Data Annotation
@@ -107,7 +107,7 @@ pData(ex_sc_example)[grep("0hr", rownames(pData(ex_sc_example))),"Timepoint"] <-
 pData(ex_sc_example)[grep("1hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "1hr"
 pData(ex_sc_example)[grep("4hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "4hr"
 
-draw_density(ex_sc_example, val = "UMIs", var1 = "Timepoint", statistic = "mean")  
+plot_density(ex_sc_example, val = "UMIs", var1 = "Timepoint", statistic = "mean")  
 
 plot_tsne_metadata(ex_sc_example, color_by = "Timepoint", title = "Clusters over Time", facet_by = "Cluster", size = 0.2) # Notice that now we are including a facet that will break the tSNE plot into smaller plots, one each for the variable. From this we can see that some clusters are forming based on timepoint, while others contain multiple timepoints.
 
@@ -120,13 +120,13 @@ For normalization and cluster id a function is provided that will id both marker
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
 ex_sc_example <- id_markers(ex_sc_example, num_markers = 10, num_reference = 1000) # This is a quick method to find good markers genes for cell identification. These genes get written to fData()
 
-marker_list <- return_markers(ex_sc_example) # However returning the genes are a list can be helpful
+marker_list <- return_markers(ex_sc_example) # However returning the genes as a list can be helpful
 
-plot_scatter(input = ex_sc_example, gene1 = marker_list[[5]][1], gene2 = marker_list[[5]][2], facet_by = "Cluster", color_by = "Cluster") # A scater plotting function. Note the correlation of this marker gene.
+plot_scatter(input = ex_sc_example, gene1 = marker_list$Cluster5[1], gene2 = marker_list$Cluster5[2], facet_by = "Cluster", color_by = "Cluster") # A scater plotting function. Note the correlation of the marker genes.
 
 plot_scatter(input = ex_sc_example, gene1 = "Csf1r", gene2 = "Ccl4", facet_by = "Cluster", color_by = "Timepoint") # Note that 3 clusters express
 
-gene <- marker_list[[5]][1]
+gene <- "Csf1r"
 gene_Dat <- pData(ex_sc_example)[,c("x", "y")]
 gene_Dat$gene <- log2(exprs(ex_sc_example)[gene,]+2)-1
 gene_Dat <- gene_Dat[with(gene_Dat, order(gene_Dat[,c("gene")])), ]
