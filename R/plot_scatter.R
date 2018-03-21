@@ -1,6 +1,6 @@
 #' Create a Scatter Plot
 #'
-#' This will plot information onto a 2d tsne plot
+#' This will plot information onto a 2d scatter (Gene 1 v Gene 2)
 #'
 #' @param input The input data
 #' @param gene1 The first gene for scatter plot
