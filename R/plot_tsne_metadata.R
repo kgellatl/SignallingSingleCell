@@ -4,7 +4,8 @@
 #'
 #' @param input The input data
 #' @param title The title
-#' @param color_by What to color points by, either "UMI_sum" or pData categorial variable
+#' @param color_by What to color points by, either "UMI_sum", or pData categorial variable, ignored if gene is provided
+#' @param gene if provided will color_by the gene
 #' @param facet_by What to break the plots by
 #' @param ncol How many columns if faceting
 #' @param size The size of the points
@@ -16,8 +17,15 @@
 #' @examples
 #' plot_tsne_metadata(input, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_tsne_metadata <- function(input, title, color_by, facet_by = "NA", ncol = "NA", size = 1, colors = "NA"){
-  g <- ggplot(pData(ex_sc_example))
+plot_tsne_metadata <- function(input, title, color_by, gene = "NA", facet_by = "NA", ncol = "NA", size = 1, colors = "NA"){
+  if(gene != "NA"){
+    dat <- pData(ex_sc_example)
+    dat <- cbind(dat, log2(exprs(input)[gene,]+2)-1)
+    colnames(dat) <- c(colnames(dat)[1:ncol(dat)-1],gene)
+    g <- ggplot(dat)
+  } else {
+    g <- ggplot(pData(ex_sc_example))
+  }
   g <- g + theme_classic()
   g <- g + labs(title= title, x = "tSNE[1]", y = "tSNE[2]")
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
@@ -26,14 +34,18 @@ plot_tsne_metadata <- function(input, title, color_by, facet_by = "NA", ncol = "
     tmp <- pData(ex_sc_example)[c("x", "y")]
     g <- g + geom_point(data = tmp, aes(x=x, y=y), col = "gray", size = size)
   }
-  if(color_by == "UMI_sum"){
-    g <- g +  geom_point(aes_string(x = "x", y = "y", col = "UMI_sum"), size = size)
+  if(gene != "NA"){
+    g <- g +  geom_point(aes_string(x = "x", y = "y", col = gene), size = size)
     g <- g +  scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow'))
   } else {
-    g <- g +  geom_point(aes_string(x = "x", y = "y", col = color_by), size = size)
-    if(colors == "NA"){
+    if(color_by == "UMI_sum"){
+      g <- g +  geom_point(aes_string(x = "x", y = "y", col = "UMI_sum"), size = size)
+      g <- g +  scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow'))
     } else {
-      g <- g + scale_color_manual(values = c(colors))
+      g <- g +  geom_point(aes_string(x = "x", y = "y", col = color_by), size = size)
+      if(colors != "NA"){
+        g <- g + scale_color_manual(values = c(colors))
+      }
     }
   }
   if(facet_by != "NA"){
@@ -45,5 +57,4 @@ plot_tsne_metadata <- function(input, title, color_by, facet_by = "NA", ncol = "
   }
   return(g)
 }
-
 
