@@ -22,6 +22,7 @@ plot_tsne_metadata <- function(input, title, color_by, gene = "NA", facet_by = "
     dat <- pData(ex_sc_example)
     dat <- cbind(dat, log2(exprs(input)[gene,]+2)-1)
     colnames(dat) <- c(colnames(dat)[1:ncol(dat)-1],gene)
+    dat <- dat[with(dat, order(dat[,gene])), ]
     g <- ggplot(dat)
   } else {
     g <- ggplot(pData(ex_sc_example))
