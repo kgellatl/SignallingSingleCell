@@ -81,7 +81,7 @@ plot_density <- function(input, val, color_by = "NA", statistic = "mean"){
       gpd$gene <- log2(exprs(input)[val,]+2)-1
       clustermean <- aggregate(gpd[,"gene"], list(group=gpd[,color_by]), statistic)
       clustermean$x <- round(clustermean$x, 2)
-      colnames(gpd) <- c("UMI_sum", "Cluster", val)
+      colnames(gpd) <- c("UMI_sum", color_by, val)
       ggplot(gpd, aes_string(val, colour=color_by, fill=color_by)) +
         geom_density(alpha=0.1, lwd=1)  +
         geom_vline(data=clustermean, aes(xintercept=x, colour=group),
