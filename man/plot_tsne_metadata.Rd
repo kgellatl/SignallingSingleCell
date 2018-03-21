@@ -31,5 +31,5 @@ This will plot information onto a 2d tsne plot
 Utilize information stored in pData to control the plot display.
 }
 \examples{
-plot_tsne_metadata(input, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
+plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 }
