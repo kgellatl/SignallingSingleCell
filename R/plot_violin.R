@@ -26,13 +26,18 @@ plot_violin <- function(input, title, color_by, gene, facet_by = "NA", ncol = "N
     geneColored1 <- cbind(geneColored1, log2(exprs(input)[gene,]+2)-1)
     colnames(geneColored1)<-c("x","y", color_by, facet_by, gene)
   }
+  gg_color_hue <- function(n) {
+    hues = seq(15, 375, length = n + 1)
+    hcl(h = hues, l = 65, c = 100)[1:n]
+  }
+  cols <- gg_color_hue(length(unique(pData(input)[,color_by])))
   g <- ggplot(geneColored1)
   g <- g + theme_classic()
-  g <- g + labs(title= title, x = color_by, y = gene)
+  g <- g + labs(title= title, y = gene)
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
-  g <- g + geom_violin(aes_string(x=color_by, y=gene, fill = color_by), trim = T)
-  g <- g + geom_jitter(aes_string(x=color_by, y=gene, col = color_by), width = 0.2, alpha=0.5, size = size)
+  g <- g + geom_violin(aes_string(x=color_by, y=gene, col = color_by), trim = T, alpha = 0.5)
+  g <- g + geom_jitter(aes_string(x=color_by, y=gene, col = color_by), width = 0.2, size = size)
   g <- g + stat_summary(aes_string(x=color_by, y=gene), fun.y=mean, geom="point", size=3, color="black")
   if(facet_by != "NA"){
     if(ncol != "NA"){
@@ -41,5 +46,8 @@ plot_violin <- function(input, title, color_by, gene, facet_by = "NA", ncol = "N
       g <- g +  facet_wrap(facets = reformulate(facet_by))
     }
   }
+  g <- g + theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
   return(g)
 }

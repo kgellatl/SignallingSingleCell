@@ -91,9 +91,9 @@ Now that we have dimension reduced data we can try clustering it!
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- cluster_sc(ex_sc_example, dimension = "Comp", method = "spectral", num_clust = 6) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
 
-plot_density(ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
+plot_tsne_metadata(ex_sc_example, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
 
-plot_tsne_metadata(ex_sc_example, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any metadata onto a 2d tsne mapping
+plot_density(ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 ```
 
 ## Data Annotation
@@ -107,14 +107,16 @@ pData(ex_sc_example)[grep("0hr", rownames(pData(ex_sc_example))),"Timepoint"] <-
 pData(ex_sc_example)[grep("1hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "1hr"
 pData(ex_sc_example)[grep("4hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "4hr"
 
-plot_scatter(ex_sc_example, gene1 = "Tnf", gene2 = "Ccl4", title = "Clusters over Time", color_by = "Timepoint", facet_by = "Cluster", size = 0.2)
-                   
-plot_violin(input, title = "Actb across clusters", gene = "Gapdh", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
-
 plot_tsne_metadata(ex_sc_example, gene = "Tnf", title = "Tnf over Time", facet_by = "Timepoint", size = 0.2)
-
-
 # Notice that now we are including a facet that will break the tSNE plot into smaller plots, one each for the variable. From this we can see that some clusters are forming based on timepoint, while others contain multiple timepoints.
+
+plot_violin(ex_sc_example, title = "Tnf across clusters", gene = "Tnf", color_by = "Cluster", facet_by = "Timepoint", size = 1, ncol = 3)
+
+ex_sc_example_subset <- subset_ex_sc(ex_sc_example, variable = "Timepoint", select = c("1hr"))
+
+plot_tsne_metadata(ex_sc_example_subset, color_by = "Cluster", title = "1hr cells") # this function is flexible for plotting any data onto a 2d tsne mapping
+
+plot_violin(ex_sc_example_subset, title = "Actb across clusters", gene = "Actb", facet_by = "Cluster", size = 1, ncol = 3, color_by = "Cluster")
 
 ```
 

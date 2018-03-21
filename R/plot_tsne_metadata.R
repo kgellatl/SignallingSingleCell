@@ -10,29 +10,28 @@
 #' @param ncol How many columns if faceting
 #' @param size The size of the points
 #' @param colors What colors to utilize for categorial data. Be sure it is of the proper length!
-
 #' @export
 #' @details
 #' Utilize information stored in pData to control the plot display.
 #' @examples
-#' plot_tsne_metadata(input, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
+#' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
 plot_tsne_metadata <- function(input, title, color_by, gene = "NA", facet_by = "NA", ncol = "NA", size = 1, colors = "NA"){
   if(gene != "NA"){
-    dat <- pData(ex_sc_example)
+    dat <- pData(input)
     dat <- cbind(dat, log2(exprs(input)[gene,]+2)-1)
     colnames(dat) <- c(colnames(dat)[1:ncol(dat)-1],gene)
     dat <- dat[with(dat, order(dat[,gene])), ]
     g <- ggplot(dat)
   } else {
-    g <- ggplot(pData(ex_sc_example))
+    g <- ggplot(pData(input))
   }
   g <- g + theme_classic()
   g <- g + labs(title= title, x = "tSNE[1]", y = "tSNE[2]")
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   if(facet_by != "NA"){
-    tmp <- pData(ex_sc_example)[c("x", "y")]
+    tmp <- pData(input)[c("x", "y")]
     g <- g + geom_point(data = tmp, aes(x=x, y=y), col = "gray", size = size)
   }
   if(gene != "NA"){
