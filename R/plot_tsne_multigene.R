@@ -31,7 +31,7 @@ plot_tsne_multigene <- function(input, title, genes, ncol = 4, size = 1, colors 
     gene_final <- c(gene_final, genesvec)
   }
   geneColored1$gene <- gene_final
-  geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,4])), ]
+  geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,3])), ]
   ggplot(geneColored1) +
     geom_point(aes(x=x, y=y, col=vals), size = 0.5) + # notice col = dens, column 3 which is expression value
     facet_wrap(~gene, ncol = ncol) +

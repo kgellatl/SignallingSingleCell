@@ -4,23 +4,23 @@
 \alias{plot_density}
 \title{Plot Density}
 \usage{
-plot_density(input, val, var1 = "NA", statistic = "mean")
+plot_density(input, val, color_by = "NA", statistic = "mean")
 }
 \arguments{
 \item{input}{the input data}
 
-\item{val}{Either "UMIs" or a gene name}
+\item{val}{Either "UMI_sum" or a gene name}
 
-\item{var1}{The metadata in pData that will be used to break the distributions into groups. Can be left blank.}
+\item{color_by}{The metadata in pData that will be used to break the distributions into groups. Can be left blank.}
 
 \item{statistic}{Either the "mean" or "median" can be calculated}
 }
 \description{
-This function will draw a UMI distribution
+This function will draw a distribution for a given value
 }
 \details{
 This will draw a UMI distribution for each variable in the metadat.
 }
 \examples{
-draw_density(input = ex_sc_example, val = "UMIs", var1 = "Cluster", statistic = "mean")
+draw_density(input = ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 }

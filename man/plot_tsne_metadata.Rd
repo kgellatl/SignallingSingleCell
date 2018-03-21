@@ -4,15 +4,17 @@
 \alias{plot_tsne_metadata}
 \title{tSNE Plot on metadata}
 \usage{
-plot_tsne_metadata(input, title, color_by, facet_by = "NA", ncol = "NA",
-  size = 1, colors = "NA")
+plot_tsne_metadata(input, title, color_by, gene = "NA", facet_by = "NA",
+  ncol = "NA", size = 1, colors = "NA")
 }
 \arguments{
 \item{input}{The input data}
 
 \item{title}{The title}
 
-\item{color_by}{What to color points by, either "UMI_sum" or pData categorial variable}
+\item{color_by}{What to color points by, either "UMI_sum", or pData categorial variable, ignored if gene is provided}
+
+\item{gene}{if provided will color_by the gene}
 
 \item{facet_by}{What to break the plots by}
 

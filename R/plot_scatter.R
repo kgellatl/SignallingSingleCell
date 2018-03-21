@@ -3,6 +3,7 @@
 #' This will plot information onto a 2d scatter (Gene 1 v Gene 2)
 #'
 #' @param input The input data
+#' @param title The plot title
 #' @param gene1 The first gene for scatter plot
 #' @param gene2 The second gene for scatter plot
 #' @param color_by What to color points by, either "UMI_sum" or pData categorial variable
@@ -14,9 +15,9 @@
 #' @details
 #' Utilize information stored in pData to control the plot display.
 #' @examples
-#' plot_scatter(input = ex_sc_example, gene1 = "Ccl22", gene2 = "Ccl5", color_by = "Cluster", facet_by = "Timepoint")
+#' plot_scatter(input = ex_sc_example, title = "Plot", gene1 = "Ccl22", gene2 = "Ccl5", color_by = "Cluster", facet_by = "Timepoint")
 
-plot_scatter <- function(input, gene1, gene2, color_by, facet_by = "NA", ncol = "NA", size = 2, colors = "NA"){
+plot_scatter <- function(input, gene1, title, gene2, color_by, facet_by = "NA", ncol = "NA", size = 2, colors = "NA"){
   dat <- as.data.frame(t(exprs(input)[c(gene1, gene2),]))
   dat[,1] <- log2(dat[,1]+2)-1
   dat[,2] <- log2(dat[,2]+2)-1
@@ -44,6 +45,7 @@ plot_scatter <- function(input, gene1, gene2, color_by, facet_by = "NA", ncol = 
       g <- g +  facet_wrap(facets = reformulate(facet_by))
     }
   }
+  g <- g + labs(title= title)
   return(g)
 }
 

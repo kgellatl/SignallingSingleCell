@@ -1,6 +1,6 @@
 #' Plot Density
 #'
-#' This function will draw a UMI distribution
+#' This function will draw a distribution for a given value
 #'
 #' @param input the input data
 #' @param val Either "UMI_sum" or a gene name

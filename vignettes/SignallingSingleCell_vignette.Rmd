@@ -4,14 +4,16 @@ geometry: margin=0.5cm
 author: "Kyle Gellatly"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    highlight: tango
-    theme: cerulean
-    toc: yes
-    toc_float : yes
+html_document:
+  highlight: tango
+  theme: cerulean
+  toc: yes
+  toc_float : yes
 # pdf_document:
 #   highlight: tango
+#   theme: cerulean
 #   toc: yes
+#   toc_float : yes
 # output: rmarkdown::html_vignette
 # vignette: >
 #   %\VignetteIndexEntry{Vignette Title}
@@ -47,7 +49,7 @@ nrow(exprs(ex_sc)) == nrow(fData(ex_sc))
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- construct_ex_sc(sc_dat) # sc_dat == Input expression matrix
-ex_sc_example
+ex_sc_example # Note that phenoData and featureData are empty right now!
 ```
 
 ```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
@@ -60,11 +62,11 @@ The first step is to filter your data to remove low quality cells. Often creatin
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- calc_libsize(ex_sc_example) # sums counts for each cell
-plot_density(ex_sc_example, val = "UMIs", statistic = "mean") # density function 
+plot_density(ex_sc_example, val = "UMI_sum", statistic = "mean") # Density function. Note how many low UMI count cells are in the data!
 
 ex_sc_example <- pre_filter(ex_sc_example, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 10000) # filters cells and genes
 ex_sc_example <- calc_libsize(ex_sc_example)
-plot_density(ex_sc_example, val = "UMIs", statistic = "mean")  
+plot_density(ex_sc_example, val = "UMI_sum", statistic = "mean")  
 
 # save_ggplot(filename = "Density", format = "pdf") # Plots can be quickly and easily saved!
 ```
@@ -89,11 +91,9 @@ Now that we have dimension reduced data we can try clustering it!
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- cluster_sc(ex_sc_example, dimension = "Comp", method = "spectral", num_clust = 6) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
 
-plot_tsne_metadata(ex_sc_example, color_by = "Cluster", title = "Clusters") # this function is flexible for plotting any metadata onto a 2d tsne mapping
+plot_density(ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 
-plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMIs per cluster")
-
-plot_density(ex_sc_example, val = "UMIs", var1 = "Cluster", statistic = "mean")
+plot_tsne_metadata(ex_sc_example, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any metadata onto a 2d tsne mapping
 ```
 
 ## Data Annotation
@@ -107,9 +107,14 @@ pData(ex_sc_example)[grep("0hr", rownames(pData(ex_sc_example))),"Timepoint"] <-
 pData(ex_sc_example)[grep("1hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "1hr"
 pData(ex_sc_example)[grep("4hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "4hr"
 
-plot_density(ex_sc_example, val = "UMIs", var1 = "Timepoint", statistic = "mean")  
+plot_scatter(ex_sc_example, gene1 = "Tnf", gene2 = "Ccl4", title = "Clusters over Time", color_by = "Timepoint", facet_by = "Cluster", size = 0.2)
+                   
+plot_violin(input, title = "Actb across clusters", gene = "Gapdh", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
 
-plot_tsne_metadata(ex_sc_example, color_by = "Timepoint", title = "Clusters over Time", facet_by = "Cluster", size = 0.2) # Notice that now we are including a facet that will break the tSNE plot into smaller plots, one each for the variable. From this we can see that some clusters are forming based on timepoint, while others contain multiple timepoints.
+plot_tsne_metadata(ex_sc_example, gene = "Tnf", title = "Tnf over Time", facet_by = "Timepoint", size = 0.2)
+
+
+# Notice that now we are including a facet that will break the tSNE plot into smaller plots, one each for the variable. From this we can see that some clusters are forming based on timepoint, while others contain multiple timepoints.
 
 ```
 
@@ -122,26 +127,18 @@ ex_sc_example <- id_markers(ex_sc_example, num_markers = 10, num_reference = 100
 
 marker_list <- return_markers(ex_sc_example) # However returning the genes as a list can be helpful
 
-plot_scatter(input = ex_sc_example, gene1 = marker_list$Cluster5[1], gene2 = marker_list$Cluster5[2], facet_by = "Cluster", color_by = "Cluster") # A scater plotting function. Note the correlation of the marker genes.
+plot_scatter(input = ex_sc_example, gene1 = marker_list$Cluster4[1], gene2 = marker_list$Cluster4[2], facet_by = "Cluster", color_by = "Cluster") # A scater plotting function. Note the correlation of the marker genes.
 
-plot_scatter(input = ex_sc_example, gene1 = "Csf1r", gene2 = "Ccl4", facet_by = "Cluster", color_by = "Timepoint") # Note that 3 clusters express
+marker_facet <- c("Csf1r", "Lcn2", "Ccr7")
 
-gene <- "Csf1r"
-gene_Dat <- pData(ex_sc_example)[,c("x", "y")]
-gene_Dat$gene <- log2(exprs(ex_sc_example)[gene,]+2)-1
-gene_Dat <- gene_Dat[with(gene_Dat, order(gene_Dat[,c("gene")])), ]
+plot_tsne_multigene(input = ex_sc_example, genes = marker_facet, title = "Marker Genes",  ncol = 3)
 
-ggplot(gene_Dat) + 
-  scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +
-  geom_point(aes(x = x, y = y, col = gene)) +
-  theme_classic() + 
-  labs(title= gene, x = "tSNE[1]", y = "tSNE[2]", col = paste0("log2(", gene, ")"))
 ```
 
 
 ## Normalization
 
-Now that the data has preliminary clusters, we can normalize. CPM and TMM normalization will not utilize these clusters, however the much more powerful SCRAN normalization will first normalize internally in clusters, before normalizing across clusters. Once the data is normalized we can run the same steps as above before visualization.
+Now that the data has preliminary clusters, we can normalize. CPM and TMM normalization will not utilize these clusters, however the much more powerful SCRAN normalization will first normalize internally in clusters, before normalizing acromarker_facets clusters. Once the data is normalized we can run the same steps as above before visualization.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ```
