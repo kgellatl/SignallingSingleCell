@@ -15,7 +15,7 @@
 #' @examples
 #' plot_tsne_multigene(input, title = "UMI_sum across clusters", genes = c("Actb", "Gapdh"), ncol = 4, size = 2)
 
-plot_tsne_multigene <- function(input, title, genes, ncol = 4, size = 1, colors = "NA"){
+plot_tsne_multigene <- function(input, title, genes, ncol = 4, size = 1, colors = c("gray", 'blue', 'red', 'yellow')){
   geneColored1 <- pData(input)[,c("x", "y")] # Change 4th in facet!
   geneColored1 <- do.call(rbind, replicate(length(genes), geneColored1, simplify=FALSE))
   geneColored3 <- t(exprs(input)[genes,])
@@ -32,12 +32,13 @@ plot_tsne_multigene <- function(input, title, genes, ncol = 4, size = 1, colors 
   }
   geneColored1$gene <- gene_final
   geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,3])), ]
-  ggplot(geneColored1) +
-    geom_point(aes(x=x, y=y, col=vals), size = 0.5) + # notice col = dens, column 3 which is expression value
-    facet_wrap(~gene, ncol = ncol) +
-    scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow')) +  # COLORS FOR CONTOUR POINTS, FEEL FREE TO PLAY
-    labs(title= title, col= "log2(Normalized\nUMIs)", x = "tSNE[1]", y = "tSNE[2]") +
-    theme_classic() +
-    theme(plot.title = element_text(size = 25), axis.title = element_text(size = 17.5), legend.title = element_text(size = 17.5), legend.text=element_text(size=10)) +
-    theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
+  g <- ggplot(geneColored1)
+  g <- g + theme_classic()
+  g <- g + labs(title= title, col= "log2(Normalized\nUMIs)", x = "tSNE[1]", y = "tSNE[2]")
+  g <- g + theme(plot.title = element_text(size = 25), axis.title = element_text(size = 17.5), legend.title = element_text(size = 17.5), legend.text=element_text(size=10))
+  g <- g +theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
+  g <- g + geom_point(aes(x=x, y=y, col=vals), size = 0.5)
+  g <- g + facet_wrap(~gene, ncol = ncol)
+  g <- g + scale_color_gradientn(colours=colors)
+  return(g)
 }
