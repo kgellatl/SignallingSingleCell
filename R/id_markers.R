@@ -2,25 +2,26 @@
 #'
 #' This will perform marker gene identification
 #'
-#' @param input the input data matrix.
-#' @param num_markers the approximate number of marker genes to return
-#' @param num_reference the approximate number of reference genes to return
+#' @param input the input ex_sc
 #' @export
 #' @details
-#' This will find marker genes for each cluster. First, for each cluster it calculates the fraction of cells expressing a given gene, and the mean expression of that gene (within the cluster). It then compares these values to the values of all other groups looking for genes which maximize the distance in both fraction expressing and the mean expression.
+#' This will find marker genes for each cluster. First, for each cluster it calculates the fraction of cells expressing a given gene,
+#' and the mean expression of that gene (within the cluster).
+#' It then compares these values to the values of all other groups looking for genes which maximize the distance in both
+#' fraction expressing and the mean expression.
 #' @examples
-#' ex_sc_example <- id_markers(input = ex_sc_example, num_markers = 10, num_reference = 1000)
+#' ex_sc_example <- id_markers(input = ex_sc_example)
 
-id_markers <- function(input, num_markers, num_reference){
+id_markers <- function(input){
   marker_input <- input
-  fData(marker_input)$Markers <- NA
-  fData(marker_input)$Reference <- NA
+  fData(marker_input) <- fData(marker_input)[,-grep("marker_score", colnames(fData(marker_input)))]
+  fData(marker_input)$tmp <- "tmp"
   print("Finding markers based on fraction expressing")
   num_cluster <- length(unique(pData(marker_input)[,"Cluster"]))
   num_marker_genes <- nrow(fData(input))
   non0 <- c()
   percent <- c()
-  gene_perent <- c()
+  gene_percent <- c()
   for(n in 1:length(unique(pData(marker_input)[,"Cluster"]))){
     cluster <- (paste0("Cluster", n))
     index <- which(pData(marker_input)[,"Cluster"] == cluster)
@@ -31,10 +32,10 @@ id_markers <- function(input, num_markers, num_reference){
     for(i in 1:nrow(tmp_expr_matrix)){
       numExpr <- sum(tmp_expr_matrix[i,])
       percent <- numExpr/ncol(tmp_expr_matrix)
-      gene_perent <- c(gene_perent, percent)
+      gene_percent <- c(gene_percent, percent)
     }
   }
-  gene_markers_fractionExpression <- matrix(data = gene_perent, nrow = nrow(fData(marker_input)), ncol = length(unique(pData(marker_input)[,"Cluster"])))
+  gene_markers_fractionExpression <- matrix(data = gene_percent, nrow = nrow(fData(marker_input)), ncol = length(unique(pData(marker_input)[,"Cluster"])))
   colnames(gene_markers_fractionExpression) <- c(seq(1:num_cluster))
   rownames(gene_markers_fractionExpression) <- rownames(fData(marker_input))
   gene_markers_meandiff <- matrix(ncol = ncol(gene_markers_fractionExpression), nrow=nrow(gene_markers_fractionExpression))
@@ -53,7 +54,7 @@ id_markers <- function(input, num_markers, num_reference){
   colnames(cluster_markers) <- c(seq(1:num_cluster))
   for(i in 1:ncol(gene_markers_meandiff)){
     sorted <- sort(gene_markers_meandiff[,i])
-    interested_genes <- names((tail(sorted, n=num_marker_genes)))
+    interested_genes <- names(sorted)
     cluster_markers[,i] <- interested_genes
   }
   print("Finding markers based on mean expressing")
@@ -88,7 +89,7 @@ id_markers <- function(input, num_markers, num_reference){
   colnames(cluster_markers_FC) <- c(seq(1:num_cluster))
   for(i in 1:ncol(gene_markers_foldchange)){
     sorted <- sort(gene_markers_foldchange[,i])
-    interested_genes <- names((tail(sorted, n=num_marker_genes)))
+    interested_genes <- names(sorted)
     cluster_markers_FC[,i] <- interested_genes
   }
   print("Merging Lists")
@@ -107,49 +108,13 @@ id_markers <- function(input, num_markers, num_reference){
     final <- cbind(cm, cf)
     final <- final[,c(2,4)]
     final$score <- apply(final,1,sum)
-    final <- final[order(final$score),]
-    marker_genes[[i]] <- rev(rownames(tail(final, num_markers)))
+    final <- final[order(-final$score),]
+    cluster_marker_rank <- rownames(final)
+    val <- match(rownames(fData(input)), cluster_marker_rank)
+    fData(marker_input)$name <- val
+    colnames(fData(marker_input))[grep("name", colnames(fData(marker_input)))] <- paste0("Cluster",i,"_marker_score")
   }
-  for(i in 1:length(marker_genes)){
-    set <- marker_genes[[i]]
-    ind <- match(set, rownames(fData(marker_input)))
-    fData(marker_input)$Markers[ind] <- paste0("Cluster", i)
-  }
-  print("Finding reference genes")
-  num_marker_genes <- num_reference
-  high_frac_exprs <- matrix(ncol = ncol(gene_markers_meandiff), nrow=num_marker_genes)
-  colnames(high_frac_exprs) <- c(seq(1:num_cluster))
-  for(i in 1:ncol(gene_markers_fractionExpression)){
-    sorted <- sort(gene_markers_fractionExpression[,i])
-    interested_genes <- names((tail(sorted, n=num_marker_genes)))
-    high_frac_exprs[,i] <- interested_genes
-  }
-  cluster_no_FC <- matrix(ncol = ncol(gene_markers_foldchange), nrow=num_marker_genes)
-  colnames(cluster_no_FC) <- c(seq(1:num_cluster))
-  for(i in 1:ncol(gene_markers_foldchange)){
-    distance <- sort(abs(gene_markers_foldchange[,i]))
-    interested_genes <- names((head(distance, n=num_marker_genes)))
-    cluster_no_FC[,i] <- interested_genes
-  }
-  common_genes <- list()
-  for(i in 1:ncol(high_frac_exprs)){
-    cluster_common <- intersect(high_frac_exprs[,i], cluster_no_FC[,i])
-    common_genes[[i]] <- cluster_common
-  }
-  common_genes_recurring <- table(unlist(common_genes))
-  common_genes_recurring <- rev(sort(common_genes_recurring))
-  high_frac_exprs <- matrix(ncol = ncol(gene_markers_meandiff), nrow=num_marker_genes)
-  colnames(high_frac_exprs) <- c(seq(1:num_cluster))
-  for(i in 1:ncol(gene_markers_fractionExpression)){
-    sorted <- sort(gene_markers_fractionExpression[,i])
-    interested_genes <- names((tail(sorted, n=num_marker_genes)))
-    high_frac_exprs[,i] <- interested_genes
-  }
-  common_genes_recurring_allexprs <- table(unlist(cluster_no_FC))
-  common_genes_recurring_allexprs <- rev(sort(common_genes_recurring_allexprs))
-  common_genes_recurring_allexprs <- intersect(names(common_genes_recurring_allexprs), unlist(high_frac_exprs))
-  ind <- match(common_genes_recurring_allexprs, rownames(fData(marker_input)))
-  fData(marker_input)$Reference[ind] <- "Reference"
+  fData(marker_input) <- fData(marker_input)[,-grep("tmp", colnames(fData(marker_input)))]
   return(marker_input)
 }
 
