@@ -4,21 +4,20 @@
 \alias{id_markers}
 \title{ID markers}
 \usage{
-id_markers(input, num_markers, num_reference)
+id_markers(input)
 }
 \arguments{
-\item{input}{the input data matrix.}
-
-\item{num_markers}{the approximate number of marker genes to return}
-
-\item{num_reference}{the approximate number of reference genes to return}
+\item{input}{the input ex_sc}
 }
 \description{
 This will perform marker gene identification
 }
 \details{
-This will find marker genes for each cluster. First, for each cluster it calculates the fraction of cells expressing a given gene, and the mean expression of that gene (within the cluster). It then compares these values to the values of all other groups looking for genes which maximize the distance in both fraction expressing and the mean expression.
+This will find marker genes for each cluster. First, for each cluster it calculates the fraction of cells expressing a given gene,
+and the mean expression of that gene (within the cluster).
+It then compares these values to the values of all other groups looking for genes which maximize the distance in both
+fraction expressing and the mean expression.
 }
 \examples{
-ex_sc_example <- id_markers(input = ex_sc_example, num_markers = 10, num_reference = 1000)
+ex_sc_example <- id_markers(input = ex_sc_example)
 }

@@ -16,5 +16,5 @@ This function will take an input expression matrix and make an ESC
 This will take an input matrix and create the expression set class that further analysis can be written into.
 }
 \examples{
-construct_ex_sc(filtered_data)
+construct_ex_sc(input = sc_dat)
 }

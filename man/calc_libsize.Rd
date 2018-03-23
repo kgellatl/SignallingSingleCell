@@ -7,14 +7,14 @@
 calc_libsize(input)
 }
 \arguments{
-\item{input}{the input data}
+\item{input}{the input ex_sc}
 }
 \description{
 This function will count the number of reads / UMIs per cell
 }
 \details{
-This will calculate library sizes
+This will calculate total UMIs on a per cell basis.
 }
 \examples{
-ex_sc_example <- calc_libsize(ex_sc_example)
+ex_sc_example <- calc_libsize(input = ex_sc_example)
 }

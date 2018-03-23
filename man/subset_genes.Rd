@@ -7,7 +7,7 @@
 subset_genes(input, method, threshold, minCells, nComp, cutoff)
 }
 \arguments{
-\item{input}{the input data matrix.}
+\item{input}{the input ex_sc.}
 
 \item{method}{can either be "Expression", CV", or "PCA".}
 
@@ -20,10 +20,15 @@ subset_genes(input, method, threshold, minCells, nComp, cutoff)
 \item{cutoff}{the percentile of genes to keep}
 }
 \description{
-This will select genes based on minimum expression, coefficient of variation, or by a preliminary PCA.
+This will select genes based on minimum expression, coefficient of variation,
+or by a preliminary PCA.
 }
 \details{
-If the method is expression, this will filter genes by subsetting to genes that are expressed above the threshold in more than minCells. If the method is CV, it will first subset the genes based on the expression cutoffs, then find the coefficient of variation across all genes. Next it will select the percentile of genes (cutoff) based on their coefficient of variation. The last method will perform PCA on the cells, and then look at the loadings of each gene. By finding genes that are off center (via malhanoobis distance) we can filter to include only genes that contribute significant variance to the data.
+If the method is expression, this will filter genes by subsetting to genes that are
+expressed above the threshold in more than minCells.
+If the method is CV, it will first subset the genes based on the expression cutoffs,
+then find the coefficient of variation across all genes.
+Next it will select the percentile of genes (cutoff) based on their coefficient of variation. The last method will perform PCA on the cells, and then look at the loadings of each gene. By finding genes that are off center (via malhanoobis distance) we can filter to include only genes that contribute significant variance to the data.
 }
 \examples{
 gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "PCA", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.75)

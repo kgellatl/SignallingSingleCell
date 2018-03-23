@@ -2,12 +2,12 @@
 % Please edit documentation in R/pre_filter.R
 \name{pre_filter}
 \alias{pre_filter}
-\title{Filter Cells based on Expression}
+\title{Filter Data}
 \usage{
 pre_filter(input, minUMI, maxUMI = NA, threshold = NA, minCells = NA)
 }
 \arguments{
-\item{input}{the input data}
+\item{input}{the input ex_sc}
 
 \item{minUMI}{min number of UMIs per cell}
 
@@ -18,10 +18,12 @@ pre_filter(input, minUMI, maxUMI = NA, threshold = NA, minCells = NA)
 \item{minCells}{number of cells expressed above threshold for a given gene}
 }
 \description{
-This function will filter the data to remove cells and/or cells.
+This function will filter the data to remove cells and/or genes
 }
 \details{
-When processing the data, low quality cells may contain very few UMIs, while some overrepresented cell barcodes may indicate barcode bleedover or cell doublets. Filtering out both low and high UMI count cells is recommended before normalization.
+When processing the data, low quality cells may contain very few UMIs,
+while some overrepresented cell barcodes may indicate barcode bleedover or cell doublets.
+Filtering out both low and high UMI count cells is recommended before normalization.
 }
 \examples{
 filtered_data <- filter_UMIs(input = ex_sc_example, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
