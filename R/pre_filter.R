@@ -1,15 +1,17 @@
-#' Filter Cells based on Expression
+#' Filter Data
 #'
-#' This function will filter the data to remove cells and/or cells.
+#' This function will filter the data to remove cells and/or genes
 #'
-#' @param input the input data
+#' @param input the input ex_sc
 #' @param minUMI min number of UMIs per cell
 #' @param maxUMI max number of UMIs per cell
 #' @param threshold UMI threshold for gene detection
 #' @param minCells number of cells expressed above threshold for a given gene
 #' @export
 #' @details
-#' When processing the data, low quality cells may contain very few UMIs, while some overrepresented cell barcodes may indicate barcode bleedover or cell doublets. Filtering out both low and high UMI count cells is recommended before normalization.
+#' When processing the data, low quality cells may contain very few UMIs,
+#' while some overrepresented cell barcodes may indicate barcode bleedover or cell doublets.
+#' Filtering out both low and high UMI count cells is recommended before normalization.
 #' @examples
 #' filtered_data <- filter_UMIs(input = ex_sc_example, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
 

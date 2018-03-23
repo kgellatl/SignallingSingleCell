@@ -2,14 +2,14 @@
 #'
 #' This function will draw a distribution for a given value
 #'
-#' @param input the input data
+#' @param input the input ex_sc
 #' @param val Either "UMI_sum" or a gene name
 #' @param title The title of the plot
 #' @param color_by The metadata in pData that will be used to break the distributions into groups. Can be left blank.
 #' @param statistic Either the "mean" or "median" can be calculated
 #' @export
 #' @details
-#' This will draw a UMI distribution for each variable in the metadat.
+#' This will draw a UMI distribution for a given value, broken into groups if color_by != "NA"
 #' @examples
 #' draw_density(input = ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 

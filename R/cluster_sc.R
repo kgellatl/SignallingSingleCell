@@ -1,14 +1,16 @@
-#' Cluster_sc
+#' Cluster Single Cell
 #'
 #' This will perform clustering on your single cell data.
 #'
-#' @param input the input data matrix.
+#' @param input the input ex_sc
 #' @param dimension either "Comp" or "2d"
 #' @param method can either be "spectral" or "density"
 #' @param num_clust the number of clusters
 #' @export
 #' @details
-#' This will perform clustering on either the high dimensional PCA / ICA components if dimension = Comp, or the 2d tsne result if method = density. Typically spectral clustering works much better on higher dimensional data, which density based clustering works better on 2d data.
+#' This will perform clustering on either the high dimensional PCA / ICA components if dimension = Comp,
+#' or the 2d tsne result if method = density. Typically spectral clustering works much better on higher dimensional data,
+#' which density based clustering works better on 2d data.
 #' @examples
 #' ex_sc_example <- cluster_sc(input = ex_sc_example, dimension = "Comp", method = "spectral", num_clust = 6)
 

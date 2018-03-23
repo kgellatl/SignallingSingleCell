@@ -7,7 +7,7 @@
 #' @details
 #' This will take an input matrix and create the expression set class that further analysis can be written into.
 #' @examples
-#' construct_ex_sc(filtered_data)
+#' construct_ex_sc(input = sc_dat)
 
 construct_ex_sc <- function(input){
   HSMM_expr_matrix <- input
