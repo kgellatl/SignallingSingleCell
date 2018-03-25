@@ -3,6 +3,7 @@
 #' This will perform marker gene identification
 #'
 #' @param input the input ex_sc
+#' @param print_progress will print progress if TRUE
 #' @export
 #' @details
 #' This will find marker genes for each cluster. First, for each cluster it calculates the fraction of cells expressing a given gene,
@@ -10,13 +11,15 @@
 #' It then compares these values to the values of all other groups looking for genes which maximize the distance in both
 #' fraction expressing and the mean expression.
 #' @examples
-#' ex_sc_example <- id_markers(input = ex_sc_example)
+#' ex_sc_example <- id_markers(input = ex_sc_example, print_progress = TRUE)
 
-id_markers <- function(input){
+id_markers <- function(input, print_progress = TRUE){
   marker_input <- input
   fData(marker_input) <- fData(marker_input)[,-grep("marker_score", colnames(fData(marker_input)))]
   fData(marker_input)$tmp <- "tmp"
-  print("Finding markers based on fraction expressing")
+  if(print_progress == TRUE){
+    print("Finding markers based on fraction expressing")
+  }
   num_cluster <- length(unique(pData(marker_input)[,"Cluster"]))
   num_marker_genes <- nrow(fData(input))
   non0 <- c()
@@ -57,7 +60,9 @@ id_markers <- function(input){
     interested_genes <- names(sorted)
     cluster_markers[,i] <- interested_genes
   }
-  print("Finding markers based on mean expressing")
+  if(print_progress == TRUE){
+    print("Finding markers based on mean expressing")
+  }
   mean_exp <- c()
   mean_data <- c()
   for(n in 1:length(unique(pData(marker_input)[,"Cluster"]))){
@@ -92,7 +97,9 @@ id_markers <- function(input){
     interested_genes <- names(sorted)
     cluster_markers_FC[,i] <- interested_genes
   }
-  print("Merging Lists")
+  if(print_progress == TRUE){
+    print("Merging Lists")
+  }
   marker_genes <- list()
   for(i in 1:ncol(cluster_markers_FC)){
     cm <- cluster_markers[,i]
