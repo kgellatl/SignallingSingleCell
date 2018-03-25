@@ -28,8 +28,8 @@ plot_density <- function(input, val, title, color_by = "NA", statistic = "mean")
     clustermean <- aggregate(dat[,val], list(group=dat[,"group"]), statistic)
     clustermean$x = round(clustermean$x)
   } else {
-    clustermean <- aggregate(dat[,"UMI_sum"], list(group=dat[,color_by]), statistic)
-    clustermean$x = round(clustermean$x)
+    clustermean <- aggregate(dat[,val], list(group=dat[,color_by]), statistic)
+    clustermean$x = round(clustermean$x, 2)
   }
   if(color_by == "NA"){
     g <- ggplot(dat, aes_string(val))
