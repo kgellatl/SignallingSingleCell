@@ -2,7 +2,7 @@
 #'
 #' This will plot information onto a 2d tsne plot
 #'
-#' @param input The input data
+#' @param input the input ex_sc.
 #' @param title The title
 #' @param color_by What to color points by, either "UMI_sum", or pData categorial variable, ignored if gene is provided
 #' @param facet_by What to break the plots by
@@ -15,7 +15,7 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_tsne_metadata <- function(input, title, color_by, facet_by = "NA", ncol = "NA", size = 1, colors = "NA"){
+plot_tsne_metadata <- function(input, title, color_by, facet_by = "NA", ncol = "NA", size = 1.5, colors = "NA"){
   g <- ggplot(pData(input))
   g <- g + theme_classic()
   g <- g + labs(title= title, x = "tSNE[1]", y = "tSNE[2]")
@@ -23,15 +23,15 @@ plot_tsne_metadata <- function(input, title, color_by, facet_by = "NA", ncol = "
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   if(facet_by != "NA"){
     tmp <- pData(input)[c("x", "y")]
-    g <- g + geom_point(data = tmp, aes(x=x, y=y), col = "gray", size = size)
+    g <- g + geom_point(data = tmp, aes(x=x, y=y), shape = 21, fill = "white", size = size)
   }
   if(color_by == "UMI_sum"){
-    g <- g +  geom_point(aes_string(x = "x", y = "y", col = "UMI_sum"), size = size)
-    g <- g +  scale_color_gradientn(colours=c("gray", 'blue', 'red', 'yellow'))
+    g <- g +  geom_point(aes_string(x = "x", y = "y", fill = "UMI_sum"), shape = 21, size = size)
+    g <- g +  scale_fill_gradientn(colours=c('blue', 'red', 'yellow'))
   } else {
-    g <- g +  geom_point(aes_string(x = "x", y = "y", col = color_by), size = size)
+    g <- g +  geom_point(aes_string(x = "x", y = "y", fill = color_by), shape = 21, size = size)
     if(colors != "NA"){
-      g <- g + scale_color_manual(values = c(colors))
+      g <- g + scale_fill_manual(values = c(colors))
     }
   }
   if(facet_by != "NA"){
