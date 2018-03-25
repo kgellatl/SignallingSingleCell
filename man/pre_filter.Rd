@@ -4,7 +4,8 @@
 \alias{pre_filter}
 \title{Filter Data}
 \usage{
-pre_filter(input, minUMI, maxUMI = NA, threshold = NA, minCells = NA)
+pre_filter(input, minUMI, maxUMI = NA, threshold = NA, minCells = NA,
+  print_progress = TRUE)
 }
 \arguments{
 \item{input}{the input ex_sc}
@@ -16,6 +17,8 @@ pre_filter(input, minUMI, maxUMI = NA, threshold = NA, minCells = NA)
 \item{threshold}{UMI threshold for gene detection}
 
 \item{minCells}{number of cells expressed above threshold for a given gene}
+
+\item{print_progress}{will print progress if TRUE}
 }
 \description{
 This function will filter the data to remove cells and/or genes
@@ -26,5 +29,5 @@ while some overrepresented cell barcodes may indicate barcode bleedover or cell 
 Filtering out both low and high UMI count cells is recommended before normalization.
 }
 \examples{
-filtered_data <- filter_UMIs(input = ex_sc_example, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10)
+filtered_data <- filter_UMIs(input = ex_sc_example, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10, print_progress = TRUE)
 }

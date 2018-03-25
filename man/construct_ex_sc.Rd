@@ -10,10 +10,11 @@ construct_ex_sc(input)
 \item{input}{the input data matrix.}
 }
 \description{
-This function will take an input expression matrix and make an ESC
+This function will take an input expression matrix and make an Expression Set Class
 }
 \details{
-This will take an input matrix and create the expression set class that further analysis can be written into.
+This will take an input matrix and create the expression set class that further analysis
+will be written to
 }
 \examples{
 construct_ex_sc(input = sc_dat)

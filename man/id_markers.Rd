@@ -4,10 +4,12 @@
 \alias{id_markers}
 \title{ID markers}
 \usage{
-id_markers(input)
+id_markers(input, print_progress = TRUE)
 }
 \arguments{
 \item{input}{the input ex_sc}
+
+\item{print_progress}{will print progress if TRUE}
 }
 \description{
 This will perform marker gene identification
@@ -19,5 +21,5 @@ It then compares these values to the values of all other groups looking for gene
 fraction expressing and the mean expression.
 }
 \examples{
-ex_sc_example <- id_markers(input = ex_sc_example)
+ex_sc_example <- id_markers(input = ex_sc_example, print_progress = TRUE)
 }

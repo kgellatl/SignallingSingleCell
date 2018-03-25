@@ -8,7 +8,7 @@ dim_reduce(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15,
   tSNE_perp = 30, iterations = 1000, print_progress = TRUE)
 }
 \arguments{
-\item{input}{the input data matrix.}
+\item{input}{the input ex_sc}
 
 \item{genelist}{the subset of genes to perform dimensionality reduction on}
 
@@ -20,7 +20,7 @@ dim_reduce(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15,
 
 \item{iterations}{The number of iterations for tSNE to perform.}
 
-\item{print_progress}{Print to the terminal progress information.}
+\item{print_progress}{will print progress if TRUE}
 }
 \description{
 This function will do dimensionality reduction.

@@ -4,22 +4,33 @@
 \alias{plot_tsne_gene}
 \title{tSNE Plot on a gene or genes}
 \usage{
-plot_tsne_gene(input, genes, title, colors_points = c("white", "blue", "red",
-  "yellow"), colors_density = c("black", "blue", "red", "yellow"), size = 1,
-  ncol = 2, cutoff = 0.2)
+plot_tsne_gene(input, genes, title, density = FALSE, facet_by = "NA",
+  colors_points = c("white", "blue", "red", "yellow"),
+  colors_density = c("white", "blue", "red", "yellow"), size = 1.5,
+  ncol = 2, resolution = 250, cutoff = 0.25)
 }
 \arguments{
 \item{input}{The input data}
 
-\item{genes}{if provided will color_by the gene}
+\item{genes}{the gene or genes to ploy}
 
 \item{title}{The title}
+
+\item{density}{If true will color a density of the points}
+
+\item{facet_by}{If ONE gene is being plotted it can be faceted. You cannot facet multiple genes}
 
 \item{colors_points}{Colors for the cells}
 
 \item{colors_density}{Colors for the background}
 
 \item{size}{The size of the points}
+
+\item{ncol}{controls the number of columns if faceting}
+
+\item{resolution}{Control the density drawing resolution. Higher values will increase file size}
+
+\item{cutoff}{removes points from density below this threshold. Lower values will increase file size}
 }
 \description{
 This will plot gene information onto a 2d tsne plot
@@ -28,5 +39,6 @@ This will plot gene information onto a 2d tsne plot
 Utilize information stored in pData to control the plot display.
 }
 \examples{
-plot_tsne_metadata(input = ex_sc_example, genes,  title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
+plot_tsne_gene(ex_sc_example, gene = "Tnf", title = "Tnf over Time", facet_by = "Timepoint", density = TRUE)
+
 }
