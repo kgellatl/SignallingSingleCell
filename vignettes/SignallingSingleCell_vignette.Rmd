@@ -29,7 +29,6 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 ```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
 library("SignallingSingleCell")
 load("/Users/KGellatly/Dropbox (UMass Medical School)/Lab_inDrop/mDC_vignette_data/mDC_0hr_1hr_4hr_CLEAN.Rdata") # this in in the Lab_inDrop folder so anyone can access it!!
-sc_dat <- mDC_0hr_1hr_4hr_CLEAN
 ```
 
 # Preprocessing  
@@ -45,7 +44,7 @@ ncol(exprs(ex_sc)) == nrow(pData(ex_sc))
 nrow(exprs(ex_sc)) == nrow(fData(ex_sc))  
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc_example <- construct_ex_sc(sc_dat) # sc_dat == Input expression matrix
+ex_sc_example <- construct_ex_sc(mDC_0hr_1hr_4hr_CLEAN) # sc_dat == Input expression matrix
 ex_sc_example # Note that phenoData and featureData are empty right now!
 ```
 
