@@ -29,13 +29,14 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 ```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
 library("SignallingSingleCell")
 load("/Users/KGellatly/Dropbox (UMass Medical School)/Lab_inDrop/mDC_vignette_data/mDC_0hr_1hr_4hr_CLEAN.Rdata") # this in in the Lab_inDrop folder so anyone can access it!!
+sc_dat <- mDC_0hr_1hr_4hr_CLEAN
 ```
 
 # Preprocessing  
 
-## Constructing the ExpressionSet Class  
+## Constructing the Expression Set Class  
 
-The ExpressionSet class (ex_sc) is an extremely convienient data structure that contains 3 dataframes. These dataframes contain expression data, cell information, and gene information respectivelty. 
+The Expression Set class (ex_sc) is an extremely convienient data structure that contains 3 dataframes. These dataframes contain expression data, cell information, and gene information respectivelty. 
 
 exprs(ex_sc) is the expression data  
 pData(ex_sc) is cell information, where rows are cells and columns are metadata  
@@ -44,7 +45,7 @@ ncol(exprs(ex_sc)) == nrow(pData(ex_sc))
 nrow(exprs(ex_sc)) == nrow(fData(ex_sc))  
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc_example <- construct_ex_sc(mDC_0hr_1hr_4hr_CLEAN) # sc_dat == Input expression matrix
+ex_sc_example <- construct_ex_sc(sc_dat) # sc_dat == Input expression matrix. This is the only function that does not take the Expression Set Class as an input
 ex_sc_example # Note that phenoData and featureData are empty right now!
 ```
 
@@ -58,11 +59,12 @@ The first step is to filter your data to remove low quality cells. Often creatin
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- calc_libsize(ex_sc_example) # sums counts for each cell
-plot_density(ex_sc_example, val = "UMI_sum", statistic = "mean") # Density function. Note how many low UMI count cells are in the data!
+plot_density(ex_sc_example, title = "UMI Density", val = "UMI_sum", statistic = "mean") # Density function. Note how many low UMI count cells are in the data!
 
-ex_sc_example <- pre_filter(ex_sc_example, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 10000) # filters cells and genes
+ex_sc_example <- pre_filter(ex_sc_example, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 10000, print_progress=TRUE) # filters cells and genes
+
 ex_sc_example <- calc_libsize(ex_sc_example)
-plot_density(ex_sc_example, val = "UMI_sum", statistic = "mean")  
+plot_density(ex_sc_example, title = "UMI Density", val = "UMI_sum", statistic = "mean")  
 
 # save_ggplot(filename = "Density", format = "pdf") # Plots can be quickly and easily saved!
 ```
@@ -84,14 +86,14 @@ plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "Total UMIs per 
 
 ## Initial Clustering
 
-Now that we have dimension reduced data we can try clustering it!
+Now that we have dimension reduced data we can try clustering it! From the UMI plot it looks as though there are 6 clusters.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- cluster_sc(ex_sc_example, dimension = "Comp", method = "spectral", num_clust = 6) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
 
 plot_tsne_metadata(ex_sc_example, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
 
-plot_density(ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
+plot_density(ex_sc_example, title = "UMI per cluster", val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 ```
 
 ## Normalization
@@ -114,33 +116,34 @@ pData(ex_sc_example)[grep("0hr", rownames(pData(ex_sc_example))),"Timepoint"] <-
 pData(ex_sc_example)[grep("1hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "1hr"
 pData(ex_sc_example)[grep("4hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "4hr"
 
-plot_tsne_metadata(ex_sc_example, gene = "Tnf", title = "Tnf over Time", facet_by = "Timepoint", size = 0.2)
+plot_tsne_metadata(ex_sc_example, color_by = "Timepoint", title = "Clusters over Time", facet_by = "Cluster")
 # Notice that now we are including a facet that will break the tSNE plot into smaller plots, one each for the variable. From this we can see that some clusters are forming based on timepoint, while others contain multiple timepoints.
-
-plot_violin(ex_sc_example, title = "Tnf across clusters", gene = "Tnf", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
-
-ex_sc_example_subset <- subset_ex_sc(ex_sc_example, variable = "Cluster", select = c("Cluster4")) #subsetting can be very handy! If needed chain together several rounds of subsetting.
-
-plot_tsne_metadata(ex_sc_example_subset, gene = "Ccl22", facet_by = "Timepoint", title = "Cluster 4 cells") # this function is flexible for plotting any data onto a 2d tsne mapping
-
-plot_violin(ex_sc_example_subset, title = "Ccl22 across time in Cluster 4 cells", gene = "Ccl22", facet_by = "Cluster", size = 1, ncol = 3, color_by = "Timepoint")
-
 ```
 
 ## Identify markers and reference genes
 
-For normalization and cluster id a function is provided that will id both marker genes and reference genes.
+Forcluster id a function is provided that will id marker genes. This method is much quicker DE and returns genes that are uniquely expressed in each cluster.
 
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
-ex_sc_example <- id_markers(ex_sc_example, num_markers = 10, num_reference = 1000) # This is a quick method to find good markers genes for cell identification. These genes get written to fData()
+ex_sc_example <- id_markers(ex_sc_example, print_progress = TRUE) # This is a quick method to find good markers genes for cell identification. These genes get written to fData()
+head(fData(ex_sc_example))
 
-marker_list <- return_markers(ex_sc_example) # However returning the genes as a list can be helpful
+marker_list <- return_markers(ex_sc_example, num_markers = 50) # However returning the genes as a list can be helpful
 
-plot_scatter(input = ex_sc_example, title = "Top 2 marker (Alphabetical) genes for Cluster 4", gene1 = marker_list$Cluster4[1], gene2 = marker_list$Cluster4[2], facet_by = "Cluster", color_by = "Cluster") # A scater plotting function. Note the correlation of the marker genes.
+plot_scatter(input = ex_sc_example, title = "Top 2 marker genes for Cluster 3", gene1 = marker_list$Cluster3[1], gene2 = marker_list$Cluster3[2], facet_by = "Cluster", color_by = "Cluster") # A scater plotting function. Note the correlation of the marker genes.
 
 marker_facet <- c("Csf1r", "Lcn2", "Ccr7")
 
-plot_tsne_multigene(input = ex_sc_example, genes = marker_facet, title = "Marker Genes",  ncol = 3)
-
+plot_tsne_gene(ex_sc_example, gene = marker_facet, title = "Cluster Markers", density = TRUE)
 ```
 
+## Data Subsetting
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+ex_sc_example_subset <- subset_ex_sc(ex_sc_example, variable = "Cluster", select = c("Cluster1")) #subsetting can be very handy! If needed chain together several rounds of subsetting.
+
+plot_tsne_gene(ex_sc_example_subset, gene = "Ccl22", facet_by = "Timepoint", title = "Cluster 4 Tnf over Time", density = TRUE) # this function is flexible for plotting any data onto a 2d tsne mapping
+
+plot_violin(ex_sc_example_subset, title = "Cluster 4 Ccl22 over Time", gene = "Ccl22", facet_by = "Cluster", color_by = "Timepoint")
+
+```
