@@ -97,7 +97,7 @@ plot_tsne_gene <- function(input, genes, title, density = FALSE,  facet_by = "NA
     }
     geneColored1 <- pData(input)[,c("x", "y", facet_by)]
     geneColored1 <- as.data.frame(geneColored1)
-    values <- t(exprs(input)[genes,])
+    values <- log2(t(exprs(input)[genes,])+2)-1
     values <- as.vector(values)
     geneColored1$vals <- values
     final_dfdens_norm <- data.frame()
@@ -118,10 +118,10 @@ plot_tsne_gene <- function(input, genes, title, density = FALSE,  facet_by = "NA
       final_dfdens_norm <- final_dfdens_norm[-remove,]
       final_dfdens_norm <- final_dfdens_norm[with(final_dfdens_norm, order(final_dfdens_norm[,3])), ]
       geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,4])), ]
+      colnames(final_dfdens_norm) <- c("x", "y", "z", facet_by)
     } else {
       geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,4])), ]
     }
-    colnames(final_dfdens_norm) <- c("x", "y", "z", facet_by)
     tmp <- pData(input)[c("x", "y")]
     g <- ggplot(geneColored1)
     if(density == TRUE){
