@@ -20,7 +20,9 @@ Imports:
     fastICA,
     Rtsne,
     kknn,
-    MASS
+    MASS,
+    scran,
+    scater
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1.9000
