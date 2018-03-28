@@ -22,7 +22,8 @@ Imports:
     kknn,
     MASS,
     scran,
-    scater
+    scater,
+    ggridges
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1.9000
