@@ -28,11 +28,7 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 
 ```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
 library("SignallingSingleCell")
-load("~/Documents/Work/Garber/Data/inDrop/mDC_UMIClean/1-RawFiles/mDC_0hr_1hr_4hr_CLEAN.Rdata")
-sc_dat <- mDC_0hr_1hr_4hr_CLEAN
-
-# load("/Users/KGellatly/Documents/Work/Garber/Data/inDrop/Vitiligo/1_29_18/Vitiligo_1_29_18_1000UMI_MASTER.Rdata")
-# sc_dat <- master_data
+load("/Users/KGellatly/Dropbox (UMass Medical School)/Lab_inDrop/mDC_vignette_data/mDC_0hr_1hr_4hr_CLEAN.Rdata") # this in in the Lab_inDrop folder so anyone can access it!!
 ```
 
 # Preprocessing  
@@ -48,12 +44,9 @@ ncol(exprs(ex_sc)) == nrow(pData(ex_sc))
 nrow(exprs(ex_sc)) == nrow(fData(ex_sc))  
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc_example <- construct_ex_sc(sc_dat) # sc_dat == Input expression matrix
+ex_sc_example <- construct_ex_sc(mDC_0hr_1hr_4hr_CLEAN) # sc_dat == Input expression matrix
 ex_sc_example # Note that phenoData and featureData are empty right now!
-```
-
-```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
-rm(mDC_0hr_1hr_4hr_CLEAN, sc_dat)
+rm(mDC_0hr_1hr_4hr_CLEAN)
 ```
 
 ## Filtering
@@ -62,11 +55,11 @@ The first step is to filter your data to remove low quality cells. Often creatin
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- calc_libsize(ex_sc_example) # sums counts for each cell
-plot_density(ex_sc_example, val = "UMI_sum", statistic = "mean") # Density function. Note how many low UMI count cells are in the data!
+plot_density(ex_sc_example, title = "UMI Density", val = "UMI_sum", statistic = "mean") # Density function. Note how many low UMI count cells are in the data!
 
-ex_sc_example <- pre_filter(ex_sc_example, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 10000) # filters cells and genes
+ex_sc_example <- pre_filter(ex_sc_example, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 10000, print_progress = TRUE) # filters cells and genes
 ex_sc_example <- calc_libsize(ex_sc_example)
-plot_density(ex_sc_example, val = "UMI_sum", statistic = "mean")  
+plot_density(ex_sc_example, title = "UMI Density",  val = "UMI_sum", statistic = "mean")  
 
 # save_ggplot(filename = "Density", format = "pdf") # Plots can be quickly and easily saved!
 ```
@@ -76,11 +69,13 @@ plot_density(ex_sc_example, val = "UMI_sum", statistic = "mean")
 Before normalization dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters. First we can subset the genes, and then use these feature selected genes for dimension reduction.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-gene_subset <- subset_genes(ex_sc_example, method = "PCA", threshold = 3, minCells = 30, nComp = 10, cutoff = 0.75) # 3 available methods for selecting genes
+gene_subset <- subset_genes(ex_sc_example, method = "PCA", threshold = 1, minCells = 30, nComp = 10, cutoff = 0.85) # 3 available methods for selecting genes
 
 ex_sc_example <- dim_reduce(ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  # 3 available methods for dimensionality reduction
 
-head(pData(ex_sc_example))
+colnames(pData(ex_sc_example))
+
+plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "Total UMIs per cell") 
 
 ```
 
@@ -93,54 +88,97 @@ ex_sc_example <- cluster_sc(ex_sc_example, dimension = "Comp", method = "spectra
 
 plot_tsne_metadata(ex_sc_example, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
 
-plot_density(ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
+plot_density(ex_sc_example, title = "UMIs per cluster", val = "UMI_sum", color_by = "Cluster", statistic = "mean")
+
+plot_density_ridge(ex_sc_example, title = "UMIs per cluster", val = "Lyz1", color_by = "Cluster")
 ```
+
+## Normalization
+
+Now that the data has preliminary clusters, we can normalize. SCRAN normalization will first normalize internally in clusters, before normalizing across clusters. Once the data is normalized we can run the same steps as above before visualization. The first step is to select the genes to be used for normalization. One method would be to first only use genes expressed in more than n cells, and then remove the most variable genes.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+gene_subset_exp <- subset_genes(ex_sc_example, method = "Expression", threshold = 3, minCells = .01*(ncol(exprs(ex_sc_example)))) # filter genes on expression
+
+gene_subset_var <- subset_genes(ex_sc_example, method = "PCA", threshold = 3, minCells = .01*(ncol(exprs(ex_sc_example))), nComp = 10, cutoff = 0.85) # filter genes on variability
+
+stable_genes <- gene_subset_exp[!gene_subset_exp %in% gene_subset_var] # remove variable genes
+
+clusters <- pData(ex_sc_example)[,"Cluster"]
+c_sizes <- c()
+for(i in 1:length(unique(pData(ex_sc_example)$Cluster))){
+    c_sizes <- c(c_sizes, length(which(clusters == paste0("Cluster", i))))
+}
+min(c_sizes) # This is the maximum pool size. We generally aim for 5 sets of pool sizes. If one cluster is much too small it can be merged into a larger cluster.
+
+ex_sc_example_norm <- norm_sc(ex_sc_example, genelist = stable_genes,  pool_sizes = c(20,30,40,50,60))
+```
+
+## Post Normalization Pre-processing
+
+Now that we have normalized, it is time to reprocess the data as before, this time on the normalized counts!
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+ex_sc_example_norm <- calc_libsize(ex_sc_example_norm)
+plot_density(ex_sc_example_norm, title = "UMI Density", val = "UMI_sum", statistic = "mean") 
+
+gene_subset <- subset_genes(ex_sc_example_norm, method = "PCA", threshold = 1, minCells = 30, nComp = 10, cutoff = 0.85)
+
+ex_sc_example_norm <- dim_reduce(ex_sc_example_norm, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
+
+plot_tsne_metadata(ex_sc_example_norm, color_by = "UMI_sum", title = "Total UMIs per cell") 
+
+ex_sc_example_norm <- cluster_sc(ex_sc_example_norm, dimension = "Comp", method = "spectral", num_clust = 6)
+
+plot_tsne_metadata(ex_sc_example_norm, color_by = "Cluster", title = "Spectral Cluster on iPCA components")
+
+plot_density(ex_sc_example_norm, title = "UMIs per cluster", val = "UMI_sum", color_by = "Cluster", statistic = "mean")
+```
+
+# Basic Analysis
 
 ## Data Annotation
 
 Often we have metadata about the experiment that can be valuable in the analysis! Writing that information now may be appropriate. Our experiment consists of a time course with LPS stimulation. Now we can begin to take advantage of our faceting!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-pData(ex_sc_example)$Timepoint <- NA # initialize a new pData column
+pData(ex_sc_example_norm)$Timepoint <- NA # initialize a new pData column
 
-pData(ex_sc_example)[grep("0hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "0hr"
-pData(ex_sc_example)[grep("1hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "1hr"
-pData(ex_sc_example)[grep("4hr", rownames(pData(ex_sc_example))),"Timepoint"] <- "4hr"
+pData(ex_sc_example_norm)[grep("0hr", rownames(pData(ex_sc_example_norm))),"Timepoint"] <- "0hr"
+pData(ex_sc_example_norm)[grep("1hr", rownames(pData(ex_sc_example_norm))),"Timepoint"] <- "1hr"
+pData(ex_sc_example_norm)[grep("4hr", rownames(pData(ex_sc_example_norm))),"Timepoint"] <- "4hr"
 
-plot_tsne_metadata(ex_sc_example, gene = "Tnf", title = "Tnf over Time", facet_by = "Timepoint", size = 0.2)
+plot_tsne_metadata(ex_sc_example_norm, color_by = "Timepoint", title = "Clusters over Time", facet_by = "Cluster")
 # Notice that now we are including a facet that will break the tSNE plot into smaller plots, one each for the variable. From this we can see that some clusters are forming based on timepoint, while others contain multiple timepoints.
-
-plot_violin(ex_sc_example, title = "Tnf across clusters", gene = "Tnf", color_by = "Cluster", facet_by = "Timepoint", size = 1, ncol = 3)
-
-ex_sc_example_subset <- subset_ex_sc(ex_sc_example, variable = "Timepoint", select = c("1hr"))
-
-plot_tsne_metadata(ex_sc_example_subset, color_by = "Cluster", title = "1hr cells") # this function is flexible for plotting any data onto a 2d tsne mapping
-
-plot_violin(ex_sc_example_subset, title = "Actb across clusters", gene = "Actb", facet_by = "Cluster", size = 1, ncol = 3, color_by = "Cluster")
-
 ```
 
 ## Identify markers and reference genes
 
-For normalization and cluster id a function is provided that will id both marker genes and reference genes.
+As a quick and easy way to ID cells a marker id function is provided.
 
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
-ex_sc_example <- id_markers(ex_sc_example, num_markers = 10, num_reference = 1000) # This is a quick method to find good markers genes for cell identification. These genes get written to fData()
+ex_sc_example_norm <- id_markers(ex_sc_example_norm, print_progress = TRUE) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
+head(fData(ex_sc_example_norm))
 
-marker_list <- return_markers(ex_sc_example) # However returning the genes as a list can be helpful
+marker_list <- return_markers(ex_sc_example_norm, num_markers = 50) # However returning the genes as a list can be helpful
 
-plot_scatter(input = ex_sc_example, gene1 = marker_list$Cluster4[1], gene2 = marker_list$Cluster4[2], facet_by = "Cluster", color_by = "Cluster") # A scater plotting function. Note the correlation of the marker genes.
+plot_scatter(input = ex_sc_example_norm, title = "Top 2 markers for Cluster 2", gene1 = marker_list$Cluster2[1], gene2 = marker_list$Cluster2[2], facet_by = "Cluster", color_by = "Cluster") # A scater plotting function. Note the correlation of the marker genes.
 
-marker_facet <- c("Csf1r", "Lcn2", "Ccr7")
+marker_facet <- c("Emr1", "Lcn2", "Ccr7")
 
-plot_tsne_multigene(input = ex_sc_example, genes = marker_facet, title = "Marker Genes",  ncol = 3)
+plot_tsne_gene(input = ex_sc_example_norm, genes = marker_facet, title = "Marker Genes",  ncol = 3, density = TRUE)
 
+plot_violin(ex_sc_example_norm, title = "Ccr7 across clusters", gene = "Ccr7", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
 ```
 
+## Subsetting Data
 
-## Normalization
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+ex_sc_example_subset <- subset_ex_sc(ex_sc_example_norm, variable = "Cluster", select = c("Cluster3")) #subsetting can be very handy! If needed chain together several rounds of subsetting.
 
-Now that the data has preliminary clusters, we can normalize. CPM and TMM normalization will not utilize these clusters, however the much more powerful SCRAN normalization will first normalize internally in clusters, before normalizing acromarker_facets clusters. Once the data is normalized we can run the same steps as above before visualization.
+plot_tsne_gene(ex_sc_example_subset, genes = "Ccl22", facet_by = "Timepoint", title = "1 hour cells TNF by Cluster", density = FALSE) # this function is flexible for plotting any data onto a 2d tsne mapping
 
-```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+plot_violin(ex_sc_example_subset, title = "Ccl22 across time in Cluster 6 cells", gene = "Ccl22", facet_by = "Cluster", size = 1, ncol = 3, color_by = "Timepoint")
 ```
+
+# Advanced Analysis

@@ -4,10 +4,12 @@
 \alias{return_markers}
 \title{Return markers}
 \usage{
-return_markers(input)
+return_markers(input, num_markers)
 }
 \arguments{
-\item{input}{the input data matrix.}
+\item{input}{the input ex_sc}
+
+\item{num_markers}{the number of markers to return for each cell type}
 }
 \description{
 This will return the marker genes.
@@ -16,5 +18,5 @@ This will return the marker genes.
 This will return the marker and reference genes stored in fData(input) in a convienient list format.
 }
 \examples{
-marker_list <- return_markers(input)
+marker_list <- return_markers(input = ex_sc, num_markers = 50)
 }

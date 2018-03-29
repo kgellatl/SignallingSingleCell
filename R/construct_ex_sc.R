@@ -1,13 +1,14 @@
 #' Construct Expression Set Class
 #'
-#' This function will take an input expression matrix and make an ESC
+#' This function will take an input expression matrix and make an Expression Set Class
 #'
 #' @param input the input data matrix.
 #' @export
 #' @details
-#' This will take an input matrix and create the expression set class that further analysis can be written into.
+#' This will take an input matrix and create the expression set class that further analysis
+#' will be written to
 #' @examples
-#' construct_ex_sc(filtered_data)
+#' construct_ex_sc(input = sc_dat)
 
 construct_ex_sc <- function(input){
   HSMM_expr_matrix <- input

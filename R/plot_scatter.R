@@ -17,10 +17,12 @@
 #' @examples
 #' plot_scatter(input = ex_sc_example, title = "Plot", gene1 = "Ccl22", gene2 = "Ccl5", color_by = "Cluster", facet_by = "Timepoint")
 
-plot_scatter <- function(input, gene1, title, gene2, color_by, facet_by = "NA", ncol = "NA", size = 2, colors = "NA"){
+plot_scatter <- function(input, gene1, title, gene2, color_by, facet_by = "NA", ncol = "NA", size = 2, colors = "NA", logscale = FALSE){
   dat <- as.data.frame(t(exprs(input)[c(gene1, gene2),]))
-  dat[,1] <- log2(dat[,1]+2)-1
-  dat[,2] <- log2(dat[,2]+2)-1
+  if(logscale != FALSE){
+    dat[,1] <- log2(dat[,1]+2)-1
+    dat[,2] <- log2(dat[,2]+2)-1
+  }
   dat$color_by <- pData(input)[,color_by]
   colnames(dat) <- c(gene1, gene2, color_by)
   if (facet_by != "NA"){

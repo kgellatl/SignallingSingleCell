@@ -19,7 +19,11 @@ Imports:
     irlba,
     fastICA,
     Rtsne,
-    kknn
+    kknn,
+    MASS,
+    scran,
+    scater,
+    ggridges
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1.9000
