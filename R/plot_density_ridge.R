@@ -19,13 +19,15 @@ plot_density_ridge <- function(input, val, title, color_by){
     dat <- cbind(dat, log2(exprs(input)[val,]+2)-1)
     colnames(dat) <- c(colnames(dat[2:ncol(dat)-1]), val)
   }
-  g <- ggplot(dat, aes_string(x = val, y = color_by, col = color_by))
-  g <- g + ggridges::geom_density_ridges(alpha=0.1, lwd=1)
+  g <- ggplot(dat, aes_string(x = val, y = color_by, col = color_by, fill = color_by))
+  g <- g + ggridges::geom_density_ridges(scale = 1, alpha = 0.25)
   g <- g + theme_classic()
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   g <- g + ggtitle(title)
-  # g <- g + scale_x_log10()
   g <- g + xlab(val)
-  print(g)
+  if(val == "UMI_sum"){
+    g <- g + scale_x_log10()
+  }
+  return(g)
 }
