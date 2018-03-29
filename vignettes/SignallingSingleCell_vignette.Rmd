@@ -89,6 +89,8 @@ ex_sc_example <- cluster_sc(ex_sc_example, dimension = "Comp", method = "spectra
 plot_tsne_metadata(ex_sc_example, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
 
 plot_density(ex_sc_example, title = "UMIs per cluster", val = "UMI_sum", color_by = "Cluster", statistic = "mean")
+
+plot_density_ridge(ex_sc_example, title = "UMIs per cluster", val = "Lyz1", color_by = "Cluster")
 ```
 
 ## Normalization
@@ -96,11 +98,11 @@ plot_density(ex_sc_example, title = "UMIs per cluster", val = "UMI_sum", color_b
 Now that the data has preliminary clusters, we can normalize. SCRAN normalization will first normalize internally in clusters, before normalizing across clusters. Once the data is normalized we can run the same steps as above before visualization. The first step is to select the genes to be used for normalization. One method would be to first only use genes expressed in more than n cells, and then remove the most variable genes.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-gene_subset_exp <- subset_genes(ex_sc_example, method = "Expression", threshold = 3, minCells = .01*(ncol(exprs(ex_sc_example))))
+gene_subset_exp <- subset_genes(ex_sc_example, method = "Expression", threshold = 3, minCells = .01*(ncol(exprs(ex_sc_example)))) # filter genes on expression
 
-gene_subset_var <- subset_genes(ex_sc_example, method = "PCA", threshold = 3, minCells = .01*(ncol(exprs(ex_sc_example))), nComp = 10, cutoff = 0.85)
+gene_subset_var <- subset_genes(ex_sc_example, method = "PCA", threshold = 3, minCells = .01*(ncol(exprs(ex_sc_example))), nComp = 10, cutoff = 0.85) # filter genes on variability
 
-stable_genes <- gene_subset_exp[!gene_subset_exp %in% gene_subset_var]
+stable_genes <- gene_subset_exp[!gene_subset_exp %in% gene_subset_var] # remove variable genes
 
 clusters <- pData(ex_sc_example)[,"Cluster"]
 c_sizes <- c()
@@ -130,7 +132,7 @@ ex_sc_example_norm <- cluster_sc(ex_sc_example_norm, dimension = "Comp", method 
 
 plot_tsne_metadata(ex_sc_example_norm, color_by = "Cluster", title = "Spectral Cluster on iPCA components")
 
-plot_density(ex_sc_example, title = "UMIs per cluster", val = "UMI_sum", color_by = "Cluster", statistic = "mean")
+plot_density(ex_sc_example_norm, title = "UMIs per cluster", val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 ```
 
 # Basic Analysis
@@ -158,9 +160,9 @@ As a quick and easy way to ID cells a marker id function is provided.
 ex_sc_example_norm <- id_markers(ex_sc_example_norm, print_progress = TRUE) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
 head(fData(ex_sc_example_norm))
 
-marker_list <- return_markers(ex_sc_example_norm, num_markers = 5) # However returning the genes as a list can be helpful
+marker_list <- return_markers(ex_sc_example_norm, num_markers = 50) # However returning the genes as a list can be helpful
 
-plot_scatter(input = ex_sc_example_norm, title = "Top 2 markers for Cluster 6", gene1 = marker_list$Cluster6[1], gene2 = marker_list$Cluster6[2], facet_by = "Cluster", color_by = "Cluster") # A scater plotting function. Note the correlation of the marker genes.
+plot_scatter(input = ex_sc_example_norm, title = "Top 2 markers for Cluster 2", gene1 = marker_list$Cluster2[1], gene2 = marker_list$Cluster2[2], facet_by = "Cluster", color_by = "Cluster") # A scater plotting function. Note the correlation of the marker genes.
 
 marker_facet <- c("Emr1", "Lcn2", "Ccr7")
 
@@ -172,9 +174,11 @@ plot_violin(ex_sc_example_norm, title = "Ccr7 across clusters", gene = "Ccr7", c
 ## Subsetting Data
 
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
-ex_sc_example_subset <- subset_ex_sc(ex_sc_example_norm, variable = "Cluster", select = c("Cluster6")) #subsetting can be very handy! If needed chain together several rounds of subsetting.
+ex_sc_example_subset <- subset_ex_sc(ex_sc_example_norm, variable = "Cluster", select = c("Cluster3")) #subsetting can be very handy! If needed chain together several rounds of subsetting.
 
 plot_tsne_gene(ex_sc_example_subset, genes = "Ccl22", facet_by = "Timepoint", title = "1 hour cells TNF by Cluster", density = FALSE) # this function is flexible for plotting any data onto a 2d tsne mapping
 
 plot_violin(ex_sc_example_subset, title = "Ccl22 across time in Cluster 6 cells", gene = "Ccl22", facet_by = "Cluster", size = 1, ncol = 3, color_by = "Timepoint")
 ```
+
+# Advanced Analysis
