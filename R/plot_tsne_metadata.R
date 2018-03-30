@@ -23,15 +23,15 @@ plot_tsne_metadata <- function(input, title, color_by, facet_by = "NA", ncol = "
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   if(facet_by != "NA"){
     tmp <- pData(input)[c("x", "y")]
-    g <- g + geom_point(data = tmp, aes(x=x, y=y), shape = 21, fill = "white", size = size)
+    g <- g + geom_point(data = tmp, aes(x=x, y=y), shape = 20, col = "gray", size = size)
   }
-  if(color_by == "UMI_sum" | "size_factor"){
-    g <- g +  geom_point(aes_string(x = "x", y = "y", fill = "UMI_sum"), shape = 21, size = size)
-    g <- g +  scale_fill_gradientn(colours=c('blue', 'red', 'yellow'))
+  if(typeof(pData(input)[,color_by]) == "double"){
+    g <- g +  geom_point(aes_string(x = "x", y = "y", col = color_by), shape = 20, size = size)
+    g <- g +  scale_color_gradientn(colours=c('blue', 'red', 'yellow'))
   } else {
-    g <- g +  geom_point(aes_string(x = "x", y = "y", fill = color_by), shape = 21, size = size)
+    g <- g +  geom_point(aes_string(x = "x", y = "y", col = color_by), shape = 20, size = size)
     if(colors != "NA"){
-      g <- g + scale_fill_manual(values = c(colors))
+      g <- g + scale_color_gradientn(values = c(colors))
     }
   }
   if(facet_by != "NA"){
@@ -41,6 +41,6 @@ plot_tsne_metadata <- function(input, title, color_by, facet_by = "NA", ncol = "
       g <- g +  facet_wrap(facets = reformulate(facet_by))
     }
   }
-  return(g)
+  plot(g)
 }
 
