@@ -7,7 +7,6 @@
 #' @param title The title
 #' @param colors_points Colors for the cells
 #' @param density If true will color a density of the points
-#' @param colors_density Colors for the background
 #' @param resolution Control the density drawing resolution. Higher values will increase file size
 #' @param cutoff removes points from density below this threshold. Lower values will increase file size
 #' @param facet_by If ONE gene is being plotted it can be faceted. You cannot facet multiple genes
@@ -20,8 +19,8 @@
 #' plot_tsne_gene(ex_sc_example, gene = "Tnf", title = "Tnf over Time", facet_by = "Timepoint", density = TRUE)
 #'
 plot_tsne_gene <- function(input, genes, title, density = FALSE,  facet_by = "NA",
-                           colors_points = c("white", 'blue', 'red', 'yellow') , colors_density = c("white", 'blue', 'red', "yellow"),
-                           size = 1.5, ncol = 2, resolution = 250, cutoff = 0.25){
+                           colors_points = c("gray", 'blue', 'red', 'yellow'),
+                           size = 1.5, ncol = 2, resolution = 500, cutoff = 0.2){
   kde2d_weighted <- function (x, y, w, h, n , lims = c(range(x), range(y))) {
     nx <- length(x)
     if (length(y) != nx)
@@ -82,15 +81,11 @@ plot_tsne_gene <- function(input, genes, title, density = FALSE,  facet_by = "NA
     g <- g +  theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
     g <- g +  facet_wrap(~gene, ncol = ncol)
     if(density == TRUE){
-      g <- g +  geom_point(data=final_dfdens_norm, aes(x=x, y=y, color=z), shape=21, size=.1, stroke = 1)
+      g <- g +  geom_point(data=final_dfdens_norm, aes(x=x, y=y, color=z), shape=20, size=.1, stroke = 1)
     }
-    g <- g +  scale_color_gradientn(colours=colors_density)
-    g <- g +  geom_point(data= geneColored1, aes(x=x, y=y, fill=vals), shape=21, size = size)
-    g <- g +  scale_fill_gradientn(colours=colors_points)
-    g <- g +  labs(title= title, col= "Weighted\nDensity", x = "tSNE[1]", y = "tSNE[2]", fill = "UMIs")
-    if(density == TRUE){
-      g <- g + guides(fill=FALSE)
-    }
+    g <- g +  scale_color_gradientn(colours=colors_points)
+    g <- g +  geom_point(data= geneColored1, aes(x=x, y=y, col=vals), shape=20, size = size)
+    g <- g +  labs(title= title, col= "UMIs", x = "tSNE[1]", y = "tSNE[2]")
   } else { #This will allow plotting of 1 gene, faceted by variable in pData
     if(length(genes) > 1){
       stop("You cannot facet multiple genes")
@@ -125,20 +120,16 @@ plot_tsne_gene <- function(input, genes, title, density = FALSE,  facet_by = "NA
     tmp <- pData(input)[c("x", "y")]
     g <- ggplot(geneColored1)
     if(density == TRUE){
-      g <- g +  geom_point(data=final_dfdens_norm, aes(x=x, y=y, color=z), shape=21, size=.1, stroke = 1)
+      g <- g +  geom_point(data=final_dfdens_norm, aes(x=x, y=y, color=z), shape=20, size=.1, stroke = 1)
     }
-    g <- g +  geom_point(data= tmp, aes(x=x, y=y), shape=21, size = size, fill = "white")
+    g <- g +  geom_point(data= tmp, aes(x=x, y=y), shape=20, size = size, col = "gray")
     g <- g +  theme_classic()
     g <- g +  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 10), legend.title = element_text(size = 10), legend.text=element_text(size=5))
     g <- g +  theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
     g <- g +  facet_wrap(facets = reformulate(facet_by), ncol = ncol)
-    g <- g +  scale_color_gradientn(colours=colors_density)
-    g <- g +  geom_point(data= geneColored1, aes(x=x, y=y, fill=vals), shape=21, size = size)
-    g <- g +  scale_fill_gradientn(colours=colors_points)
-    g <- g +  labs(title= title, col= "Weighted\nDensity", x = "tSNE[1]", y = "tSNE[2]", fill = "UMIs")
-    if(density == TRUE){
-      g <- g + guides(fill=FALSE)
-    }
+    g <- g +  scale_color_gradientn(colours=colors_points)
+    g <- g +  geom_point(data= geneColored1, aes(x=x, y=y, col=vals), shape=20, size = size)
+    g <- g +  labs(title= title, x = "tSNE[1]", y = "tSNE[2]", col = "UMIs")
   }
   return(g)
 }
