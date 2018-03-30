@@ -39,7 +39,7 @@ dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp
     tSNE_result <- Rtsne::Rtsne(ica$S, dims = 2, perplexity = tSNE_perp, theta = 0.5, check_duplicates = F, pca = F, max_iter = iterations, verbose = print_progress)
     tSNE_result <- tSNE_result$Y
     row.names(tSNE_result) <- rownames(ica$S)
-    colnames(ica$S) <- paste0("IC-Comp", seq(1:ncol(ica$S)))
+    colnames(ica$S) <- paste0("IC_Comp", seq(1:ncol(ica$S)))
     colnames(tSNE_result) <- c("x", "y")
     tSNE_result[,"x"] <-  abs(min(tSNE_result[,"x"]))+tSNE_result[,"x"]
     tSNE_result[,"x"] <-  tSNE_result[,"x"]/max(tSNE_result[,"x"])
@@ -53,7 +53,7 @@ dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp
     }
     PCA <- irlba::prcomp_irlba(t(input_scale), nComp, center = F)
     rownames(PCA$x) <- colnames(input)
-    colnames(PCA$x) <- paste0("PC-Comp", seq(1:ncol(PCA$x)))
+    colnames(PCA$x) <- paste0("PC_Comp", seq(1:ncol(PCA$x)))
     set.seed(100)
     if(print_progress == TRUE){
       print("Starting tSNE")
@@ -74,7 +74,7 @@ dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp
     }
     iPCA <- irlba::prcomp_irlba(input_scale, nComp, center = F)
     rownames(iPCA$rotation) <- colnames(input)
-    colnames(iPCA$rotation) <- paste0("iPC-Comp", seq(1:ncol(iPCA$rotation)))
+    colnames(iPCA$rotation) <- paste0("iPC_Comp", seq(1:ncol(iPCA$rotation)))
     set.seed(100)
     if(print_progress == TRUE){
       print("Starting tSNE")
