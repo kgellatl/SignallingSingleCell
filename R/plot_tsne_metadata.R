@@ -25,7 +25,7 @@ plot_tsne_metadata <- function(input, title, color_by, facet_by = "NA", ncol = "
     tmp <- pData(input)[c("x", "y")]
     g <- g + geom_point(data = tmp, aes(x=x, y=y), shape = 21, fill = "white", size = size)
   }
-  if(color_by == "UMI_sum"){
+  if(color_by == "UMI_sum" | "size_factor"){
     g <- g +  geom_point(aes_string(x = "x", y = "y", fill = "UMI_sum"), shape = 21, size = size)
     g <- g +  scale_fill_gradientn(colours=c('blue', 'red', 'yellow'))
   } else {
