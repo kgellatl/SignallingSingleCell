@@ -23,6 +23,14 @@ cluster_sc <- function(input, dimension, method, num_clust){
       pData(input)$Cluster <- cluster
     }
     if(method == "density"){
+      dist_tSNE = dist(pData(input)[,grep("Comp", colnames(pData(input)))])
+      clust_tSNE = densityClust::densityClust(dist_tSNE, gaussian = T) # calculate density
+      comb = as.data.frame(clust_tSNE$rho*clust_tSNE$delta) # combine rho and delta values
+      comb = comb[order(comb[,1], decreasing = T), ,drop=F] # order cells by highest rho*delta
+      cellcut = rownames(comb)[1:num_clust] # select top num_clust cells to be cluster centers
+      cellidx = which(names(clust_tSNE$rho)%in%cellcut) # get index for cluster centers
+      clust_tSNE = densityClust::findClusters(clust_tSNE, peaks = cellidx) # define clusters
+      pData(input)$Cluster = paste0("Cluster", clust_tSNE$clusters)
     }
   }
   if(dimension == "2d"){
@@ -33,6 +41,14 @@ cluster_sc <- function(input, dimension, method, num_clust){
       pData(input)$Cluster <- cluster
     }
     if(method == "density"){
+      dist_tSNE = dist(pData(input)[,c("x","y")]) # select tSNE coordinates
+      clust_tSNE = densityClust::densityClust(dist_tSNE, gaussian = T) # calculate density
+      comb = as.data.frame(clust_tSNE$rho*clust_tSNE$delta) # combine rho and delta values
+      comb = comb[order(comb[,1], decreasing = T), ,drop=F] # order cells by highest rho*delta
+      cellcut = rownames(comb)[1:num_clust] # select top num_clust cells to be cluster centers
+      cellidx = which(names(clust_tSNE$rho)%in%cellcut) # get index for cluster centers
+      clust_tSNE = densityClust::findClusters(clust_tSNE, peaks = cellidx) # define clusters
+      pData(input)$Cluster = paste0("Cluster", clust_tSNE$clusters)
     }
   }
   return(input)

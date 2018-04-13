@@ -23,7 +23,8 @@ Imports:
     MASS,
     scran,
     scater,
-    ggridges
+    ggridges,
+    densityClust
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1.9000
