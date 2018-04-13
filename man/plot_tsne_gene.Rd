@@ -5,9 +5,8 @@
 \title{tSNE Plot on a gene or genes}
 \usage{
 plot_tsne_gene(input, genes, title, density = FALSE, facet_by = "NA",
-  colors_points = c("white", "blue", "red", "yellow"),
-  colors_density = c("white", "blue", "red", "yellow"), size = 1.5,
-  ncol = 2, resolution = 250, cutoff = 0.25)
+  colors_points = c("gray", "blue", "red", "yellow"), size = 1.5,
+  ncol = 2, resolution = 500, cutoff = 0.2)
 }
 \arguments{
 \item{input}{The input data}
@@ -21,8 +20,6 @@ plot_tsne_gene(input, genes, title, density = FALSE, facet_by = "NA",
 \item{facet_by}{If ONE gene is being plotted it can be faceted. You cannot facet multiple genes}
 
 \item{colors_points}{Colors for the cells}
-
-\item{colors_density}{Colors for the background}
 
 \item{size}{The size of the points}
 
