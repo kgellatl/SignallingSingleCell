@@ -28,7 +28,7 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 
 ```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
 library("SignallingSingleCell")
-load(url("http://garberlab.umassmed.edu/data/scRNASeqTools/mDC_0hr_1hr_4hr_CLEAN.Rdata")) # this in in the Lab_inDrop folder so anyone can access it!!
+load(url("http://garberlab.umassmed.edu/data/scRNASeqTools/mDC_0hr_1hr_4hr_CLEAN.Rdata"))
 ```
 
 # Preprocessing  
@@ -37,11 +37,9 @@ load(url("http://garberlab.umassmed.edu/data/scRNASeqTools/mDC_0hr_1hr_4hr_CLEAN
 
 The ExpressionSet class (ex_sc) is an extremely convienient data structure that contains 3 dataframes. These dataframes contain expression data, cell information, and gene information respectivelty. 
 
-exprs(ex_sc) is the expression data  
+exprs(ex_sc) is the expression data, where rows are genes and columns are cells  
 pData(ex_sc) is cell information, where rows are cells and columns are metadata  
-fData(ex_sc) is gene information, where rows are genes and columns are metadata  
-ncol(exprs(ex_sc)) == nrow(pData(ex_sc))  
-nrow(exprs(ex_sc)) == nrow(fData(ex_sc))  
+fData(ex_sc) is gene information, where rows are genes and columns are metadata
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc_example <- construct_ex_sc(mDC_0hr_1hr_4hr_CLEAN) # sc_dat == Input expression matrix
