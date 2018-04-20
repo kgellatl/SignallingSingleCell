@@ -28,8 +28,10 @@ flow_filter <- function(input, panels, title){
     celltmp <- cells[[i]]
     remove <- match(multi_pos, celltmp)
     remove <- remove[!is.na(remove)]
-    celltmp2 <- celltmp[-remove]
-    cells[[i]] <- celltmp2
+    if(length(remove > 0)){
+      celltmp2 <- celltmp[-remove]
+      cells[[i]] <- celltmp2
+    }
   }
   pData(input)$Pass_Gate <- NA
   for(i in 1:length(cells)){

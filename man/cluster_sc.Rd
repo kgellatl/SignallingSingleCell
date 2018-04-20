@@ -11,7 +11,7 @@ cluster_sc(input, dimension, method, num_clust)
 
 \item{dimension}{either "Comp" or "2d"}
 
-\item{method}{can either be "spectral" or "density"}
+\item{method}{can either be "spectral" or "density" which is on 2d}
 
 \item{num_clust}{the number of clusters}
 }
