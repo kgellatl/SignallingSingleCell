@@ -36,8 +36,8 @@ plot_violin <- function(input, title, color_by, gene, facet_by = "NA", ncol = "N
   g <- g + labs(title= title, y = gene)
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
-  g <- g + geom_violin(aes_string(x=color_by, y=gene, col = color_by), trim = T, alpha = 0.5)
-  g <- g + geom_jitter(aes_string(x=color_by, y=gene, col = color_by), width = 0.2, size = size)
+  g <- g + geom_jitter(aes_string(x=color_by, y=gene, col = color_by), width = 0.2, size = size, alpha = 0.25)
+  g <- g + geom_violin(aes_string(x=color_by, y=gene, col = color_by), trim = T, fill = NA)
   g <- g + stat_summary(aes_string(x=color_by, y=gene), fun.y=mean, geom="point", size=3, color="black")
   if(facet_by != "NA"){
     if(ncol != "NA"){
