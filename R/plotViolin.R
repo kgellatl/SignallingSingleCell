@@ -38,7 +38,7 @@ plotViolin = function(gene, input, sampleID, facetID, colourID, cols = NULL, sub
   merged = merge(melted, pData(input), by="variable")
   merged$value = log2(merged$value+1)
   valueID = "value"
-  if (is.na(cols[1])) {
+  if (is.null(cols) | length(cols)==0) {
     cols = gg_color_hue(length(unique(merged[,colourID])))
   }
   ggplot(merged, aes_string(sampleID, valueID, colour = colourID)) +
