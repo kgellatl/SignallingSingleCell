@@ -126,7 +126,7 @@ gene_subset <- subset_genes(ex_sc_norm, method = "PCA", threshold = 1, minCells 
 
 ex_sc_norm <- dim_reduce(ex_sc_norm, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
 
-ex_sc_norm <- cluster_sc(ex_sc_norm, dimension = "Comp", method = "spectral", num_clust = 6)
+ex_sc_norm <- cluster_sc(ex_sc_norm, dimension = "Comp", method = "spectral", num_clust = 4)
 
 plot_tsne_metadata(ex_sc_norm, color_by = "Cluster", title = "Spectral Cluster on iPCA components")
 
@@ -171,24 +171,57 @@ head(fData(ex_sc_norm))
 
 marker_list <- return_markers(ex_sc_norm, num_markers = 5) # However returning the genes as a list can be helpful
 
-plot_scatter(input = ex_sc_norm, title = "Top 2 markers for Cluster 4", gene1 = marker_list$Cluster4[1], gene2 = marker_list$Cluster4[2], facet_by = "Cluster", color_by = "Cluster", logscale = FALSE) # A scater plotting function. Note the correlation of the marker genes.
+plot_scatter(input = ex_sc_norm, title = "Top 2 markers for Cluster 4", gene1 = "Emr1", gene2 = "Tnf", facet_by = "Cluster", color_by = "Timepoint", logscale = FALSE) # A scater plotting function. Note the correlation of the marker genes.
 
 marker_facet <- c("Emr1", "Lcn2", "Ccr7")
 
-plot_tsne_gene(input = ex_sc_norm, genes = "Ccr7", title = "Marker Genes",  ncol = 3, density = TRUE)
+plot_tsne_gene(input = ex_sc_norm, genes = marker_facet, title = "Marker Genes",  ncol = 3, density = FALSE)
 plot_tsne_gene(input = ex_sc_norm, genes = marker_facet, title = "Marker Genes",  ncol = 3, density = TRUE)
 
 plot_violin(ex_sc_norm, title = "Ccr7 across clusters", gene = "Ccr7", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
 ```
 
-## Subsetting Data
+# Advanced Analysis
+
+# Subsetting Data
 
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
-ex_sc_subset <- subset_ex_sc(ex_sc_norm, variable = "Cluster", select = c("Cluster3")) #subsetting can be very handy! If needed chain together several rounds of subsetting.
+mDC_0hr <- subset_ex_sc(ex_sc_norm, variable = "Timepoint", select = c("0hr"))
 
-plot_tsne_gene(ex_sc_subset, genes = "Ccl22", facet_by = "Timepoint", title = "1 hour cells TNF by Cluster", density = FALSE) # this function is flexible for plotting any data onto a 2d tsne mapping
+gene_subset <- subset_genes(mDC_0hr, method = "PCA", threshold = 1, minCells = 30, nComp = 10, cutoff = 0.85)
 
-plot_violin(ex_sc_subset, title = "Ccl22 across time in Cluster 6 cells", gene = "Ccl22", facet_by = "Cluster", size = 1, ncol = 3, color_by = "Timepoint")
+mDC_0hr <- dim_reduce(mDC_0hr, genelist = gene_subset, pre_reduce = "iPCA", nComp = 10, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
+
+mDC_0hr <- cluster_sc(mDC_0hr, dimension = "Comp", method = "spectral", num_clust = 4)
+
+plot_tsne_metadata(mDC_0hr, title = "", color_by = "Cluster")
 ```
 
-# Advanced Analysis
+## Flow Gating
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+
+panel1 <- c("S100a9", "Chil1") # Neutrophil Markers
+panel2 <- c("Ccr7", "Fscn1") # DC
+panel3 <- c("Csf1r", "Mertk") # Mac
+
+panels <- list(panel1, panel2, panel3)
+
+plot_tsne_gene(mDC_0hr, genes = unlist(panels), title = "")
+
+names(panels) <- c("Neutrophil", "Dendritic", "Macrophage")
+
+mDC_0hr <- flow_filter(mDC_0hr, panels = panels, title = "Flow Pass Cells")
+
+```
+
+## SVM training on cells pass gate for flow
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+
+mDC_0hr <- flow_svm(mDC_0hr)
+
+plot_tsne_metadata(mDC_0hr, color_by = "Cluster", title = "Spectral Cluster on PCA components")
+plot_tsne_metadata(mDC_0hr, color_by = "SVM_Classify", title = "Spectral Cluster on PCA components")
+
+```

@@ -22,8 +22,10 @@ Imports:
     kknn,
     MASS,
     scran,
+    limSolve,
     scater,
     ggridges,
+    caret,
     densityClust
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)

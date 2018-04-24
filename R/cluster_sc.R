@@ -4,7 +4,7 @@
 #'
 #' @param input the input ex_sc
 #' @param dimension either "Comp" or "2d"
-#' @param method can either be "spectral" or "density"
+#' @param method can either be "spectral" or "density" which is on 2d
 #' @param num_clust the number of clusters
 #' @export
 #' @details
@@ -53,6 +53,3 @@ cluster_sc <- function(input, dimension, method, num_clust){
   }
   return(input)
 }
-
-
-
