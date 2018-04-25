@@ -5,10 +5,10 @@
 \title{This will create a violin plot}
 \usage{
 plotViolin(gene, input, sampleID, facetID, colourID, cols = NULL,
-  subsetID = NA, subsetName = NA)
+  subsetID = NA, subsetName = NA, facet_scale = "fixed")
 }
 \arguments{
-\item{gene}{Will only plot data for this gene}
+\item{gene}{Will only plot data for this gene, if the gene paramter is a list the violin plot will display the sum of the expression for all genes in the list}
 
 \item{input}{Input expression set}
 
@@ -23,6 +23,8 @@ plotViolin(gene, input, sampleID, facetID, colourID, cols = NULL,
 \item{subsetID}{a pData variable to subset the data by}
 
 \item{subsetName}{a value from the subsetID variable specified}
+
+\item{facet_scale}{ggplot2 parameter for plot scales defaults to fixed}
 }
 \description{
 This will plot a given gene via violin plot
