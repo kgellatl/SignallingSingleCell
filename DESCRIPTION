@@ -26,7 +26,6 @@ Imports:
     scater,
     ggridges,
     densityClust,
-    reshape2,
     caret
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
