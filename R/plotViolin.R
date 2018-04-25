@@ -2,7 +2,7 @@
 #'
 #' This will plot a given gene via violin plot
 #'
-#' @param gene Will only plot data for this gene
+#' @param gene Will only plot data for this gene, if the gene paramter is a list the violin plot will display the sum of the expression for all genes in the list
 #' @param input Input expression set
 #' @param sampleID pData variable to group by on the x axis
 #' @param facetID a pData variable
@@ -27,15 +27,25 @@ plotViolin = function(gene, input, sampleID, facetID, colourID, cols = NULL, sub
     return(c(y=-1, label=length(x)))
   }
   ###
-  if (!is.na(subsetID)) {
+  if (!is.null(subsetID) & !is.na(subsetID)) {
     input = input[,which(pData(input)[,subsetID]==subsetName)]
   }
-  inputM = as.data.frame(exprs(input))
-  inputM = inputM[rownames(inputM)%in%gene,]
-  inputM$gene = rownames(inputM)
+  inputM = as.data.frame(exprs(input[rownames(input)%in%gene,]));
+
+  geneName = gene;
+  if(length(gene)>1) {
+    sum = apply(inputM, MARGIN = 2, FUN = sum);
+    inputM[1,] = sum;
+    inputM = inputM[-(2:length(rownames(inputM))),]
+    geneName = gsub(", ","_",toString(genes));
+    rownames(inputM) = geneName;
+  }
+
+  inputM$gene = geneName;
   melted = reshape2::melt(inputM, id.vars = "gene")
   pData(input)$variable = rownames(pData(input))
   merged = merge(melted, pData(input), by="variable")
+  head(merged)
   merged$value = log2(merged$value+1)
   valueID = "value"
   if (is.null(cols) | length(cols)==0) {
@@ -49,5 +59,5 @@ plotViolin = function(gene, input, sampleID, facetID, colourID, cols = NULL, sub
     stat_summary(data = merged, aes_string(x = sampleID, y = valueID), fun.y = mean, colour = "black", geom = "point", size=3, shape = 18) +
     theme_bw() +
     scale_colour_manual(values=cols) +
-    ggtitle(gene)
+    ggtitle(geneName)
 }
