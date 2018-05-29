@@ -5,7 +5,7 @@
 \title{This will create a violin plot}
 \usage{
 plot_violin(input, title, color_by, gene, facet_by = "NA", ncol = "NA",
-  size = 1, colors = "NA")
+  size = 1, colors = "NA", plot_mean = TRUE)
 }
 \arguments{
 \item{input}{The input data}
@@ -23,6 +23,8 @@ plot_violin(input, title, color_by, gene, facet_by = "NA", ncol = "NA",
 \item{size}{The size of the points}
 
 \item{colors}{What colors to utilize for categorial data. Be sure it is of the proper length!}
+
+\item{plot_mean}{If true will create a secondary axis to plot the mean expression value}
 }
 \description{
 This will plot a given gene via violin plot
