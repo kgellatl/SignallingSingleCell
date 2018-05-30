@@ -18,7 +18,7 @@
 #' @examples
 #' plot_tsne_gene(ex_sc_example, gene = "Tnf", title = "Tnf over Time", facet_by = "Timepoint", density = TRUE)
 #'
-plot_tsne_gene <- function(input, genes, title, density = FALSE,  facet_by = "NA",
+plot_tsne_gene <- function(input, genes, title = "", density = FALSE,  facet_by = "NA",
                            colors_points = c("gray", 'blue', 'red', 'yellow'),
                            size = 1.5, ncol = 2, resolution = 500, cutoff = 0.2){
   kde2d_weighted <- function (x, y, w, h, n , lims = c(range(x), range(y))) {
@@ -85,7 +85,12 @@ plot_tsne_gene <- function(input, genes, title, density = FALSE,  facet_by = "NA
     }
     g <- g +  scale_color_gradientn(colours=colors_points)
     g <- g +  geom_point(data= geneColored1, aes(x=x, y=y, col=vals), shape=20, size = size)
-    g <- g +  labs(title= title, col= "UMIs", x = "tSNE[1]", y = "tSNE[2]")
+    if(title == ""){
+      title <- genes
+      g <- g +  labs(title= title, col= "UMIs", x = "tSNE[1]", y = "tSNE[2]")
+    } else {
+      g <- g +  labs(title= title, col= "UMIs", x = "tSNE[1]", y = "tSNE[2]")
+    }
   } else { #This will allow plotting of 1 gene, faceted by variable in pData
     if(length(genes) > 1){
       stop("You cannot facet multiple genes")
@@ -129,7 +134,12 @@ plot_tsne_gene <- function(input, genes, title, density = FALSE,  facet_by = "NA
     g <- g +  facet_wrap(facets = reformulate(facet_by), ncol = ncol)
     g <- g +  scale_color_gradientn(colours=colors_points)
     g <- g +  geom_point(data= geneColored1, aes(x=x, y=y, col=vals), shape=20, size = size)
-    g <- g +  labs(title= title, x = "tSNE[1]", y = "tSNE[2]", col = "UMIs")
+    if(title == ""){
+      title <- genes
+      g <- g +  labs(title= title, col= "UMIs", x = "tSNE[1]", y = "tSNE[2]")
+    } else {
+      g <- g +  labs(title= title, col= "UMIs", x = "tSNE[1]", y = "tSNE[2]")
+    }
   }
   return(g)
 }

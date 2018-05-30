@@ -17,7 +17,7 @@
 #' @examples
 #' plot_violin(input, title = "Actb across clusters", gene = "Actb", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
 
-plot_violin <- function(input, title, color_by, gene, facet_by = "NA", ncol = "NA", size = 1, colors = "NA", plot_mean = TRUE){
+plot_violin <- function(input, title = "", color_by, gene, facet_by = "NA", ncol = "NA", size = 1, colors = "NA", plot_mean = TRUE){
   if(facet_by == "NA"){
     geneColored1 <- pData(input)[,c("x", "y", color_by)]
     geneColored1 <- cbind(geneColored1, log2(exprs(input)[gene,]+2)-1)
@@ -37,7 +37,13 @@ plot_violin <- function(input, title, color_by, gene, facet_by = "NA", ncol = "N
   }
   g <- ggplot(geneColored1)
   g <- g + theme_classic()
-  g <- g + labs(title= title, y = gene)
+  if(title == ""){
+    title <- gene
+    g <- g + labs(title= title, y = gene)
+
+  } else {
+    g <- g + labs(title= title, y = gene)
+  }
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   g <- g + geom_jitter(aes_string(x=color_by, y=gene, col = color_by), width = 0.2, size = size, alpha = 0.25)

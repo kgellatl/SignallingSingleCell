@@ -13,7 +13,7 @@
 #' @examples
 #' draw_density(input = ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 
-plot_density_ridge <- function(input, val, title, color_by){
+plot_density_ridge <- function(input, val, title = "", color_by){
   dat <- pData(input)
   if(val != "UMI_sum"){
     dat <- cbind(dat, log2(exprs(input)[val,]+2)-1)
@@ -24,7 +24,12 @@ plot_density_ridge <- function(input, val, title, color_by){
   g <- g + theme_classic()
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
-  g <- g + ggtitle(title)
+  if(title == ""){
+    title <- val
+    g <- g + ggtitle(title)
+  } else {
+    g <- g + ggtitle(title)
+  }
   g <- g + xlab(val)
   if(val == "UMI_sum"){
     g <- g + scale_x_log10()

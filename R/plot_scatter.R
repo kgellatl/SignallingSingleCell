@@ -17,7 +17,7 @@
 #' @examples
 #' plot_scatter(input = ex_sc_example, title = "Plot", gene1 = "Ccl22", gene2 = "Ccl5", color_by = "Cluster", facet_by = "Timepoint")
 
-plot_scatter <- function(input, gene1, title, gene2, color_by, facet_by = "NA", ncol = "NA", size = 2, colors = "NA", logscale = FALSE){
+plot_scatter <- function(input, gene1, title = "", gene2, color_by, facet_by = "NA", ncol = "NA", size = 2, colors = "NA", logscale = FALSE){
   dat <- as.data.frame(t(exprs(input)[c(gene1, gene2),]))
   if(logscale != FALSE){
     dat[,1] <- log2(dat[,1]+2)-1
@@ -30,7 +30,6 @@ plot_scatter <- function(input, gene1, title, gene2, color_by, facet_by = "NA", 
     colnames(dat) <- c(gene1, gene2, color_by, facet_by)
   }
   g <- ggplot(dat)
-  g <- g + ggtitle(paste0(gene1, " vs ", gene2, " scatter plot"))
   g <- g + theme_classic()
   g <- g + labs(x = paste0("log2(", gene1, ")"), y = paste0("log2(", gene2, ")"))
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
@@ -47,7 +46,11 @@ plot_scatter <- function(input, gene1, title, gene2, color_by, facet_by = "NA", 
       g <- g +  facet_wrap(facets = reformulate(facet_by))
     }
   }
-  g <- g + labs(title= title)
+  if(title == ""){
+    g <- g + labs(title = paste0(gene1, " vs ", gene2, " scatter plot"))
+  } else {
+    g <- g + labs(title= title)
+  }
   return(g)
 }
 
