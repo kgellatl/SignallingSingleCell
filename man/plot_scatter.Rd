@@ -4,7 +4,7 @@
 \alias{plot_scatter}
 \title{Create a Scatter Plot}
 \usage{
-plot_scatter(input, gene1, title, gene2, color_by, facet_by = "NA",
+plot_scatter(input, gene1, title = "", gene2, color_by, facet_by = "NA",
   ncol = "NA", size = 2, colors = "NA", logscale = FALSE)
 }
 \arguments{
