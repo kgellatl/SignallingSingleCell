@@ -77,13 +77,17 @@ plot_violin <- function(input, title = "", color_by, gene, facet_by = "NA", ncol
       facets <- sort(unique(geneColored1[,facet_by]))
       all_dat <- expand.grid(breaks, facets)
       all_dat <- as.data.frame(all_dat)
-      all_dat[,3] <- "NA"
+      all_dat[,3] <- 0
       for (i in 1:nrow(all_dat)) {
         ind1 <- which(geneColored1[,color_by] == all_dat[i,1])
         ind2 <- which(geneColored1[,facet_by] == all_dat[i,2])
         ind <- intersect(ind1, ind2)
         val <- mean(geneColored1[ind,gene])
-        all_dat[i,3] <- val
+        if(is.nan(val) == TRUE){
+          all_dat[i,3] <- 0
+        } else {
+          all_dat[i,3] <- val
+        }
       }
       all_dat[,3] <- as.numeric(as.character(all_dat[,3]))
       colnames(all_dat) <- c(color_by, facet_by, gene)
