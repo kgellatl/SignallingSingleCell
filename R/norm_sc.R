@@ -14,7 +14,7 @@
 #'
 norm_sc <- function(input, genelist = gene_subset, pool_sizes = c(20,30,40,50), positive = TRUE){
   clusters <- pData(input)$Cluster
-  larger.sce <- scater::newSCESet(countData=exprs(input))
+  larger.sce <- SingleCellExperiment::SingleCellExperiment(list(counts = exprs(input)))
   larger.sce <- scran::computeSumFactors(larger.sce, cluster=clusters, subset.row = genelist, sizes=pool_sizes, positive = positive)
   larger.sce <-  scater::normalise(larger.sce)
   norm_counts <- exprs(larger.sce)
@@ -23,7 +23,7 @@ norm_sc <- function(input, genelist = gene_subset, pool_sizes = c(20,30,40,50), 
   norm_counts <- norm_counts[,colSums(norm_counts)>0]
   input_norm <- construct_ex_sc(norm_counts)
   ind <- match(colnames(input_norm), colnames(larger.sce))
-  size_factor <- pData(larger.sce)$size_factor
+  size_factor <- sizeFactors(larger.sce)
   size_factor <- size_factor[ind]
   pData(input_norm)$size_factor <- size_factor
   return(input_norm)

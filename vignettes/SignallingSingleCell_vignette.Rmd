@@ -71,7 +71,7 @@ Before normalization dimensionality reduction is necessary to form preliminary c
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 gene_subset <- subset_genes(ex_sc, method = "PCA", threshold = 1, minCells = 30, nComp = 10, cutoff = 0.85) # 3 available methods for selecting genes
 
-ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  # 3 available methods for dimensionality reduction
+ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "iPCA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  # 3 available methods for dimensionality reduction
 
 colnames(pData(ex_sc))
 
