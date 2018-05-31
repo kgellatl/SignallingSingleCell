@@ -25,9 +25,8 @@ Imports:
     limSolve,
     scater,
     ggridges,
-    caret,
     densityClust,
-    SingleCellExperiment
+    caret
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1.9000
