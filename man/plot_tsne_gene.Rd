@@ -4,7 +4,7 @@
 \alias{plot_tsne_gene}
 \title{tSNE Plot on a gene or genes}
 \usage{
-plot_tsne_gene(input, genes, title, density = FALSE, facet_by = "NA",
+plot_tsne_gene(input, genes, title = "", density = FALSE, facet_by = "NA",
   colors_points = c("gray", "blue", "red", "yellow"), size = 1.5,
   ncol = 2, resolution = 500, cutoff = 0.2)
 }

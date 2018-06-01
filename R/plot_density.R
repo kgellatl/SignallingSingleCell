@@ -13,7 +13,7 @@
 #' @examples
 #' draw_density(input = ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 
-plot_density <- function(input, val, title, color_by = "NA", statistic = "mean"){
+plot_density <- function(input, val, title = "", color_by = "NA", statistic = "mean"){
   gg_color_hue <- function(n) { #ggplot color selection tool. For the mean line
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
@@ -41,7 +41,12 @@ plot_density <- function(input, val, title, color_by = "NA", statistic = "mean")
   g <- g + theme_classic()
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
-  g <- g + ggtitle(title)
+  if(title == ""){
+    title <- val
+    g <- g + ggtitle(title)
+  } else {
+    g <- g + ggtitle(title)
+  }
   g <- g + geom_density(alpha=0.1, lwd=1)
   g <- g + scale_x_log10()
   g <- g + xlab(val)

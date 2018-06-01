@@ -69,7 +69,7 @@ Before normalization dimensionality reduction is necessary to form preliminary c
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 gene_subset <- subset_genes(ex_sc, method = "PCA", threshold = 1, minCells = 30, nComp = 10, cutoff = 0.85) # 3 available methods for selecting genes
 
-ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  # 3 available methods for dimensionality reduction
+ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "iPCA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  # 3 available methods for dimensionality reduction
 
 colnames(pData(ex_sc))
 
@@ -122,9 +122,9 @@ plot_density(ex_sc_norm, title = "UMI Density", val = "UMI_sum", statistic = "me
 
 gene_subset <- subset_genes(ex_sc_norm, method = "PCA", threshold = 1, minCells = 30, nComp = 10, cutoff = 0.85)
 
-ex_sc_norm <- dim_reduce(ex_sc_norm, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
+ex_sc_norm <- dim_reduce(ex_sc_norm, genelist = gene_subset, pre_reduce = "iPCA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
 
-ex_sc_norm <- cluster_sc(ex_sc_norm, dimension = "Comp", method = "spectral", num_clust = 4)
+ex_sc_norm <- cluster_sc(ex_sc_norm, dimension = "Comp", method = "spectral", num_clust = 6)
 
 plot_tsne_metadata(ex_sc_norm, color_by = "Cluster", title = "Spectral Cluster on iPCA components")
 
@@ -169,7 +169,7 @@ head(fData(ex_sc_norm))
 
 marker_list <- return_markers(ex_sc_norm, num_markers = 5) # However returning the genes as a list can be helpful
 
-plot_scatter(input = ex_sc_norm, title = "Top 2 markers for Cluster 4", gene1 = "Emr1", gene2 = "Tnf", facet_by = "Cluster", color_by = "Timepoint", logscale = FALSE) # A scater plotting function. Note the correlation of the marker genes.
+plot_scatter(input = ex_sc_norm, title = "Correlation Plot", gene1 = "Ccr7", gene2 = "Ccl22", facet_by = "Cluster", color_by = "Timepoint", logscale = FALSE) # A scater plotting function. Note the correlation of the marker genes.
 
 marker_facet <- c("Emr1", "Lcn2", "Ccr7")
 
