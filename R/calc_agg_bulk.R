@@ -11,6 +11,10 @@
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
 calc_agg_bulk <- function(input, aggregate_by){
+  check <- grep("bulk", colnames(fData(input)))
+  if(length(check) > 0){
+    fData(input) <- fData(input)[,-check]
+  }
   to_expand <- vector("list", length(aggregate_by))
   for(i in 1:length(aggregate_by)) {
     var <- aggregate_by[i]
@@ -43,7 +47,7 @@ calc_agg_bulk <- function(input, aggregate_by){
     cname <- paste0(c(cname, "bulk"), collapse = "_")
     colnames(bulk)[l] <- cname
   }
-  fData(input) <- rbind(fData(input), bulk)
+  fData(input) <- cbind(fData(input), bulk)
   return(input)
 }
 
