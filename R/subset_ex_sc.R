@@ -17,13 +17,12 @@ subset_ex_sc <- function(input, variable, select){
  val <- dat[,ind]
  selected <- c()
  for(s in select){
-   print(s)
    ind2 <- grep(s, val)
    selected <- c(selected, ind2)
  }
  cells <- rownames(dat)[selected]
- print(sprintf("Selected %i cells ",length(cells)));
-
+ print(paste0("Selected Data is ", length(cells), " cells"))
+ print(table(pData(input[,cells])[,variable]))
  return(input[,cells])
 }
 
