@@ -15,6 +15,7 @@ Depends:
     Matrix (>= 1.2-6),
     Biobase,
     ggplot2 (>= 1.0.0),
+    viridis
 Imports:
     irlba,
     fastICA,
@@ -26,7 +27,8 @@ Imports:
     scater,
     ggridges,
     densityClust,
-    caret
+    caret,
+    SingleCellExperiment
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1.9000

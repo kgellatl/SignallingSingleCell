@@ -5,7 +5,8 @@
 \title{This will create a violin plot}
 \usage{
 plotViolin(gene, input, sampleID, facetID, colourID, cols = NULL,
-  subsetID = NA, subsetName = NA, facet_scale = "fixed")
+  subsetID = NA, subsetName = NA, facet_scale = "fixed", mean_text = F,
+  fraction_text = F)
 }
 \arguments{
 \item{gene}{Will only plot data for this gene, if the gene paramter is a list the violin plot will display the sum of the expression for all genes in the list}
@@ -25,6 +26,10 @@ plotViolin(gene, input, sampleID, facetID, colourID, cols = NULL,
 \item{subsetName}{a value from the subsetID variable specified}
 
 \item{facet_scale}{ggplot2 parameter for plot scales defaults to fixed}
+
+\item{mean_text}{ggplot2 parameter for adding the mean expression per group defaults to False}
+
+\item{fraction_text}{ggplot2 parameter for adding the fraction of cells with expression greater than 0 for that gene defaults to False}
 }
 \description{
 This will plot a given gene via violin plot
@@ -33,5 +38,5 @@ This will plot a given gene via violin plot
 Utilize information stored in pData to control the plot display.
 }
 \examples{
-plotViolin("Actb", input, sampleID = "sample", facetID = "subtype", colourID = "genotype", cols = NULL, subsetID = "celltype", subsetName = "Neurons")
+plotViolin("Actb", input, sampleID = "sample", facetID = "subtype", colourID = "genotype", cols = NULL, subsetID = "celltype", subsetName = "Neurons", facet_scale = "fixed")
 }

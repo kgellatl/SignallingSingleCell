@@ -15,7 +15,10 @@
 
 id_markers <- function(input, print_progress = TRUE){
   marker_input <- input
-  fData(marker_input) <- fData(marker_input)[,-grep("marker_score", colnames(fData(marker_input)))]
+  ind <- grep("marker_score", colnames(fData(marker_input)))
+  if(length(ind) > 0){
+    fData(marker_input) <- fData(marker_input)[,ind]
+  }
   fData(marker_input)$tmp <- "tmp"
   if(print_progress == TRUE){
     print("Finding markers based on fraction expressing")
