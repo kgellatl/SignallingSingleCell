@@ -6,7 +6,7 @@
 \usage{
 plot_heatmap(input, genes, type, title = "Heatmap", scale_by = "row",
   cluster_by = "row", color_pal = viridis::magma(256), text_angle = 60,
-  group_names = TRUE, group_labels = FALSE, gene_names = TRUE)
+  group_names = TRUE, gene_names = TRUE, facet_by = FALSE)
 }
 \arguments{
 \item{input}{the input ex_sc}
@@ -19,11 +19,17 @@ plot_heatmap(input, genes, type, title = "Heatmap", scale_by = "row",
 
 \item{scale_by}{scale across "row" (genes), "col" (groups), or FALSE}
 
-\item{cluster_by}{either "row"}
+\item{cluster_by}{either "row", col, or both}
 
 \item{color_pal}{The color pallete to be used}
 
 \item{text_angle}{The desired angle for text on the group labels}
+
+\item{group_names}{whether groups should be labelled}
+
+\item{gene_names}{whether genes should be labelled}
+
+\item{facet_by}{will create breaks in the heatmap by some pData Variable}
 }
 \description{
 Makes either a single cell or bulk heatmap,

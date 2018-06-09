@@ -8,15 +8,18 @@
 #' @param title A heatmap title
 #' @param color_pal The color pallete to be used
 #' @param scale_by scale across "row" (genes), "col" (groups), or FALSE
-#' @param cluster_by either "row"
+#' @param cluster_by either "row", col, or both
 #' @param text_angle The desired angle for text on the group labels
+#' @param group_names whether groups should be labelled
+#' @param gene_names whether genes should be labelled
+#' @param facet_by will create breaks in the heatmap by some pData Variable
 #' @export
 #' @details
 #' Utilize information stored in pData to control the plot display.
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", color_pal = viridis::magma(256), text_angle = 60, group_names = TRUE, group_labels = FALSE, gene_names = TRUE){
+plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", color_pal = viridis::magma(256), text_angle = 60, group_names = TRUE, gene_names = TRUE, facet_by = FALSE){
   if(type == "bulk"){
     heat_dat <- fData(input)[,grep("bulk", colnames(fData(input)))]
     heat_dat <- heat_dat[genes,]
@@ -55,6 +58,9 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   #####
   if(type == "single_cell"){
     heat_dat[which(heat_dat > 5)] <- 5
+  }
+  if(facet_by != FALSE){
+   colnames(heat_dat) <- pData(input)[,facet_by]
   }
   heat_dat <- as.data.frame(heat_dat)
   heat_dat_lng <- tidyr::gather(heat_dat, key = "group", "Expression", 1:ncol(heat_dat), factor_key = "TRUE")
