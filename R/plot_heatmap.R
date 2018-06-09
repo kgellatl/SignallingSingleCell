@@ -75,7 +75,10 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   g <- g + theme(axis.text.x = element_text(angle = text_angle, hjust = 1))
   g <- g +
     theme(axis.title.x=element_blank(),
-          axis.title.y=element_blank())
+          axis.title.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          line = element_blank())
   if(group_names == FALSE){
     g <- g + theme(axis.text.x=element_blank())
   }
