@@ -12,7 +12,7 @@
 
 #' @export
 #' @details
-#' If the method is expression, this will filter genes by subsetting to genes that are
+#' Genes will be first filtered by minimum expression selecting by subsetting to genes that are
 #' expressed above the threshold in more than minCells.
 #' If the method is CV, it will first subset the genes based on the expression cutoffs,
 #' then find the coefficient of variation across all genes.
@@ -22,13 +22,10 @@
 
 subset_genes <- function(input, method, threshold, minCells, nComp, cutoff){
   input <- exprs(input)
-  if(method == "Expression"){
-    gCount <- apply(input,1,function(x) length(which(x>=threshold)))
-    gene_subset <- rownames(input[(which(gCount >= minCells)),])
-  }
+
+  gCount <- apply(input,1,function(x) length(which(x>=threshold))) # a bit wasteful if threshold = 0, but alas.
+  gene_subset <- rownames(input[(which(gCount >= minCells)),])
   if(method == "CV"){
-    gCount <- apply(input,1,function(x) length(which(x>=threshold)))
-    gene_subset <- rownames(input[(which(gCount >= minCells)),])
     g_exp <- log2(input[gene_subset,]+2)-1
     gsd <- apply(g_exp,1,sd)
     CV = sqrt((exp(gsd))^2-1)
@@ -36,8 +33,6 @@ subset_genes <- function(input, method, threshold, minCells, nComp, cutoff){
     gene_subset <- names(CV[round(length(CV)*cutoff):length(CV)])
   }
   if(method == "PCA"){
-    gCount <- apply(input,1,function(x) length(which(x>=threshold)))
-    gene_subset <- rownames(input[(which(gCount >= minCells)),])
     input_scale <- scale(log2(input[gene_subset,]+2)-1)
     pc <- irlba::prcomp_irlba(t(input_scale), nComp, center = F)
     rownames(pc$rotation) <- gene_subset
