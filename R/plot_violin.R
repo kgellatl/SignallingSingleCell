@@ -17,7 +17,7 @@
 #' @examples
 #' plot_violin(input, title = "Actb across clusters", gene = "Actb", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
 
-plot_violin <- function(input, title = "", color_by, gene, facet_by = "NA", ncol = "NA", size = 1, colors = "NA", plot_mean = TRUE){
+plot_violin <- function(input, title = "", color_by, gene, facet_by = "NA", ncol = "NA", size = 1, colors = "NA", plot_mean = TRUE, theme = "classic"){
   if(facet_by == "NA"){
     geneColored1 <- pData(input)[,c("x", "y", color_by)]
     geneColored1 <- cbind(geneColored1, log2(exprs(input)[gene,]+2)-1)
@@ -36,7 +36,11 @@ plot_violin <- function(input, title = "", color_by, gene, facet_by = "NA", ncol
     return(c(y=-0.25, label=length(x)))
   }
   g <- ggplot(geneColored1)
-  g <- g + theme_classic()
+  if(theme == "bw") {
+    g <- g + theme_bw();
+  } else {
+    g <- g + theme_classic()
+  }
   if(title == ""){
     title <- gene
     g <- g + labs(title= title, y = gene)
@@ -50,6 +54,7 @@ plot_violin <- function(input, title = "", color_by, gene, facet_by = "NA", ncol
   g <- g + geom_violin(aes_string(x=color_by, y=gene, col = color_by), trim = T, fill = NA)
   # g <- g + stat_summary(aes_string(x=color_by, y=gene), fun.y=mean, geom="point", size=3, color="black")
   g <- g + stat_summary(aes_string(x = color_by, y = gene), fun.data = label.n, fun.y = "mean", colour = "black", geom = "text", size=3)
+
 
   #####
   if(plot_mean == TRUE){
