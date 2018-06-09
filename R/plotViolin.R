@@ -68,7 +68,12 @@ plotViolin = function(gene,
   if (is.null(cols) | length(cols)==0) {
     cols = gg_color_hue(length(unique(merged[,colourID])))
   }
-  p = ggplot(merged, aes_string(sampleID, geneName, colour = colourID)) +
+
+  title = geneName;
+  if (!is.null(subsetName) & !is.na(subsetName) ) {
+    title = paste(subsetName, geneName, sep=" - ");
+  }
+  ggplot(merged, aes_string(sampleID, geneName, colour = colourID)) +
     facet_wrap(reformulate(facetID), scales = facet_scale) +
     geom_jitter(width = 0.2, alpha=0.5) +
     geom_violin(fill = NA) +
@@ -77,6 +82,7 @@ plotViolin = function(gene,
     theme_bw() +
     scale_colour_manual(values=cols) +
     ggtitle(geneName)
+  
   if (mean_text == T) {
     p = p + stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.data = meanSC, fun.y = "mean", colour = "black", geom = "text", size=3)
   }
