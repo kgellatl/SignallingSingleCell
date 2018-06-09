@@ -4,7 +4,7 @@
 \alias{return_markers}
 \title{Return markers}
 \usage{
-return_markers(input, num_markers)
+return_markers(input, num_markers = 10)
 }
 \arguments{
 \item{input}{the input ex_sc}
