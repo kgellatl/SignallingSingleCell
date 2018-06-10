@@ -21,8 +21,9 @@ subset_ex_sc <- function(input, variable, select){
    selected <- c(selected, ind2)
  }
  cells <- rownames(dat)[selected]
- print(paste0("Selected Data is ", length(cells), " cells"))
- print(table(pData(input[,cells])[,variable]))
- return(input[,cells])
+ subset <- input[,cells]
+ print(paste0("Subsetted Data is ", length(cells), " cells"))
+ print(table(pData(subset)[,variable]))
+ return(subset)
 }
 
