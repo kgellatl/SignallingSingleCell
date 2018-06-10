@@ -1,15 +1,13 @@
 #' Receptor Ligand Data
 #'
-#' Simplified Receptor Ligand database
+#' @description  Simplified Receptor Ligand database
+#' @usage data(Receptor_Ligand_Data)
 #'
 #' Self note... Create .rda file in /data, then a .R file called data
 #' run devtools::load_all()
 #' run roxygen2::roxygenise()
 #'
 #' @references Ramilowski, Jordan A., et al. "A draft network of ligand–receptor-mediated multicellular signalling in human." Nature communications 6 (2015): 7866.
-#' (\href{https://www.nature.com/articles/ncomms8866})
-#'
-#' Receptor Ligand Database
 #'
 #' A dataset containing a simplified version of the datafile in reference above.
 #'
