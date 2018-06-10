@@ -24,7 +24,7 @@ This will select genes based on minimum expression, coefficient of variation,
 or by a preliminary PCA.
 }
 \details{
-If the method is expression, this will filter genes by subsetting to genes that are
+Genes will be first filtered by minimum expression selecting by subsetting to genes that are
 expressed above the threshold in more than minCells.
 If the method is CV, it will first subset the genes based on the expression cutoffs,
 then find the coefficient of variation across all genes.
