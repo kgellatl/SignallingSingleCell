@@ -13,8 +13,10 @@ id_rl(input)
 This function will id receptors and ligands in your data and mark them in fData
 }
 \details{
-This will use data(Receptor_Ligand_Data) to write to fData 2 columns, one for
-receptors and one for ligands. TRUE FALSE statements will be written depending on their presence.
+This will use data(Receptor_Ligand_Data) to write to fData 3 columns, one for
+receptors, one for ligands, and one for the expressed pairs. TRUE FALSE in the first 2 if the gene is a ligand or receptor respectively.
+For all pairs where both a receptor and ligand are expressed, a 3rd column named
+networks_expressed_pairs will be created with all ligands expressed that bind that receptor.
 Note that this uses HUMAN GENE NAMES!!
 }
 \examples{
