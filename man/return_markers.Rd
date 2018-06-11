@@ -4,10 +4,12 @@
 \alias{return_markers}
 \title{Return markers}
 \usage{
-return_markers(input, num_markers = 10)
+return_markers(input, return_by = "Cluster", num_markers = 10)
 }
 \arguments{
 \item{input}{the input ex_sc}
+
+\item{return_by}{the pData column that was used for id_markers (id_by argument)}
 
 \item{num_markers}{the number of markers to return for each cell type}
 }
