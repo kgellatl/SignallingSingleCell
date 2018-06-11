@@ -18,6 +18,7 @@ data(Receptor_Ligand_Data)
 Self note... Create .rda file in /data, then a .R file called data
 run devtools::load_all()
 run roxygen2::roxygenise()
+or run SignallingSingleCell::check_package()
 }
 \description{
 Simplified Receptor Ligand database
