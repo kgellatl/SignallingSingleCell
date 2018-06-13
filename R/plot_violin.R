@@ -35,6 +35,8 @@ plot_violin <- function(input, title = "", color_by, gene, facet_by = "NA", ncol
   label.n = function(x) {
     return(c(y=-0.25, label=length(x)))
   }
+  colnames(geneColored1) <- gsub("-", "", colnames(geneColored1))
+  gene <- gsub("-", "", gene)
   g <- ggplot(geneColored1)
   if(theme == "bw") {
     g <- g + theme_bw();
