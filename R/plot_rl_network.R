@@ -33,8 +33,8 @@ plot_rl_network <- function(input, nodes, break_by = FALSE){
   }
   ##### Extract the expression data for the expressed ligand receptor interactions
   all_expr <- fData(input)[,grep("_bulk", colnames(fData(input)))]
-  receptor_bulks <- unique(all_pairs_long$receptor)
-  ligand_bulks <- unique(all_pairs_long$ligand)
+  receptor_bulks <- as.character(unique(all_pairs_long$receptor))
+  ligand_bulks <- as.character(unique(all_pairs_long$ligand))
   all_expr <- all_expr[c(receptor_bulks, ligand_bulks),]
   ##### Construct the possible nodes in the network
   node <- unique(pData(input)[,nodes])
@@ -82,9 +82,22 @@ plot_rl_network <- function(input, nodes, break_by = FALSE){
     full_network <- full_network[,c(1,3,2,4)]
     colnames(full_network) <- c(nodes, "Ligand", nodes, "Receptor")
   }
+  full_network[,1] <- as.character(full_network[,1])
+  full_network[,2] <- as.character(full_network[,2])
+  full_network[,3] <- as.character(full_network[,3])
+  full_network[,4] <- as.character(full_network[,4])
+  if(break_by != FALSE){
+    full_network[,5] <- as.character(full_network[,5])
+  }
+  full_network$Ligand_expression <- 0
+  full_network$Receptor_expression <- 0
+  str(full_network)
   ##### Write in the expression values
+  head(all_expr)
+  head(full_network)
   for (i in 1:nrow(full_network)) {
     int <- full_network[i,]
+    int_exp <-all_expr[c(int$Ligand, int$Receptor),]
 
   }
 }
