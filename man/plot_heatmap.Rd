@@ -5,7 +5,7 @@
 \title{Plots a heatmap}
 \usage{
 plot_heatmap(input, genes, type, title = "Heatmap", scale_by = "row",
-  cluster_by = "row", color_pal = viridis::magma(256), text_angle = 60,
+  cluster_by = "row", color_pal = viridis::inferno(256), text_angle = 60,
   group_names = TRUE, gene_names = TRUE, facet_by = FALSE)
 }
 \arguments{

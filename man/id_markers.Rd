@@ -4,12 +4,17 @@
 \alias{id_markers}
 \title{ID markers}
 \usage{
-id_markers(input, print_progress = TRUE)
+id_markers(input, id_by = "Cluster", print_progress = TRUE,
+  overwrite = FALSE)
 }
 \arguments{
 \item{input}{the input ex_sc}
 
+\item{id_by}{a pData variable to run id_markers on. Defaults to "Cluster"}
+
 \item{print_progress}{will print progress if TRUE}
+
+\item{overwrite}{if TRUE will overwrite previously calculated scores on the same id_by variable}
 }
 \description{
 This will perform marker gene identification
