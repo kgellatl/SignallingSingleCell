@@ -20,7 +20,8 @@ id_rl <- function(input){
   expressed_genes <- rownames(fData(input))
   fData(input)$networks_Receptors <- FALSE
   fData(input)$networks_ligands <- FALSE
-  fData(input)$networks_expressed_pairs <- ""
+  fData(input)$networks_ligs_to_receptor <- ""
+  fData(input)$networks_receptor_to_ligs <- ""
   fData(input)$networks_ligands[which(is.na(match(expressed_genes, ligs)) == FALSE)] <- TRUE
   fData(input)$networks_Receptors[which(is.na(match(expressed_genes, recs)) == FALSE)] <- TRUE
   for (i in 1:nrow(Receptor_Ligand_Data)) {
@@ -33,10 +34,13 @@ id_rl <- function(input){
     if(is.na(lig_state) == TRUE | is.na(rec_state) == TRUE){
     } else
     if(lig_state == TRUE & rec_state == TRUE){
-      fData(input)$networks_expressed_pairs[ind_rec] <- paste0(fData(input)$networks_expressed_pairs[ind_rec], pair[1], "_")
+      fData(input)$networks_ligs_to_receptor[ind_rec] <- paste0(fData(input)$networks_ligs_to_receptor[ind_rec], pair[1], "_")
+      fData(input)$networks_receptor_to_ligs[ind_lig] <- paste0(fData(input)$networks_receptor_to_ligs[ind_lig], pair[2], "_")
     }
   }
-  fData(input)$networks_expressed_pairs <- substr(fData(input)$networks_expressed_pairs,1,nchar(fData(input)$networks_expressed_pairs)-1)
-  fData(input)$networks_expressed_pairs[which(fData(input)$networks_expressed_pairs == "")] <- NA
+  fData(input)$networks_ligs_to_receptor <- substr(fData(input)$networks_ligs_to_receptor,1,nchar(fData(input)$networks_ligs_to_receptor)-1)
+  fData(input)$networks_ligs_to_receptor[which(fData(input)$networks_ligs_to_receptor == "")] <- NA
+  fData(input)$networks_receptor_to_ligs <- substr(fData(input)$networks_receptor_to_ligs,1,nchar(fData(input)$networks_receptor_to_ligs)-1)
+  fData(input)$networks_receptor_to_ligs[which(fData(input)$networks_receptor_to_ligs == "")] <- NA
   return(input)
 }
