@@ -56,5 +56,35 @@ plot_rl_network <- function(input, nodes, break_by = FALSE){
     }
     interactions <- matrix(c(col1, col2, col3), ncol = 3)
   }
-  ##### Now begin to count the interactions
+  ##### Now construct the full network
+  full_network <- data.frame()
+  for (i in 1:nrow(interactions)) {
+    inter <- interactions[i,]
+    dat <- rep(inter, nrow(all_pairs_long))
+    if(break_by != FALSE){
+      dat <- matrix(dat, ncol = 3, byrow = T)
+      dat <- as.data.frame(dat)
+      dat[,4] <- all_pairs_long[,1]
+      dat[,5] <- all_pairs_long[,2]
+      full_network <- rbind(full_network, dat)
+    } else {
+      dat <- matrix(dat, ncol = 2, byrow = T)
+      dat <- as.data.frame(dat)
+      dat[,3] <- all_pairs_long[,1]
+      dat[,4] <- all_pairs_long[,2]
+      full_network <- rbind(full_network, dat)
+    }
+  }
+  if(break_by != FALSE){
+    full_network <- full_network[,c(1,5,2,4,3)]
+    colnames(full_network) <- c(nodes, "Ligand", nodes, "Receptor", break_by)
+  } else {
+    full_network <- full_network[,c(1,3,2,4)]
+    colnames(full_network) <- c(nodes, "Ligand", nodes, "Receptor")
+  }
+  ##### Write in the expression values
+  for (i in 1:nrow(full_network)) {
+    int <- full_network[i,]
+
+  }
 }
