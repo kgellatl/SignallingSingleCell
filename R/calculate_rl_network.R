@@ -4,15 +4,16 @@
 #'
 #' @param input the input ex_sc
 #' @param nodes the pData variable used in calc_agg_bulk that will be used to place nodes (such as cluster or cell type)
-#' @param break_by the pData columns calc_agg_bulk was calculated on to split the netoworks into independent networks
+#' @param group_by the pData columns calc_agg_bulk was calculated on to split the netoworks into independent networks
 #'(such as an experimental condition)
+#' @param weight_by_proportion if true will multiple ligand mean expression within a node by the proportion of that group
 #' @export
 #' @details
 #' This will use the calc_agg_bulk results to ID networks
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-calculate_rl_network <- function(input, nodes, break_by = FALSE, print_progress = TRUE){
+calculate_rl_network <- function(input, nodes, group_by = FALSE, print_progress = TRUE, weight_by_proportion = TRUE){
   ##### Get all Receptor Ligand Pairs expressed in the data into long format
   if(print_progress == TRUE){
     print("Getting all RL Pairs")
@@ -112,6 +113,8 @@ calculate_rl_network <- function(input, nodes, break_by = FALSE, print_progress 
     }
   }
   ##### Write in the expression values
+
+
   for (i in 1:nrow(full_network)) {
     if(print_progress == TRUE){
       if(i %in% alerts){
@@ -126,16 +129,23 @@ calculate_rl_network <- function(input, nodes, break_by = FALSE, print_progress 
     lig <- int$Ligand
     rec <- int$Receptor
     if(break_by != FALSE){
-      ctr <- paste0(int[,break_by], "_", ctr, "_bulk")
-      ctl <- paste0(int[,break_by], "_", ctl, "_bulk")
+      ctr <- paste0(int[,break_by], "_", ctr)
+      ctl <- paste0(int[,break_by], "_", ctl)
     } else {
-      ctr <- paste0(ctr, "_bulk")
-      ctl <- paste0(ctl, "_bulk")
+      ctr <- paste0(ctr)
+      ctl <- paste0(ctl)
     }
-    rec <- int_exp[rec,ctr]
-    lig <- int_exp[lig,ctl]
-    full_network[i, "Ligand_expression"] <- lig
-    full_network[i, "Receptor_expression"] <- rec
+    rec_ex <- int_exp[rec,grep(ctr, colnames(int_exp))]
+    lig_ex <- int_exp[lig,grep(ctl, colnames(int_exp))]
+    if(weight_by_proportion == TRUE){
+      to_parse <- colnames(int_exp)[grep(ctl, colnames(int_exp))]
+      to_parse <- unlist(strsplit(to_parse, "_"))
+      to_parse <- to_parse[match("percent", to_parse)+1]
+      to_parse <- as.numeric(to_parse)/100
+      lig_ex <- lig_ex*to_parse
+    }
+    full_network[i, "Ligand_expression"] <- lig_ex
+    full_network[i, "Receptor_expression"] <- rec_ex
     if(full_network[i, "Ligand_expression"] == 0 || full_network[i, "Receptor_expression"] == 0 ){
       remove <- c(remove, i)
     }
@@ -144,7 +154,9 @@ calculate_rl_network <- function(input, nodes, break_by = FALSE, print_progress 
   full_network$Ligand_expression <- full_network$Ligand_expression*1E6
   full_network$Receptor_expression <- full_network$Receptor_expression*1E6
   full_network$Connection <- full_network$Ligand_expression*full_network$Receptor_expression
+  plot(density(log10(full_network$Connection)))
   ##### Summarize Interactions #####
+
   #####
   return(full_network)
   #####
