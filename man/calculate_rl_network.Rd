@@ -4,7 +4,7 @@
 \alias{calculate_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-calculate_rl_network(input, nodes, break_by = FALSE)
+calculate_rl_network(input, nodes, break_by = FALSE, print_progress = TRUE)
 }
 \arguments{
 \item{input}{the input ex_sc}

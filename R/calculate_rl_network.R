@@ -12,8 +12,11 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-calculate_rl_network <- function(input, nodes, break_by = FALSE){
+calculate_rl_network <- function(input, nodes, break_by = FALSE, print_progress = TRUE){
   ##### Get all Receptor Ligand Pairs expressed in the data into long format
+  if(print_progress == TRUE){
+    print("Getting all RL Pairs")
+  }
   all_pairs <- which(!is.na(fData(input)[,"networks_ligs_to_receptor"]))
   all_pairs <- fData(input)[all_pairs,]
   all_pairs <- all_pairs[,grep("networks_", colnames(all_pairs))]
@@ -32,11 +35,17 @@ calculate_rl_network <- function(input, nodes, break_by = FALSE){
     }
   }
   ##### Extract the expression data for the expressed ligand receptor interactions
+  if(print_progress == TRUE){
+    print("Extracting RL Pairs Expression Information")
+  }
   all_expr <- fData(input)[,grep("_bulk", colnames(fData(input)))]
   receptor_bulks <- as.character(unique(all_pairs_long$receptor))
   ligand_bulks <- as.character(unique(all_pairs_long$ligand))
   all_expr <- all_expr[c(receptor_bulks, ligand_bulks),]
   ##### Construct the possible nodes in the network
+  if(print_progress == TRUE){
+    print("Constructing Nodes")
+  }
   node <- unique(pData(input)[,nodes])
   nod <- vector(mode = "list", 2)
   nod[[1]] <- node
@@ -57,6 +66,9 @@ calculate_rl_network <- function(input, nodes, break_by = FALSE){
     interactions <- matrix(c(col1, col2, col3), ncol = 3)
   }
   ##### Now construct the full network
+  if(print_progress == TRUE){
+    print("Constructing Interactome")
+  }
   full_network <- data.frame()
   for (i in 1:nrow(interactions)) {
     inter <- interactions[i,]
@@ -91,8 +103,22 @@ calculate_rl_network <- function(input, nodes, break_by = FALSE){
   }
   full_network$Ligand_expression <- 0
   full_network$Receptor_expression <- 0
+  remove <- c()
+  if(print_progress == TRUE){
+    alerts <- c()
+    for (i in 1:100) {
+      printi <- floor(nrow(full_network)/100)*i
+      alerts <- c(alerts, printi)
+    }
+  }
   ##### Write in the expression values
   for (i in 1:nrow(full_network)) {
+    if(print_progress == TRUE){
+      if(i %in% alerts){
+        ind <- match(i, alerts)
+        print(paste0(ind, "% Complete"))
+      }
+    }
     int <- full_network[i,]
     int_exp <- all_expr[c(int$Ligand, int$Receptor),]
     ctr <- int[,1]
@@ -110,8 +136,16 @@ calculate_rl_network <- function(input, nodes, break_by = FALSE){
     lig <- int_exp[lig,ctl]
     full_network[i, "Ligand_expression"] <- lig
     full_network[i, "Receptor_expression"] <- rec
-    if(full_network[i, "Ligand_expression"] == 0 | full_network[i, "Receptor_expression"] == 0){
-      full_network <- full_network[-i,]
+    if(full_network[i, "Ligand_expression"] == 0 || full_network[i, "Receptor_expression"] == 0 ){
+      remove <- c(remove, i)
     }
   }
+  full_network <- full_network[-remove,]
+  full_network$Ligand_expression <- full_network$Ligand_expression*1E6
+  full_network$Receptor_expression <- full_network$Receptor_expression*1E6
+  full_network$Connection <- full_network$Ligand_expression*full_network$Receptor_expression
+  ##### Summarize Interactions #####
+  #####
+  return(full_network)
+  #####
 }
