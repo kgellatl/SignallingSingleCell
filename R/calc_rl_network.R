@@ -156,6 +156,9 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   full_network$Receptor_expression <- full_network$Receptor_expression*1E6
   full_network$Connection <- full_network$Ligand_expression*full_network$Receptor_expression
   ##### Summarize Interactions #####
+  if(print_progress == TRUE){
+    print("Summarizing Interactions")
+  }
   vec1 <- full_network[,1]
   vec2 <- full_network[,3]
   if(group_by != FALSE){
