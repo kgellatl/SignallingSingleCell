@@ -12,8 +12,8 @@ calc_rl_network(input, nodes, group_by = FALSE, weight_by_proportion = TRUE,
 
 \item{nodes}{the pData variable used in calc_agg_bulk that will be used to place nodes (such as cluster or cell type)}
 
-\item{group_by}{the pData columns calc_agg_bulk was calculated on to split the netoworks into independent networks
-(such as an experimental condition)}
+\item{group_by}{the pData columns calc_agg_bulk was calculated on to split the networks
+into independent networks (such as an experimental condition)}
 
 \item{weight_by_proportion}{if true will multiple ligand mean expression within a node by the proportion of that group}
 }

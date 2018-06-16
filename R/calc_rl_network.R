@@ -4,8 +4,8 @@
 #'
 #' @param input the input ex_sc
 #' @param nodes the pData variable used in calc_agg_bulk that will be used to place nodes (such as cluster or cell type)
-#' @param group_by the pData columns calc_agg_bulk was calculated on to split the netoworks into independent networks
-#'(such as an experimental condition)
+#' @param group_by the pData columns calc_agg_bulk was calculated on to split the networks
+#' into independent networks (such as an experimental condition)
 #' @param weight_by_proportion if true will multiple ligand mean expression within a node by the proportion of that group
 #' @export
 #' @details
@@ -168,8 +168,6 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     dat <- matrix(c(vec1, vec2), ncol = 2)
   }
   dat <- as.data.frame(dat)
-  interactions <- as.data.frame(interactions)
-  interactions$Number <- 0
   summary <- plyr::count(dat)
   #####
   results <- vector(mode = "list", 2)
