@@ -165,7 +165,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     vec3 <- full_network[,5]
     dat <- matrix(c(vec1, vec2, vec3), ncol = 3)
   } else {
-    dat <- matrix(c(vec1, vec2))
+    dat <- matrix(c(vec1, vec2), ncol = 2)
   }
   dat <- as.data.frame(dat)
   interactions <- as.data.frame(interactions)
