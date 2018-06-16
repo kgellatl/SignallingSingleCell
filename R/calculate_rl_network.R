@@ -102,30 +102,31 @@ calculate_rl_network <- function(input, nodes, group_by = FALSE, print_progress 
   if(break_by != FALSE){
     full_network[,5] <- as.character(full_network[,5])
   }
+  ##### Write in the expression values
+  if(print_progress == TRUE){
+    print("Calculating Interactions")
+  }
   full_network$Ligand_expression <- 0
   full_network$Receptor_expression <- 0
   remove <- c()
   if(print_progress == TRUE){
     alerts <- c()
-    for (i in 1:100) {
-      printi <- floor(nrow(full_network)/100)*i
+    for (i in 1:20) {
+      printi <- floor(nrow(full_network)/20)*i
       alerts <- c(alerts, printi)
     }
   }
-  ##### Write in the expression values
-
-
   for (i in 1:nrow(full_network)) {
     if(print_progress == TRUE){
       if(i %in% alerts){
         ind <- match(i, alerts)
-        print(paste0(ind, "% Complete"))
+        print(paste0(ind*5, "% Complete"))
       }
     }
     int <- full_network[i,]
     int_exp <- all_expr[c(int$Ligand, int$Receptor),]
-    ctr <- int[,1]
-    ctl <- int[,3]
+    ctr <- int[,3]
+    ctl <- int[,1]
     lig <- int$Ligand
     rec <- int$Receptor
     if(break_by != FALSE){
