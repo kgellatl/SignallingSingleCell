@@ -170,17 +170,6 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   dat <- as.data.frame(dat)
   interactions <- as.data.frame(interactions)
   interactions$Number <- 0
-
-
-  # wow ...... much much faster with plyr
-  # for (i in 1:nrow(interactions)) {
-  #   int <- interactions[i,]
-  #   int <- paste0(int, collapse = "_")
-  #   for (j in 1:nrow(dat)) {
-  #     int2 <- paste0(dat[k,], collapse = "_")
-  #     interactions$Number[i] <- interactions$Number[i]+1
-  #   }
-  # }
   summary <- plyr::count(dat)
   #####
   results <- vector(mode = "list", 2)
