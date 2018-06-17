@@ -43,7 +43,8 @@ plot_rl_network <- function(input, group_by = FALSE, mode = "Summary"){
     for (i in 1:ncol(net_dat)) {
       net_dat[,i] <- as.character(net_dat[,i])
     }
-    if(group_by!= FALSE){  ##### GROUPED DATA #####
+    if(group_by!= FALSE){
+      ##### GROUPED DATA #####
       net_dat_final <- net_dat
       for (i in 1:nrow(net_dat_final)) {
         tmp <- net_dat_final[i,]
@@ -123,7 +124,6 @@ plot_rl_network <- function(input, group_by = FALSE, mode = "Summary"){
       legend(x=-1.5, y=0, cell_legend, pch=21,
              col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
     } else {
-
       ##### NON GROUPED DATA #####
       net_dat_final <- net_dat
       for (i in 1:nrow(net_dat_final)) {
