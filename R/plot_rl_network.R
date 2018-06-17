@@ -100,10 +100,20 @@ plot_rl_network <- function(input, group_by = FALSE, mode = "Summary"){
       ##### Size Edge and Arrows #####
       E(net_graph)$width <- rank(as.numeric(net_dat_final$freq))
       E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+      ##### Size Vertices #####
+      verts <- names(V(net_graph))
+      vert_weights <- c()
+      for (i in 1:length(verts)) {
+        ind <- grep(verts[i], net_dat_final$V1)
+        sum <- net_dat_final$freq[ind]
+        sum <- sum(as.numeric(sum))
+        vert_weights <- c(vert_weights, sum)
+      }
+      vert_weights <- vert_weights[which(vert_weights > 0)]
+      vert_weights <- rank(as.numeric(vert_weights))
+      V(net_graph)$size <- (10/max(vert_weights)*vert_weights)
       ##### Remove Names #####
       V(net_graph)$name <- ""
-      ##### Size Vertices #####
-      V(net_graph)$size <- 5
       ##### Plot #####
       eqarrowPlot(net_graph, layout = l, edge.arrow.size=(2/max(E(net_graph)$width)*E(net_graph)$width),
                   edge.width=E(net_graph)$size)
@@ -144,10 +154,20 @@ plot_rl_network <- function(input, group_by = FALSE, mode = "Summary"){
       ##### Size Edge and Arrows #####
       E(net_graph)$width <- rank(as.numeric(net_dat_final$freq))
       E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+      ##### Size Vertices #####
+      verts <- names(V(net_graph))
+      vert_weights <- c()
+      for (i in 1:length(verts)) {
+        ind <- grep(verts[i], net_dat_final$V1)
+        sum <- net_dat_final$freq[ind]
+        sum <- sum(as.numeric(sum))
+        vert_weights <- c(vert_weights, sum)
+      }
+      vert_weights <- vert_weights[which(vert_weights > 0)]
+      vert_weights <- rank(as.numeric(vert_weights))
+      V(net_graph)$size <- (10/max(vert_weights)*vert_weights)
       ##### Remove Names #####
       V(net_graph)$name <- ""
-      ##### Size Vertices #####
-      V(net_graph)$size <- 5
       ##### Plot #####
       eqarrowPlot(net_graph, layout = l, edge.arrow.size=(2/max(E(net_graph)$width)*E(net_graph)$width),
                   edge.width=E(net_graph)$size)
