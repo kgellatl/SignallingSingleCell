@@ -65,7 +65,7 @@ plot_rl_network <- function(input, group_by = FALSE, mode = "Summary"){
           order <- c(order , tab)
       }
       net_dat_final <- net_dat_final[order,]
-      net_graph <- igraph::graph_from_data_frame(net_dat_final)
+      net_graph <- graph_from_data_frame(net_dat_final)
       ##### Layout #####
       l <- layout_in_circle(net_graph)
       rownames(l) <- names(V(net_graph))
@@ -84,7 +84,7 @@ plot_rl_network <- function(input, group_by = FALSE, mode = "Summary"){
         }
       }
       chunk2 <- function(x,n) split(x, cut(seq_along(x), n, labels = FALSE))
-      grouped_pos <- chunk2(xpos, 3)
+      grouped_pos <- chunk2(xpos, length(groups))
       for (i in 1:length(groups)) {
         int <- groups[i]
         ind <- grep(int, rownames(l))
@@ -122,7 +122,7 @@ plot_rl_network <- function(input, group_by = FALSE, mode = "Summary"){
         tmp$V2 <- paste0(c("Rec", tmp$V2), collapse = "_")
         net_dat_final[i,] <- tmp
       }
-      net_graph <- igraph::graph_from_data_frame(net_dat_final)
+      net_graph <- graph_from_data_frame(net_dat_final)
       ##### Layout #####
       l <- layout_in_circle(net_graph)
       rownames(l) <- names(V(net_graph))
