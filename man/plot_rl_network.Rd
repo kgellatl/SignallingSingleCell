@@ -4,14 +4,17 @@
 \alias{plot_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-plot_rl_network(input, group_by = FALSE, mode = "Summary")
+plot_rl_network(input, group_by = FALSE, mode = "Summary",
+  normalization = "num_connections")
 }
 \arguments{
 \item{input}{the input full_network from calc_rc_network}
 
 \item{group_by}{the pData columns calc_rl_network was calculated on to split the networks}
 
-\item{mode}{the network plot type
+\item{mode}{the network plot type}
+
+\item{normalization}{the network normalization types. See column names of calc_rl_network$Summary
 into independent networks}
 }
 \description{
