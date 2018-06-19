@@ -170,6 +170,36 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   dat <- as.data.frame(dat)
   summary <- plyr::count(dat)
   #####
+  tmp_dat <- matrix(c(as.character(summary$V3), as.character(summary$V1)), ncol = 2)
+  tmp_dat <- as.data.frame(tmp_dat)
+  tmp_dat$search <- NA
+  tmp_dat <- data.frame(lapply(tmp_dat, as.character), stringsAsFactors=FALSE)
+  grp <- c()
+  for (i in 1:nrow(tmp_dat)) {
+    topaste <- tmp_dat[i,1:2]
+    topaste <- as.character(as.vector(topaste))
+    int <- paste0(topaste, collapse = "_")
+    grp <- c(grp, int)
+  }
+  summary$freq_frac <- NA
+  for (i in 1:length(grp)) {
+    int <- grp[i]
+    int <- colnames(fData(input))[grep(int, colnames(fData(input)))]
+    int <- unlist(strsplit(int, "_"))
+    pos <- match("genes", int)
+    frac <- summary$freq[i]/as.numeric(int[pos+1])
+    summary$freq_frac[i] <- frac
+  }
+
+
+  #####
+  if(group_by == FALSE){
+    colnames(summary) <- c("Lig_produce", "Rec_receive", "num_connections", "fraction_connections")
+  } else {
+    colnames(summary) <- c("Lig_produce", "Rec_receive", group_by, "num_connections", "fraction_connections")
+  }
+
+  #####
   results <- vector(mode = "list", 2)
   results[[1]] <- summary
   results[[2]] <- full_network
