@@ -4,12 +4,15 @@
 \alias{plot_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-plot_rl_network(input, break_by = FALSE)
+plot_rl_network(input, group_by = FALSE, mode = "Summary")
 }
 \arguments{
-\item{input}{the input ex_sc}
+\item{input}{the input full_network from calc_rc_network}
 
-\item{break_by}{the pData columns calc_agg_bulk was calculated on}
+\item{group_by}{the pData columns calc_rl_network was calculated on to split the networks}
+
+\item{mode}{the network plot type
+into independent networks}
 }
 \description{
 This function will map all RL interactions

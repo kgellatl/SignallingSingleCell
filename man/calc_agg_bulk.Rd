@@ -4,12 +4,15 @@
 \alias{calc_agg_bulk}
 \title{Calculate mean expression values across pData values}
 \usage{
-calc_agg_bulk(input, aggregate_by)
+calc_agg_bulk(input, aggregate_by, group_by = FALSE)
 }
 \arguments{
 \item{input}{the input ex_sc.}
 
 \item{aggregate_by}{The pData variables to break by}
+
+\item{group_by}{The pData variables that contains distinct groups if included in aggregate_by (eg Timepoint, Condition, etc)
+This is used to calculate portions internally to this group}
 }
 \description{
 This will calculate mean expression values across pData columns. Useful for heatmaps and networking analysis.
