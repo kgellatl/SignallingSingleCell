@@ -35,6 +35,7 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE){
   groups <- unique(pData(input)[,group_by])
   mean_vals <- c()
   num_cells_vals <- c()
+  num_genes_vals <- c()
   for (j in 1:nrow(bulks)) {
     int <- bulks[j,]
     full_match <- c()
@@ -48,10 +49,14 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE){
     }
     num_cells <- length(full_match)
     num_cells_vals <- c(num_cells_vals, num_cells)
-    mean <- apply(exprs(input)[,full_match],1,mean)
+    tmp <- exprs(input)[,full_match]
+    mean <- apply(tmp,1,mean)
+    expressed <- length(which(mean > 0))
     mean_vals <- c(mean_vals, mean)
+    num_genes_vals <- c(num_genes_vals, expressed)
   }
   bulks$numcells <- num_cells_vals
+  bulks$numgenes <- num_genes_vals
   bulks$proportion <- 0
   if(group_by != FALSE){
     for (i in 1:length(groups)) {
@@ -67,10 +72,11 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE){
   rownames(bulk) <- rownames(exprs(input))
   colnames(bulk) <- seq(1:ncol(bulk))
   for (l in 1:nrow(bulks)) {
-    cname <- bulks[l,-c(match(c("numcells", "proportion"), colnames(bulks)))]
+    cname <- bulks[l,-c(match(c("numcells", "proportion", "numgenes"), colnames(bulks)))]
     cnum <- bulks[l,"numcells"]
     cpro <- bulks[l,"proportion"]
-    cname <- paste0(c(cname, "num",cnum, "percent",cpro, "bulk"), collapse = "_")
+    cgen <- bulks[l,"numgenes"]
+    cname <- paste0(c(cname, "num_genes", cgen, "num_cells", cnum, "percent", cpro, "bulk"), collapse = "_")
     colnames(bulk)[l] <- cname
   }
   fData(input) <- cbind(fData(input), bulk)
