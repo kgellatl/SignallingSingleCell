@@ -5,7 +5,7 @@
 #' @param input the input full_network from calc_rc_network
 #' @param group_by the pData columns calc_rl_network was calculated on to split the networks
 #' @param mode the network plot type
-#' @param normalization the network normalization types. See column names of calc_rl_network$Summary
+#' @param edge_weight the network edge_weight types. See column names of calc_rl_network$Summary
 #' into independent networks
 #' @export
 #' @details
@@ -13,7 +13,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-plot_rl_network <- function(input, group_by = FALSE, mode = "Summary", normalization = "num_connections"){
+plot_rl_network <- function(input, group_by = FALSE, mode = "Summary", edge_weight = "num_connections", rank = TRUE){
   ##### Colors to match ggplot #####
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
@@ -105,13 +105,35 @@ plot_rl_network <- function(input, group_by = FALSE, mode = "Summary", normaliza
 
 
 
-      if(normalization == "num_connections"){
-        E(net_graph)$width <- rank(as.numeric(net_dat_final$num_connections))
-        E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+      if(edge_weight == "num_connections"){
+        if(rank == TRUE){
+          E(net_graph)$width <- rank(as.numeric(net_dat_final$num_connections))
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
+        if(rank == FALSE){
+          E(net_graph)$width <- as.numeric(net_dat_final$num_connections)
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
       }
-      if(normalization == "fraction_connections"){
-        E(net_graph)$width <- rank(as.numeric(net_dat_final$fraction_connections))
-        E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+      if(edge_weight == "fraction_connections"){
+        if(rank == TRUE){
+          E(net_graph)$width <- rank(as.numeric(net_dat_final$fraction_connections))
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
+        if(rank == FALSE){
+          E(net_graph)$width <- as.numeric(net_dat_final$fraction_connections)
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
+      }
+      if(edge_weight == "proportion_connections"){
+        if(rank == TRUE){
+          E(net_graph)$width <- rank(as.numeric(net_dat_final$proportion_connections))
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
+        if(rank == FALSE){
+          E(net_graph)$width <- as.numeric(net_dat_final$proportion_connections)
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
       }
 
 
@@ -174,13 +196,35 @@ plot_rl_network <- function(input, group_by = FALSE, mode = "Summary", normaliza
 
 
 
-      if(normalization == "num_connections"){
-        E(net_graph)$width <- rank(as.numeric(net_dat_final$num_connections))
-        E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+      if(edge_weight == "num_connections"){
+        if(rank == TRUE){
+          E(net_graph)$width <- rank(as.numeric(net_dat_final$num_connections))
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
+        if(rank == FALSE){
+          E(net_graph)$width <- as.numeric(net_dat_final$num_connections)
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
       }
-      if(normalization == "fraction_connections"){
-        E(net_graph)$width <- rank(as.numeric(net_dat_final$fraction_connections))
-        E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+      if(edge_weight == "fraction_connections"){
+        if(rank == TRUE){
+          E(net_graph)$width <- rank(as.numeric(net_dat_final$fraction_connections))
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
+        if(rank == FALSE){
+          E(net_graph)$width <- as.numeric(net_dat_final$fraction_connections)
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
+      }
+      if(edge_weight == "proportion_connections"){
+        if(rank == TRUE){
+          E(net_graph)$width <- rank(as.numeric(net_dat_final$proportion_connections))
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
+        if(rank == FALSE){
+          E(net_graph)$width <- as.numeric(net_dat_final$proportion_connections)
+          E(net_graph)$width <- (10/max(E(net_graph)$width)*E(net_graph)$width)
+        }
       }
 
 

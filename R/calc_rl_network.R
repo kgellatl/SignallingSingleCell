@@ -13,7 +13,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion = TRUE, print_progress = TRUE){
+calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion = FALSE, print_progress = TRUE){
   ##### Get all Receptor Ligand Pairs expressed in the data into long format
   if(print_progress == TRUE){
     print("Getting all RL Pairs")
@@ -168,37 +168,74 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     dat <- matrix(c(vec1, vec2), ncol = 2)
   }
   dat <- as.data.frame(dat)
+  ##### Number of connections #####
   summary <- plyr::count(dat)
-  #####
-  tmp_dat <- matrix(c(as.character(summary$V3), as.character(summary$V1)), ncol = 2)
-  tmp_dat <- as.data.frame(tmp_dat)
-  tmp_dat$search <- NA
-  tmp_dat <- data.frame(lapply(tmp_dat, as.character), stringsAsFactors=FALSE)
-  grp <- c()
-  for (i in 1:nrow(tmp_dat)) {
-    topaste <- tmp_dat[i,1:2]
-    topaste <- as.character(as.vector(topaste))
-    int <- paste0(topaste, collapse = "_")
-    grp <- c(grp, int)
+  summary <- data.frame(lapply(summary, as.character), stringsAsFactors=FALSE)
+  ##### Number of connections divided by num genes #####
+  if(group_by != FALSE){
+    tmp_dat <- matrix(c(as.character(summary$V3), as.character(summary$V1)), ncol = 2)
+    tmp_dat <- as.data.frame(tmp_dat)
+    tmp_dat <- data.frame(lapply(tmp_dat, as.character), stringsAsFactors=FALSE)
+    grp <- c()
+    for (i in 1:nrow(tmp_dat)) {
+      topaste <- tmp_dat[i,1:2]
+      topaste <- as.character(as.vector(topaste))
+      int <- paste0(topaste, collapse = "_")
+      grp <- c(grp, int)
+    }
+    summary$freq_frac <- NA
+    for (i in 1:length(grp)) {
+      int <- grp[i]
+      int <- colnames(fData(input))[grep(int, colnames(fData(input)))]
+      int <- unlist(strsplit(int, "_"))
+      pos <- match("genes", int)
+      frac <- summary$freq[i]/as.numeric(int[pos+1])
+      summary$freq_frac[i] <- frac
+    }
+  } else {
+    tmp_dat <- data.frame(lapply(summary, as.character), stringsAsFactors=FALSE)
+    grp <- unique(tmp_dat$V1)
+    summary$freq_frac <- NA
+    for (i in 1:length(grp)) {
+      int <- grp[i]
+      int <- colnames(fData(input))[grep(int, colnames(fData(input)))]
+      int <- unlist(strsplit(int, "_"))
+      pos <- match("genes", int)
+      as.numeric(int[pos+1])
+      frac <- summary$freq[grep(grp[i], summary$V1)]/as.numeric(int[pos+1])
+      summary$freq_frac[grep(grp[i], summary$V1)] <- frac
+    }
   }
-  summary$freq_frac <- NA
-  for (i in 1:length(grp)) {
-    int <- grp[i]
-    int <- colnames(fData(input))[grep(int, colnames(fData(input)))]
-    int <- unlist(strsplit(int, "_"))
-    pos <- match("genes", int)
-    frac <- summary$freq[i]/as.numeric(int[pos+1])
-    summary$freq_frac[i] <- frac
+  ##### Number of connections divided by total outgoing connections #####
+  summary$prop_freq <- NA
+  if(group_by != FALSE){
+    nodes <- unique(summary$V1)
+    conds <- unique(summary$V3)
+    mat <- expand.grid(nodes, conds)
+    for (i in 1:nrow(mat)) {
+      int <- mat[i,]
+      ind1 <- grep(int$Var1, summary$V1)
+      ind2 <- grep(int$Var2, summary$V3)
+      pos <- intersect(ind1, ind2)
+      tot <- sum(summary[pos,"freq"])
+      prop <- summary[pos,"freq"]/tot
+      summary[pos,"prop_freq"] <- prop
+    }
+  } else {
+    tmp_dat <- data.frame(lapply(summary, as.character), stringsAsFactors=FALSE)
+    grp <- unique(tmp_dat$V1)
+    summary$prop_freq <- NA
+    for (i in 1:length(grp)) {
+      total <- sum(summary[grep(grp[i], summary$V1),"freq"])
+      summary[grep(grp[i], summary$V1),"prop_freq"] <- summary[grep(grp[i], summary$V1),"freq"]/total
+    }
   }
-
-
   #####
   if(group_by == FALSE){
-    colnames(summary) <- c("Lig_produce", "Rec_receive", "num_connections", "fraction_connections")
+    colnames(summary) <- c("Lig_produce", "Rec_receive", "num_connections", "fraction_connections", "proportion_connections")
   } else {
-    colnames(summary) <- c("Lig_produce", "Rec_receive", group_by, "num_connections", "fraction_connections")
+    colnames(summary) <- c("Lig_produce", "Rec_receive", group_by, "num_connections", "fraction_connections", "proportion_connections")
   }
-
   #####
   results <- vector(mode = "list", 2)
   results[[1]] <- summary
