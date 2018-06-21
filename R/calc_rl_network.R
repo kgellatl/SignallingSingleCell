@@ -170,7 +170,6 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   dat <- as.data.frame(dat)
   ##### Number of connections #####
   summary <- plyr::count(dat)
-  summary <- data.frame(lapply(summary, as.character), stringsAsFactors=FALSE)
   ##### Number of connections divided by num genes #####
   if(group_by != FALSE){
     tmp_dat <- matrix(c(as.character(summary$V3), as.character(summary$V1)), ncol = 2)
@@ -230,6 +229,61 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       summary[grep(grp[i], summary$V1),"prop_freq"] <- summary[grep(grp[i], summary$V1),"freq"]/total
     }
   }
+  ##### Rank Connections by L * R coarse (within cell type A to anyone!) #####
+  full_network$Connection_rank_coarse <- NA
+  if(print_progress == TRUE){
+    print("Calculating Coarse Ranks")
+  }
+  if(group_by != FALSE){
+    tmpdat <- expand.grid(unique(summary$V1), unique(summary$V3))
+    for (i in 1:nrow(tmpdat)) {
+      int <- tmpdat[i,]
+      ind1 <- grep(int$Var1, full_network[,1])
+      ind2 <- grep(int$Var2, full_network[,5])
+      ind <- intersect(ind1,ind2)
+      vals <- full_network[ind,"Connection"]
+      vals <- rank(-vals)
+      full_network[ind,"Connection_rank_coarse"] <- vals
+    }
+  } else {
+    # NEED TO ADD CODE HERE!!! #
+  }
+  ##### Rank Connections by L * R fine (within cell type A to cell type B!) #####
+  full_network$Connection_rank_fine <- NA
+  if(print_progress == TRUE){
+    print("Calculating Fine Ranks")
+  }
+  if(group_by != FALSE){
+    tmp_dat <- data.frame(lapply(summary, as.character), stringsAsFactors=FALSE)
+    for (i in 1:nrow(summary)) {
+      int <- tmp_dat[i,]
+      ind1 <- grep(int$V1, full_network[,1])
+      ind2 <- grep(int$V2, full_network[,3])
+      ind3 <- grep(int$V3, full_network[,5])
+      ind <- intersect(intersect(ind1,ind2),ind3)
+      vals <- full_network[ind,"Connection"]
+      vals <- rank(-vals)
+      full_network[ind,"Connection_rank_fine"] <- vals
+    }
+  } else {
+    # NEED TO ADD CODE HERE!!! #
+  }
+  ##### Rank Connections by Zscore #####
+  if(print_progress == TRUE){
+    print("Calculating Z Scores")
+  }
+  if(group_by != FALSE){
+    for (i in 1:nrow(all_pairs_long)) {
+      int <- all_pairs_long[i,]
+
+    }
+
+
+  } else {
+    # NEED TO ADD CODE HERE!!! #
+  }
+
+
   #####
   if(group_by == FALSE){
     colnames(summary) <- c("Lig_produce", "Rec_receive", "num_connections", "fraction_connections", "proportion_connections")
