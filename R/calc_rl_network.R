@@ -92,7 +92,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     full_network <- full_network[,c(1,5,2,4,3)]
     colnames(full_network) <- c(nodes, "Ligand", nodes, "Receptor", group_by)
   } else {
-    full_network <- full_network[,c(1,3,2,4)]
+    full_network <- full_network[,c(1,4,2,3)]
     colnames(full_network) <- c(nodes, "Ligand", nodes, "Receptor")
   }
   full_network[,1] <- as.character(full_network[,1])
@@ -105,17 +105,15 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   ##### Write in the expression values
   if(print_progress == TRUE){
     print("Calculating Interactions")
-  }
-  full_network$Ligand_expression <- 0
-  full_network$Receptor_expression <- 0
-  remove <- c()
-  if(print_progress == TRUE){
     alerts <- c()
     for (i in 1:20) {
       printi <- floor(nrow(full_network)/20)*i
       alerts <- c(alerts, printi)
     }
   }
+  full_network$Ligand_expression <- 0
+  full_network$Receptor_expression <- 0
+  remove <- c()
   for (i in 1:nrow(full_network)) {
     if(print_progress == TRUE){
       if(i %in% alerts){
@@ -170,6 +168,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   dat <- as.data.frame(dat)
   ##### Number of connections #####
   summary <- plyr::count(dat)
+  summary[,1:2] <- data.frame(lapply(summary[,1:2], as.character), stringsAsFactors=FALSE)
   ##### Number of connections divided by num genes #####
   if(group_by != FALSE){
     tmp_dat <- matrix(c(as.character(summary$V3), as.character(summary$V1)), ncol = 2)
@@ -246,7 +245,9 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       full_network[ind,"Connection_rank_coarse"] <- vals
     }
   } else {
+
     # NEED TO ADD CODE HERE!!! #
+
   }
   ##### Rank Connections by L * R fine (within cell type A to cell type B!) #####
   full_network$Connection_rank_fine <- NA
@@ -266,23 +267,69 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       full_network[ind,"Connection_rank_fine"] <- vals
     }
   } else {
+
     # NEED TO ADD CODE HERE!!! #
+
   }
   ##### Rank Connections by Zscore #####
+  full_network$Zscores <- NA
   if(print_progress == TRUE){
     print("Calculating Z Scores")
-  }
-  if(group_by != FALSE){
-    for (i in 1:nrow(all_pairs_long)) {
-      int <- all_pairs_long[i,]
-
+    alerts <- c()
+    for (i in 1:20) {
+      printi <- floor(nrow(all_pairs_long)/20)*i
+      alerts <- c(alerts, printi)
     }
+  }
+  tmp_dat <- data.frame(lapply(all_pairs_long, as.character), stringsAsFactors=FALSE)
+  if(group_by != FALSE){
+    full_network$Zscores_grouped <- NA
+    for (i in 1:nrow(tmp_dat)) {
+      if(print_progress == TRUE){
+        if(i %in% alerts){
+          ind <- match(i, alerts)
+          print(paste0(ind*5, "% Complete"))
+        }
+      }
+      int <- tmp_dat[i,]
+      ind1 <- grep(int$receptor, full_network$Receptor)
+      ind2 <- grep(int$ligand, full_network$Ligand)
+      ind <- intersect(ind1, ind2)
+      tmp <- full_network[ind,]
+      vals <- scale(tmp$Connection)
+      full_network[ind,"Zscores"] <- vals
+      for (j in 1:length(breaks)) {
+        int <- breaks[j]
+        ind3 <- grep(int, tmp[,group_by])
+        tmp2 <- tmp[ind3,]
+        vals <- scale(tmp2$Connection)
+        ind4 <- match(rownames(tmp2), rownames(full_network))
+        full_network[ind4,"Zscores_grouped"] <- vals
 
+        ##idea###
+        # take these z scores, sort by them. Then note is there any gini index in distribution of names??
 
+      }
+    }
   } else {
-    # NEED TO ADD CODE HERE!!! #
+    for (i in 1:nrow(tmp_dat)) {
+      if(print_progress == TRUE){
+        if(i %in% alerts){
+          ind <- match(i, alerts)
+          print(paste0(ind*5, "% Complete"))
+        }
+      }
+      int <- tmp_dat[i,]
+      ind1 <- grep(int$receptor, full_network$Receptor)
+      ind2 <- grep(int$ligand, full_network$Ligand)
+      ind <- intersect(ind1, ind2)
+      tmp <- full_network[ind,]
+      vals <- scale(tmp$Connection)
+      full_network[ind,"Zscores"] <- vals
+    }
   }
 
+  ##### Rank Connections by # above Z score threshold #####
 
   #####
   if(group_by == FALSE){
