@@ -199,7 +199,6 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       int <- colnames(fData(input))[grep(int, colnames(fData(input)))]
       int <- unlist(strsplit(int, "_"))
       pos <- match("genes", int)
-      as.numeric(int[pos+1])
       frac <- summary$freq[grep(grp[i], summary$V1)]/as.numeric(int[pos+1])
       summary$freq_frac[grep(grp[i], summary$V1)] <- frac
     }
@@ -230,10 +229,13 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   }
   ##### Rank Connections by L * R coarse (within cell type A to anyone!) #####
   full_network$Connection_rank_coarse <- NA
+  full_network$Connection_Z_coarse <- NA
   if(print_progress == TRUE){
     print("Calculating Coarse Ranks")
   }
   if(group_by != FALSE){
+    full_network$Connection_rank_coarse_grouped <- NA
+    full_network$Connection_Z_coarse_grouped <- NA
     tmpdat <- expand.grid(unique(summary$V1), unique(summary$V3))
     for (i in 1:nrow(tmpdat)) {
       int <- tmpdat[i,]
@@ -241,40 +243,62 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       ind2 <- grep(int$Var2, full_network[,5])
       ind <- intersect(ind1,ind2)
       vals <- full_network[ind,"Connection"]
+      zval <- scale(vals)
       vals <- rank(-vals)
-      full_network[ind,"Connection_rank_coarse"] <- vals
+      full_network[ind,"Connection_rank_coarse_grouped"] <- vals
+      full_network[ind,"Connection_Z_coarse_grouped"] <- zval
+
     }
-  } else {
-
-    # NEED TO ADD CODE HERE!!! #
-
+  }
+  tmpdat <- unique(summary$V1)
+  for (i in 1:length(tmpdat)) {
+    int <- tmpdat[i]
+    ind1 <- grep(int, full_network[,1])
+    vals <- full_network[ind1,"Connection"]
+    zval <- scale(vals)
+    vals <- rank(-vals)
+    full_network[ind1,"Connection_rank_coarse"] <- vals
+    full_network[ind1,"Connection_Z_coarse"] <- zval
   }
   ##### Rank Connections by L * R fine (within cell type A to cell type B!) #####
   full_network$Connection_rank_fine <- NA
+  full_network$Connection_Z_fine <- NA
   if(print_progress == TRUE){
     print("Calculating Fine Ranks")
   }
+  tmp_dat <- data.frame(lapply(summary, as.character), stringsAsFactors=FALSE)
   if(group_by != FALSE){
-    tmp_dat <- data.frame(lapply(summary, as.character), stringsAsFactors=FALSE)
-    for (i in 1:nrow(summary)) {
+    full_network$Connection_rank_fine_grouped <- NA
+    full_network$Connection_Z_fine_grouped <- NA
+    for (i in 1:nrow(tmp_dat)) {
       int <- tmp_dat[i,]
       ind1 <- grep(int$V1, full_network[,1])
       ind2 <- grep(int$V2, full_network[,3])
       ind3 <- grep(int$V3, full_network[,5])
       ind <- intersect(intersect(ind1,ind2),ind3)
       vals <- full_network[ind,"Connection"]
+      vals <- full_network[ind,"Connection"]
+      zval <- scale(vals)
       vals <- rank(-vals)
-      full_network[ind,"Connection_rank_fine"] <- vals
+      full_network[ind,"Connection_rank_fine_grouped"] <- vals
+      full_network[ind,"Connection_Z_fine_grouped"] <- zval
     }
-  } else {
-
-    # NEED TO ADD CODE HERE!!! #
-
+  }
+  for (i in 1:nrow(tmp_dat)) {
+    int <- tmp_dat[i,]
+    ind1 <- grep(int$V1, full_network[,1])
+    ind2 <- grep(int$V2, full_network[,3])
+    ind <- intersect(ind1,ind2)
+    vals <- full_network[ind,"Connection"]
+    zval <- scale(vals)
+    vals <- rank(-vals)
+    full_network[ind,"Connection_rank_fine"] <- vals
+    full_network[ind,"Connection_Z_fine"] <- vals
   }
   ##### Rank Connections by Zscore #####
-  full_network$Zscores <- NA
+  full_network$Zscores_genes <- NA
   if(print_progress == TRUE){
-    print("Calculating Z Scores")
+    print("Calculating Z Scores Grouped")
     alerts <- c()
     for (i in 1:20) {
       printi <- floor(nrow(all_pairs_long)/20)*i
@@ -283,7 +307,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   }
   tmp_dat <- data.frame(lapply(all_pairs_long, as.character), stringsAsFactors=FALSE)
   if(group_by != FALSE){
-    full_network$Zscores_grouped <- NA
+    full_network$Zscores_genes_grouped <- NA
     for (i in 1:nrow(tmp_dat)) {
       if(print_progress == TRUE){
         if(i %in% alerts){
@@ -297,40 +321,35 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       ind <- intersect(ind1, ind2)
       tmp <- full_network[ind,]
       vals <- scale(tmp$Connection)
-      full_network[ind,"Zscores"] <- vals
+      full_network[ind,"Zscores_genes_grouped"] <- vals
       for (j in 1:length(breaks)) {
         int <- breaks[j]
         ind3 <- grep(int, tmp[,group_by])
         tmp2 <- tmp[ind3,]
         vals <- scale(tmp2$Connection)
         ind4 <- match(rownames(tmp2), rownames(full_network))
-        full_network[ind4,"Zscores_grouped"] <- vals
-
-        ##idea###
-        # take these z scores, sort by them. Then note is there any gini index in distribution of names??
-
+        full_network[ind4,"Zscores_genes_grouped"] <- vals
       }
-    }
-  } else {
-    for (i in 1:nrow(tmp_dat)) {
-      if(print_progress == TRUE){
-        if(i %in% alerts){
-          ind <- match(i, alerts)
-          print(paste0(ind*5, "% Complete"))
-        }
-      }
-      int <- tmp_dat[i,]
-      ind1 <- grep(int$receptor, full_network$Receptor)
-      ind2 <- grep(int$ligand, full_network$Ligand)
-      ind <- intersect(ind1, ind2)
-      tmp <- full_network[ind,]
-      vals <- scale(tmp$Connection)
-      full_network[ind,"Zscores"] <- vals
     }
   }
-
-  ##### Rank Connections by # above Z score threshold #####
-
+  if(print_progress == TRUE){
+    print("Calculating Z Scores")
+  }
+  for (i in 1:nrow(tmp_dat)) {
+    if(print_progress == TRUE){
+      if(i %in% alerts){
+        ind <- match(i, alerts)
+        print(paste0(ind*5, "% Complete"))
+      }
+    }
+    int <- tmp_dat[i,]
+    ind1 <- grep(int$receptor, full_network$Receptor)
+    ind2 <- grep(int$ligand, full_network$Ligand)
+    ind <- intersect(ind1, ind2)
+    tmp <- full_network[ind,]
+    vals <- scale(tmp$Connection)
+    full_network[ind,"Zscores_genes"] <- vals
+  }
   #####
   if(group_by == FALSE){
     colnames(summary) <- c("Lig_produce", "Rec_receive", "num_connections", "fraction_connections", "proportion_connections")
