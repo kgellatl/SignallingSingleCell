@@ -4,6 +4,8 @@
 #'
 #' @param input the input ex_sc
 #' @param print_progress will print progress if TRUE
+#' @param id_by a pData variable to run id_markers on. Defaults to "Cluster"
+#' @param overwrite if TRUE will overwrite previously calculated scores on the same id_by variable
 #' @export
 #' @details
 #' This will find marker genes for each cluster. First, for each cluster it calculates the fraction of cells expressing a given gene,
@@ -13,24 +15,31 @@
 #' @examples
 #' ex_sc_example <- id_markers(input = ex_sc_example, print_progress = TRUE)
 
-id_markers <- function(input, print_progress = TRUE){
+id_markers <- function(input, id_by = "Cluster", print_progress = TRUE, overwrite = FALSE){
   marker_input <- input
-  ind <- grep("marker_score", colnames(fData(marker_input)))
-  if(length(ind) > 0){
-    fData(marker_input) <- fData(marker_input)[,ind]
+  cols <- sort(unique(pData(input)[,id_by]))
+  vals <- paste0(cols, "_marker_score_", id_by)
+  ind <- match(vals, colnames(fData(marker_input)))
+  if(unique(is.na(ind)) == FALSE){
+    if(overwrite == FALSE){
+      stop("Markers already calculated. Set overwrite to TRUE to recalculate")
+    }
+    if(overwrite == TRUE){
+      fData(marker_input) <- fData(marker_input)[,-ind]
+    }
   }
   fData(marker_input)$tmp <- "tmp"
   if(print_progress == TRUE){
     print("Finding markers based on fraction expressing")
   }
-  num_cluster <- length(unique(pData(marker_input)[,"Cluster"]))
+  num_cluster <- length(unique(pData(marker_input)[,id_by]))
   num_marker_genes <- nrow(fData(input))
   non0 <- c()
   percent <- c()
   gene_percent <- c()
-  for(n in 1:length(unique(pData(marker_input)[,"Cluster"]))){
-    cluster <- (paste0("Cluster", n))
-    index <- which(pData(marker_input)[,"Cluster"] == cluster)
+  for(n in 1:length(cols)){
+    cluster <- cols[n]
+    index <- which(pData(marker_input)[,id_by] == cluster)
     cells <- rownames(pData(marker_input))[index]
     tmp_expr_matrix <- exprs(marker_input)[,cells]
     non0 <- which(tmp_expr_matrix > 0)
@@ -41,7 +50,7 @@ id_markers <- function(input, print_progress = TRUE){
       gene_percent <- c(gene_percent, percent)
     }
   }
-  gene_markers_fractionExpression <- matrix(data = gene_percent, nrow = nrow(fData(marker_input)), ncol = length(unique(pData(marker_input)[,"Cluster"])))
+  gene_markers_fractionExpression <- matrix(data = gene_percent, nrow = nrow(fData(marker_input)), ncol = length(unique(pData(marker_input)[,id_by])))
   colnames(gene_markers_fractionExpression) <- c(seq(1:num_cluster))
   rownames(gene_markers_fractionExpression) <- rownames(fData(marker_input))
   gene_markers_meandiff <- matrix(ncol = ncol(gene_markers_fractionExpression), nrow=nrow(gene_markers_fractionExpression))
@@ -68,9 +77,9 @@ id_markers <- function(input, print_progress = TRUE){
   }
   mean_exp <- c()
   mean_data <- c()
-  for(n in 1:length(unique(pData(marker_input)[,"Cluster"]))){
-    cluster <- (paste0("Cluster", n))
-    index <- which(pData(marker_input)[,"Cluster"] == cluster)
+  for(n in 1:length(cols)){
+    cluster <- cols[n]
+    index <- which(pData(marker_input)[,id_by] == cluster)
     cells <- rownames(pData(marker_input))[index]
     tmp_expr_matrix <- exprs(marker_input)[,cells]
     for(i in 1:nrow(tmp_expr_matrix)){
@@ -78,7 +87,7 @@ id_markers <- function(input, print_progress = TRUE){
       mean_data <- c(mean_data, mean_exp)
     }
   }
-  gene_means <- matrix(data = mean_data, nrow = nrow(fData(marker_input)), ncol = length(unique(pData(marker_input)[,"Cluster"])))
+  gene_means <- matrix(data = mean_data, nrow = nrow(fData(marker_input)), ncol = length(unique(pData(marker_input)[,id_by])))
   colnames(gene_means) <- c(seq(1:num_cluster))
   rownames(gene_means) <- rownames(fData(marker_input))
   gene_markers_foldchange <- matrix(ncol = ncol(gene_means), nrow=nrow(gene_means))
@@ -104,7 +113,8 @@ id_markers <- function(input, print_progress = TRUE){
     print("Merging Lists")
   }
   marker_genes <- list()
-  for(i in 1:ncol(cluster_markers_FC)){
+  for(i in 1:length(cols)){
+    cluster <- cols[i]
     cm <- cluster_markers[,i]
     cf <- cluster_markers_FC[,i]
     cm <- as.data.frame(cm)
@@ -122,11 +132,8 @@ id_markers <- function(input, print_progress = TRUE){
     cluster_marker_rank <- rownames(final)
     val <- match(rownames(fData(input)), cluster_marker_rank)
     fData(marker_input)$name <- val
-    colnames(fData(marker_input))[grep("name", colnames(fData(marker_input)))] <- paste0("Cluster",i,"_marker_score")
+    colnames(fData(marker_input))[grep("name", colnames(fData(marker_input)))] <- paste0(cluster,"_marker_score_", id_by) #HERE BE THE BUG!!!
   }
   fData(marker_input) <- fData(marker_input)[,-grep("tmp", colnames(fData(marker_input)))]
   return(marker_input)
 }
-
-
-

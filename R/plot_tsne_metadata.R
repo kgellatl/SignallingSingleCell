@@ -16,6 +16,7 @@
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
 plot_tsne_metadata <- function(input, title = "", color_by, facet_by = "NA", ncol = "NA", size = 1.5, colors = "NA", theme = "classic"){
+
   tmp <- pData(input)
   tmp <- tmp[sample(nrow(tmp)),]
   g <- ggplot(tmp)
@@ -33,20 +34,20 @@ plot_tsne_metadata <- function(input, title = "", color_by, facet_by = "NA", nco
   }
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
-  if(facet_by != "NA"){
+  if(all(is.na(facet_by)) == FALSE){
     tmp <- pData(input)[c("x", "y")]
     g <- g + geom_point(data = tmp, aes(x=x, y=y), shape = 20, col = "gray", size = size)
   }
-  if(typeof(pData(input)[,color_by]) == "double" | typeof(pData(input)[,color_by]) == "integer" ){
+  if(class(pData(input)[,color_by]) == "double" | class(pData(input)[,color_by]) == "integer" ){
     g <- g +  geom_point(aes_string(x = "x", y = "y", col = color_by), shape = 20, size = size)
     g <- g +  scale_color_gradientn(colours=c('blue', 'red', 'yellow'))
   } else {
     g <- g +  geom_point(aes_string(x = "x", y = "y", col = color_by), shape = 20, size = size)
-    if(colors != "NA"){
-      g <- g + scale_color_gradientn(values = c(colors))
+    if(all(is.na(colors)) == FALSE){
+      g <- g + scale_color_manual(values = c(colors))
     }
   }
-  if(facet_by != "NA"){
+  if(all(is.na(facet_by)) == FALSE){
     if(ncol != "NA"){
       g <- g +  facet_wrap(facets = reformulate(facet_by), ncol = ncol)
     } else {
