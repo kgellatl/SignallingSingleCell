@@ -10,7 +10,7 @@
 #' @examples
 #' marker_list <- return_markers(input = ex_sc, num_markers = 50)
 
-return_markers <- function(input, num_markers){
+return_markers <- function(input, num_markers = 10){
   dat <- fData(input)
   Clusters <- sort(unique(pData(input)$Cluster))
   markers <- vector(mode = "list", length = length(Clusters))
