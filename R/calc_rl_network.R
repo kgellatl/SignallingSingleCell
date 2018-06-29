@@ -13,7 +13,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion = TRUE, print_progress = TRUE){
+calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion = FALSE, print_progress = TRUE){
   ##### Get all Receptor Ligand Pairs expressed in the data into long format
   if(print_progress == TRUE){
     print("Getting all RL Pairs")
@@ -92,7 +92,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     full_network <- full_network[,c(1,5,2,4,3)]
     colnames(full_network) <- c(nodes, "Ligand", nodes, "Receptor", group_by)
   } else {
-    full_network <- full_network[,c(1,3,2,4)]
+    full_network <- full_network[,c(1,4,2,3)]
     colnames(full_network) <- c(nodes, "Ligand", nodes, "Receptor")
   }
   full_network[,1] <- as.character(full_network[,1])
@@ -105,17 +105,15 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   ##### Write in the expression values
   if(print_progress == TRUE){
     print("Calculating Interactions")
-  }
-  full_network$Ligand_expression <- 0
-  full_network$Receptor_expression <- 0
-  remove <- c()
-  if(print_progress == TRUE){
     alerts <- c()
     for (i in 1:20) {
       printi <- floor(nrow(full_network)/20)*i
       alerts <- c(alerts, printi)
     }
   }
+  full_network$Ligand_expression <- 0
+  full_network$Receptor_expression <- 0
+  remove <- c()
   for (i in 1:nrow(full_network)) {
     if(print_progress == TRUE){
       if(i %in% alerts){
@@ -168,7 +166,197 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     dat <- matrix(c(vec1, vec2), ncol = 2)
   }
   dat <- as.data.frame(dat)
+  ##### Number of connections #####
   summary <- plyr::count(dat)
+  summary[,1:2] <- data.frame(lapply(summary[,1:2], as.character), stringsAsFactors=FALSE)
+  ##### Number of connections divided by num genes #####
+  if(group_by != FALSE){
+    tmp_dat <- matrix(c(as.character(summary$V3), as.character(summary$V1)), ncol = 2)
+    tmp_dat <- as.data.frame(tmp_dat)
+    tmp_dat <- data.frame(lapply(tmp_dat, as.character), stringsAsFactors=FALSE)
+    grp <- c()
+    for (i in 1:nrow(tmp_dat)) {
+      topaste <- tmp_dat[i,1:2]
+      topaste <- as.character(as.vector(topaste))
+      int <- paste0(topaste, collapse = "_")
+      grp <- c(grp, int)
+    }
+    summary$freq_frac <- NA
+    for (i in 1:length(grp)) {
+      int <- grp[i]
+      int <- colnames(fData(input))[grep(int, colnames(fData(input)))]
+      int <- unlist(strsplit(int, "_"))
+      pos <- match("genes", int)
+      frac <- summary$freq[i]/as.numeric(int[pos+1])
+      summary$freq_frac[i] <- frac
+    }
+  } else {
+    tmp_dat <- data.frame(lapply(summary, as.character), stringsAsFactors=FALSE)
+    grp <- unique(tmp_dat$V1)
+    summary$freq_frac <- NA
+    for (i in 1:length(grp)) {
+      int <- grp[i]
+      int <- colnames(fData(input))[grep(int, colnames(fData(input)))]
+      int <- unlist(strsplit(int, "_"))
+      pos <- match("genes", int)
+      frac <- summary$freq[grep(grp[i], summary$V1)]/as.numeric(int[pos+1])
+      summary$freq_frac[grep(grp[i], summary$V1)] <- frac
+    }
+  }
+  ##### Number of connections divided by total outgoing connections #####
+  summary$prop_freq <- NA
+  if(group_by != FALSE){
+    nodes <- unique(summary$V1)
+    conds <- unique(summary$V3)
+    mat <- expand.grid(nodes, conds)
+    for (i in 1:nrow(mat)) {
+      int <- mat[i,]
+      ind1 <- grep(int$Var1, summary$V1)
+      ind2 <- grep(int$Var2, summary$V3)
+      pos <- intersect(ind1, ind2)
+      tot <- sum(summary[pos,"freq"])
+      prop <- summary[pos,"freq"]/tot
+      summary[pos,"prop_freq"] <- prop
+    }
+  } else {
+    tmp_dat <- data.frame(lapply(summary, as.character), stringsAsFactors=FALSE)
+    grp <- unique(tmp_dat$V1)
+    summary$prop_freq <- NA
+    for (i in 1:length(grp)) {
+      total <- sum(summary[grep(grp[i], summary$V1),"freq"])
+      summary[grep(grp[i], summary$V1),"prop_freq"] <- summary[grep(grp[i], summary$V1),"freq"]/total
+    }
+  }
+  ##### Rank Connections by L * R coarse (within cell type A to anyone!) #####
+  full_network$log10_Connection <- log10(full_network$Connection)
+  full_network$Connection_rank_coarse <- NA
+  full_network$Connection_Z_coarse <- NA
+  if(print_progress == TRUE){
+    print("Calculating Coarse Ranks")
+  }
+  if(group_by != FALSE){
+    full_network$Connection_rank_coarse_grouped <- NA
+    full_network$Connection_Z_coarse_grouped <- NA
+    tmpdat <- expand.grid(unique(summary$V1), unique(summary$V3))
+    for (i in 1:nrow(tmpdat)) {
+      int <- tmpdat[i,]
+      ind1 <- grep(int$Var1, full_network[,1])
+      ind2 <- grep(int$Var2, full_network[,5])
+      ind <- intersect(ind1,ind2)
+      vals <- full_network[ind,"log10_Connection"]
+      zval <- scale(vals)
+      vals <- rank(-vals)
+      full_network[ind,"Connection_rank_coarse_grouped"] <- vals
+      full_network[ind,"Connection_Z_coarse_grouped"] <- zval
+
+    }
+  }
+  tmpdat <- unique(summary$V1)
+  for (i in 1:length(tmpdat)) {
+    int <- tmpdat[i]
+    ind1 <- grep(int, full_network[,1])
+    vals <- full_network[ind1,"log10_Connection"]
+    zval <- scale(vals)
+    vals <- rank(-vals)
+    full_network[ind1,"Connection_rank_coarse"] <- vals
+    full_network[ind1,"Connection_Z_coarse"] <- zval
+  }
+  ##### Rank Connections by L * R fine (within cell type A to cell type B!) #####
+  full_network$Connection_rank_fine <- NA
+  full_network$Connection_Z_fine <- NA
+  if(print_progress == TRUE){
+    print("Calculating Fine Ranks")
+  }
+  tmp_dat <- data.frame(lapply(summary, as.character), stringsAsFactors=FALSE)
+  if(group_by != FALSE){
+    full_network$Connection_rank_fine_grouped <- NA
+    full_network$Connection_Z_fine_grouped <- NA
+    for (i in 1:nrow(tmp_dat)) {
+      int <- tmp_dat[i,]
+      ind1 <- grep(int$V1, full_network[,1])
+      ind2 <- grep(int$V2, full_network[,3])
+      ind3 <- grep(int$V3, full_network[,5])
+      ind <- intersect(intersect(ind1,ind2),ind3)
+      vals <- full_network[ind,"log10_Connection"]
+      vals <- full_network[ind,"log10_Connection"]
+      zval <- scale(vals)
+      vals <- rank(-vals)
+      full_network[ind,"Connection_rank_fine_grouped"] <- vals
+      full_network[ind,"Connection_Z_fine_grouped"] <- zval
+    }
+  }
+  for (i in 1:nrow(tmp_dat)) {
+    int <- tmp_dat[i,]
+    ind1 <- grep(int$V1, full_network[,1])
+    ind2 <- grep(int$V2, full_network[,3])
+    ind <- intersect(ind1,ind2)
+    vals <- full_network[ind,"log10_Connection"]
+    zval <- scale(vals)
+    vals <- rank(-vals)
+    full_network[ind,"Connection_rank_fine"] <- vals
+    full_network[ind,"Connection_Z_fine"] <- zval
+  }
+  ##### Rank Connections by Zscore #####
+  full_network$Zscores_genes <- NA
+  if(print_progress == TRUE){
+    print("Calculating Z Scores Grouped")
+    alerts <- c()
+    for (i in 1:20) {
+      printi <- floor(nrow(all_pairs_long)/20)*i
+      alerts <- c(alerts, printi)
+    }
+  }
+  tmp_dat <- data.frame(lapply(all_pairs_long, as.character), stringsAsFactors=FALSE)
+  if(group_by != FALSE){
+    full_network$Zscores_genes_grouped <- NA
+    for (i in 1:nrow(tmp_dat)) {
+      if(print_progress == TRUE){
+        if(i %in% alerts){
+          ind <- match(i, alerts)
+          print(paste0(ind*5, "% Complete"))
+        }
+      }
+      int <- tmp_dat[i,]
+      ind1 <- grep(int$receptor, full_network$Receptor)
+      ind2 <- grep(int$ligand, full_network$Ligand)
+      ind <- intersect(ind1, ind2)
+      tmp <- full_network[ind,]
+      vals <- scale(tmp$log10_Connection)
+      full_network[ind,"Zscores_genes_grouped"] <- vals
+      for (j in 1:length(breaks)) {
+        int <- breaks[j]
+        ind3 <- grep(int, tmp[,group_by])
+        tmp2 <- tmp[ind3,]
+        vals <- scale(tmp2$log10_Connection)
+        ind4 <- match(rownames(tmp2), rownames(full_network))
+        full_network[ind4,"Zscores_genes_grouped"] <- vals
+      }
+    }
+  }
+  if(print_progress == TRUE){
+    print("Calculating Z Scores")
+  }
+  for (i in 1:nrow(tmp_dat)) {
+    if(print_progress == TRUE){
+      if(i %in% alerts){
+        ind <- match(i, alerts)
+        print(paste0(ind*5, "% Complete"))
+      }
+    }
+    int <- tmp_dat[i,]
+    ind1 <- grep(int$receptor, full_network$Receptor)
+    ind2 <- grep(int$ligand, full_network$Ligand)
+    ind <- intersect(ind1, ind2)
+    tmp <- full_network[ind,]
+    vals <- scale(tmp$log10_Connection)
+    full_network[ind,"Zscores_genes"] <- vals
+  }
+  #####
+  if(group_by == FALSE){
+    colnames(summary) <- c("Lig_produce", "Rec_receive", "num_connections", "fraction_connections", "proportion_connections")
+  } else {
+    colnames(summary) <- c("Lig_produce", "Rec_receive", group_by, "num_connections", "fraction_connections", "proportion_connections")
+  }
   #####
   results <- vector(mode = "list", 2)
   results[[1]] <- summary
