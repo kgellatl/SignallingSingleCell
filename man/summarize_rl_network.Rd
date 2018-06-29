@@ -4,7 +4,7 @@
 \alias{summarize_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-summarize_rl_network(input, summarize_by, nodes, cutoff, direction)
+summarize_rl_network(input, summarize_by, cutoff, direction)
 }
 \arguments{
 \item{input}{the output of calc_rl_network}
