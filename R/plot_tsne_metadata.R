@@ -15,11 +15,16 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_tsne_metadata <- function(input, title = "", color_by, facet_by = "NA", ncol = "NA", size = 1.5, colors = "NA"){
+plot_tsne_metadata <- function(input, title = "", color_by, facet_by = "NA", ncol = "NA", size = 1.5, colors = "NA", theme = "classic"){
   tmp <- pData(input)
   tmp <- tmp[sample(nrow(tmp)),]
   g <- ggplot(tmp)
-  g <- g + theme_classic()
+  if(theme == "bw") {
+    g <- g + theme_bw();
+  } else {
+    g <- g + theme_classic()
+  }
+
   if(title == ""){
     title <- color_by
     g <- g +  labs(title= title, x = "tSNE[1]", y = "tSNE[2]")
