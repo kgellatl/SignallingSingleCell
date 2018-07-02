@@ -6,16 +6,16 @@
 #' @param group_by the pData columns calc_rl_network was calculated on to split the networks
 #' @param edge_weight the network edge_weight types. See column names of calc_rl_network$Summary
 #' @param rank whether or not to rank the edges for contrast on arrow sizes
-#' @param threshold a % change (as decimal ie .25 for 25%) above / below which to color, otherwise gray, valid only for grouped data
-#' @param reference the reference on which to calculate % changes
-#' into independent networks
+#' @param threshold the percentage value as a decimal
+#' @param reference the reference for grouped data
 #' @export
 #' @details
 #' This will use the calc_agg_bulk results to ID networks
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-plot_rl_summary <- function(input, group_by = FALSE, edge_weight = "fraction_connections", rank = TRUE, threshold = NA, reference = NA){
+plot_rl_summary <- function(input, group_by = FALSE, edge_weight = "fraction_connections",
+                            rank = TRUE, threshold = NA, reference = NA){
   ##### Colors to match ggplot #####
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
@@ -122,7 +122,6 @@ plot_rl_summary <- function(input, group_by = FALSE, edge_weight = "fraction_con
             if(int2 > (1+threshold) || int2 < (1-threshold)){
               edge.col2[row] <- edge.col[row]
             } else {
-              print(vals2)
               edge.col2[row] <- "gray"
             }
           }
@@ -130,7 +129,6 @@ plot_rl_summary <- function(input, group_by = FALSE, edge_weight = "fraction_con
       }
       edge.col <- edge.col2
     }
-
     ##### Size Edge and Arrows #####
     if(rank == TRUE){
       E(net_graph)$width <- rank(as.numeric(net_dat_final[,edge_weight]))

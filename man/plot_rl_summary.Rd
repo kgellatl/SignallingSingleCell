@@ -17,10 +17,9 @@ plot_rl_summary(input, group_by = FALSE,
 
 \item{rank}{whether or not to rank the edges for contrast on arrow sizes}
 
-\item{threshold}{a % change (as decimal ie .25 for 25%) above / below which to color, otherwise gray, valid only for grouped data}
+\item{threshold}{the percentage value as a decimal}
 
-\item{reference}{the reference on which to calculate % changes
-into independent networks}
+\item{reference}{the reference for grouped data}
 }
 \description{
 This function will map all RL interactions
