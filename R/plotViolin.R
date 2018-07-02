@@ -72,7 +72,7 @@ plotViolin = function(gene,
   if (!is.null(subsetName) & !is.na(subsetName) ) {
     title = paste(subsetName, geneName, sep=" - ");
   }
-  ggplot(merged, aes_string(sampleID, geneName, colour = colourID)) +
+  p = ggplot(merged, aes_string(sampleID, geneName, colour = colourID)) +
 
 
     facet_wrap(reformulate(facetID), scales = facet_scale) +
@@ -83,7 +83,7 @@ plotViolin = function(gene,
     theme_bw() +
     scale_colour_manual(values=cols) +
         ggtitle(title)
-  
+
   if (mean_text == T) {
     p = p + stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.data = meanSC, fun.y = "mean", colour = "black", geom = "text", size=3)
   }
