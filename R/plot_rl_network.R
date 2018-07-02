@@ -143,47 +143,48 @@ plot_rl_network <- function(input, group_by = FALSE, layout = "nicely", write_in
   dev.off()
 
   #####
+  #####
+
+  if(write_interactive == TRUE){
+    V(net_graph)$name <- name_backup
+    nodes <- igraph::as_data_frame(net_graph, what = "vertices")
+    links <- igraph::as_data_frame(net_graph, what = "edges")
+    links$arrows <- "to"
+
+    colnames(nodes)[1] <- "id"
+    nodes <- nodes[,c("id", "color")]
+
+    nodes$label <- V(net_graph)$name
+    links$width <- E(net_graph)$width
+
+    cfg <- cluster_edge_betweenness(as.undirected(net_graph))
+    nodes$community <- cfg$membership
+
+    nodes$nodes <- V(net_graph)$group
+
+    if(group_by != FALSE){
+      nodes$condition <- V(net_graph)$skin
+    }
+
+    vit_net <- visNetwork::visNetwork(nodes, links, width="100%", height="1000px")
+
+    vit_net <- visOptions(vit_net, highlightNearest = TRUE, selectedBy = "nodes")
+
+    if(interactive_groups == "condition"){
+      vit_net <- visOptions(vit_net, highlightNearest = TRUE, selectedBy = "condition")
+    }
+
+    if(interactive_groups == "community"){
+      vit_net <- visOptions(vit_net, highlightNearest = TRUE, selectedBy = "community")
+    }
+
+    visNetwork::visSave(vit_net, file="Interactive_Network.html")
+  }
+
 
 }
 
 
-#####
-
-if(write_interactive == TRUE){
-  V(net_graph)$name <- name_backup
-  nodes <- igraph::as_data_frame(net_graph, what = "vertices")
-  links <- igraph::as_data_frame(net_graph, what = "edges")
-  links$arrows <- "to"
-
-  colnames(nodes)[1] <- "id"
-  nodes <- nodes[,c("id", "color")]
-
-  nodes$label <- V(net_graph)$name
-  links$width <- E(net_graph)$width
-
-  cfg <- cluster_edge_betweenness(as.undirected(net_graph))
-  nodes$community <- cfg$membership
-
-  nodes$nodes <- V(net_graph)$group
-
-  if(group_by != FALSE){
-    nodes$condition <- V(net_graph)$skin
-  }
-
-  vit_net <- visNetwork::visNetwork(nodes, links, width="100%", height="1000px")
-
-  vit_net <- visOptions(vit_net, highlightNearest = TRUE, selectedBy = "nodes")
-
-  if(interactive_groups == "condition"){
-    vit_net <- visOptions(vit_net, highlightNearest = TRUE, selectedBy = "condition")
-  }
-
-  if(interactive_groups == "community"){
-    vit_net <- visOptions(vit_net, highlightNearest = TRUE, selectedBy = "community")
-  }
-
-  visNetwork::visSave(vit_net, file="Interactive_Network.html")
-}
 
 
 
