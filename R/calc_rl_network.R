@@ -152,7 +152,8 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   full_network <- full_network[-remove,]
   full_network$Ligand_expression <- full_network$Ligand_expression*1E6
   full_network$Receptor_expression <- full_network$Receptor_expression*1E6
-  full_network$Connection <- full_network$Ligand_expression*full_network$Receptor_expression
+  full_network$Connection_product <- full_network$Ligand_expression*full_network$Receptor_expression
+  full_network$Connection_ratio <- full_network$Ligand_expression/full_network$Receptor_expression
   ##### Summarize Interactions #####
   if(print_progress == TRUE){
     print("Summarizing Interactions")
@@ -228,7 +229,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     }
   }
   ##### Rank Connections by L * R coarse (within cell type A to anyone!) #####
-  full_network$log10_Connection <- log10(full_network$Connection)
+  full_network$log10_Connection_product <- log10(full_network$Connection_product)
   full_network$Connection_rank_coarse <- NA
   full_network$Connection_Z_coarse <- NA
   if(print_progress == TRUE){
@@ -243,7 +244,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       ind1 <- grep(int$Var1, full_network[,1])
       ind2 <- grep(int$Var2, full_network[,5])
       ind <- intersect(ind1,ind2)
-      vals <- full_network[ind,"log10_Connection"]
+      vals <- full_network[ind,"log10_Connection_product"]
       zval <- scale(vals)
       vals <- rank(-vals)
       full_network[ind,"Connection_rank_coarse_grouped"] <- vals
@@ -255,7 +256,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   for (i in 1:length(tmpdat)) {
     int <- tmpdat[i]
     ind1 <- grep(int, full_network[,1])
-    vals <- full_network[ind1,"log10_Connection"]
+    vals <- full_network[ind1,"log10_Connection_product"]
     zval <- scale(vals)
     vals <- rank(-vals)
     full_network[ind1,"Connection_rank_coarse"] <- vals
@@ -277,8 +278,8 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       ind2 <- grep(int$V2, full_network[,3])
       ind3 <- grep(int$V3, full_network[,5])
       ind <- intersect(intersect(ind1,ind2),ind3)
-      vals <- full_network[ind,"log10_Connection"]
-      vals <- full_network[ind,"log10_Connection"]
+      vals <- full_network[ind,"log10_Connection_product"]
+      vals <- full_network[ind,"log10_Connection_product"]
       zval <- scale(vals)
       vals <- rank(-vals)
       full_network[ind,"Connection_rank_fine_grouped"] <- vals
@@ -290,7 +291,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     ind1 <- grep(int$V1, full_network[,1])
     ind2 <- grep(int$V2, full_network[,3])
     ind <- intersect(ind1,ind2)
-    vals <- full_network[ind,"log10_Connection"]
+    vals <- full_network[ind,"log10_Connection_product"]
     zval <- scale(vals)
     vals <- rank(-vals)
     full_network[ind,"Connection_rank_fine"] <- vals
@@ -321,13 +322,13 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       ind2 <- grep(int$ligand, full_network$Ligand)
       ind <- intersect(ind1, ind2)
       tmp <- full_network[ind,]
-      vals <- scale(tmp$log10_Connection)
+      vals <- scale(tmp$log10_Connection_product)
       full_network[ind,"Zscores_genes_grouped"] <- vals
       for (j in 1:length(breaks)) {
         int <- breaks[j]
         ind3 <- grep(int, tmp[,group_by])
         tmp2 <- tmp[ind3,]
-        vals <- scale(tmp2$log10_Connection)
+        vals <- scale(tmp2$log10_Connection_product)
         ind4 <- match(rownames(tmp2), rownames(full_network))
         full_network[ind4,"Zscores_genes_grouped"] <- vals
       }
@@ -348,7 +349,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     ind2 <- grep(int$ligand, full_network$Ligand)
     ind <- intersect(ind1, ind2)
     tmp <- full_network[ind,]
-    vals <- scale(tmp$log10_Connection)
+    vals <- scale(tmp$log10_Connection_product)
     full_network[ind,"Zscores_genes"] <- vals
   }
   #####
