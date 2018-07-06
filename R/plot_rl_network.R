@@ -22,7 +22,7 @@
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
 plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,  layout = "nicely",
-                            write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, textsize = 0.5, layout = "nicely"){
+                            write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, textsize = 0.5){
   ##### Colors to match ggplot #####
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
