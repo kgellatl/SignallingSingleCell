@@ -230,6 +230,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   }
   ##### Rank Connections by L * R coarse (within cell type A to anyone!) #####
   full_network$log10_Connection_product <- log10(full_network$Connection_product)
+  full_network$log10_Connection_ratio <- log10(full_network$Connection_ratio)
   full_network$Connection_rank_coarse <- NA
   full_network$Connection_Z_coarse <- NA
   if(print_progress == TRUE){
