@@ -4,7 +4,8 @@
 \alias{subset_genes}
 \title{Subset Genes}
 \usage{
-subset_genes(input, method, threshold, minCells, nComp, cutoff)
+subset_genes(input, method, threshold = 1, minCells = 10, nComp = 10,
+  cutoff = 0.85)
 }
 \arguments{
 \item{input}{the input ex_sc.}
