@@ -4,17 +4,35 @@
 \alias{plot_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-plot_rl_network(input, group_by = FALSE, mode = "Summary",
-  edge_weight = "num_connections", rank = TRUE)
+plot_rl_network(input, input_full, group_by = FALSE, comparitive = FALSE,
+  from = FALSE, to = FALSE, value = FALSE, layout = "nicely",
+  write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3,
+  textsize = 0.5)
 }
 \arguments{
-\item{input}{the input full_network from calc_rc_network}
+\item{input}{the input networked (usually filtered)}
+
+\item{input_full}{the input full network}
 
 \item{group_by}{the pData columns calc_rl_network was calculated on to split the networks}
 
-\item{mode}{the network plot type}
+\item{comparitive}{If true will look at connections across group_by and color edges by their change}
 
-\item{edge_weight}{the network edge_weight types. See column names of calc_rl_network$Summary
+\item{from}{the comparitive reference}
+
+\item{to}{the condition to compare to reference}
+
+\item{value}{the column of the full network to calculate foldChange on}
+
+\item{layout}{nicely, kk, circle}
+
+\item{write_interactive}{whether or not to write an interactive visNetwork html object}
+
+\item{interactive_groups}{the dropdown menu for selection nodes, either "nodes", "group_by", or "community"}
+
+\item{nodesize}{The size of nodes}
+
+\item{textsize}{The size of text
 into independent networks}
 }
 \description{

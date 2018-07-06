@@ -5,7 +5,7 @@
 \title{tSNE Plot on metadata}
 \usage{
 plot_tsne_metadata(input, title = "", color_by, facet_by = NA,
-  ncol = "NA", size = 1.5, colors = NA)
+  ncol = "NA", size = 1.5, colors = NA, theme = "classic")
 }
 \arguments{
 \item{input}{the input ex_sc.}

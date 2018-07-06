@@ -20,11 +20,13 @@
 #' @examples
 #' gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "PCA", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.75)
 
-subset_genes <- function(input, method, threshold, minCells, nComp, cutoff){
+subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85){
   input <- exprs(input)
-
   gCount <- apply(input,1,function(x) length(which(x>=threshold))) # a bit wasteful if threshold = 0, but alas.
   gene_subset <- rownames(input[(which(gCount >= minCells)),])
+  if(method =="Expression"){
+    gene_subset <- gene_subset
+  }
   if(method == "CV"){
     g_exp <- log2(input[gene_subset,]+2)-1
     gsd <- apply(g_exp,1,sd)
