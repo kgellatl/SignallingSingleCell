@@ -4,19 +4,19 @@
 #'
 #' @param input Input expression set
 #' @param groups an integer vector with the group for each cell
-#' @param batch a vector with the batch for each cell (if you don't need batches create a vector with the same id for all cells)
+#' @param batch a vector with the batch for each cell, if you don't need batches create a vector with the same id for all cells
 #' @param sizefactor a pData column containing the scran reported size factor for each cell
 #' @param lib_size a pData column containing the library size for each cell
-#' @param minCells minimum cell fraction the genes should be expressed in to be tested for DE (default = 10%)
-#' @param pVal pvalue cutoff for reported results (default=1, reports all results)
-#' @param contrast a list of contrasts to be used for the DE analysis (default is a two-class comparison, with the second class as the comparison class)
+#' @param minCells minimum cell fraction the genes should be expressed in to be tested for DE
+#' @param pVal pvalue cutoff for reported results, by default reports all results
+#' @param contrast a list of contrasts to be used for the DE analysis, default is a two-class comparison, with the second class as the comparison class
 #' @export
 #' @details
 #' Utilize information stored in pData to control the DE performed
 #' The result is a list with the contrast results, access each element for the DE table
 #' @examples
 #' myDEresults = edgeRDE(input, groups = mygroup, batch = beads, sizefactor = "sizefactor", lib_size = "lib_size")
-#' ###
+###
 edgeRDE <- function(input,
                     groups,
                     batch,

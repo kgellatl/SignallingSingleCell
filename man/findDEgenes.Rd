@@ -2,7 +2,7 @@
 % Please edit documentation in R/findDEgenes.R
 \name{findDEgenes}
 \alias{findDEgenes}
-\title{This will perform differential expression (DE) using edgeR for pairwise comparisons}
+\title{This will perform differential expression using edgeR for pairwise comparisons}
 \usage{
 findDEgenes(input, pd = pData(input), DEgroup, contrastID, sizefactor,
   lib_size, facet_by, minCells = 0.1, batchID = NULL,
@@ -12,11 +12,11 @@ findDEgenes(input, pd = pData(input), DEgroup, contrastID, sizefactor,
 \arguments{
 \item{input}{Input expression set}
 
-\item{pd}{pData (optional) by default set to pData(input)}
+\item{pd}{pData, optional, by default set to pData of input}
 
 \item{DEgroup}{a pData variable}
 
-\item{contrastID}{the pData group to set as reference (example = "WT")}
+\item{contrastID}{the pData group to set as reference}
 
 \item{sizefactor}{a pData column containing the scran reported size factor for each cell}
 
@@ -24,20 +24,20 @@ findDEgenes(input, pd = pData(input), DEgroup, contrastID, sizefactor,
 
 \item{facet_by}{a pData variable to iterate through and perform DE for a condition within each group}
 
-\item{minCells}{minimum cell fraction the genes should be expressed in to be tested for DE (default = 10%)}
+\item{minCells}{minimum cell fraction the genes should be expressed in to be tested for DE}
 
 \item{batchID}{a pData variable to use for model accounting for batch effects}
 
-\item{outdir}{an output directory (default="DEresults/")}
+\item{outdir}{an output directory}
 
-\item{outsuffix}{an output file suffix (default="DEresults.tsv")}
+\item{outsuffix}{an output file suffix}
 
-\item{pVal}{pvalue cutoff for reported results (default=1, reports all results)}
+\item{pVal}{pvalue cutoff for reported results, by default reports all results}
 
-\item{contrast}{a list of contrasts to be used for the DE analysis (default is a two-class comparison, with the second class as the comparison class)}
+\item{contrast}{a list of contrasts to be used for the DE analysis, default is a two-class comparison, with the second class as the comparison class}
 }
 \description{
-This will perform differential expression (DE) using edgeR for pairwise comparisons
+This will perform differential expression using edgeR for pairwise comparisons
 }
 \details{
 Utilize information stored in pData to control the DE performed

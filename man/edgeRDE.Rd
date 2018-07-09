@@ -12,17 +12,17 @@ edgeRDE(input, groups, batch, sizefactor, lib_size, minCells = 0.1,
 
 \item{groups}{an integer vector with the group for each cell}
 
-\item{batch}{a vector with the batch for each cell (if you don't need batches create a vector with the same id for all cells)}
+\item{batch}{a vector with the batch for each cell, if you don't need batches create a vector with the same id for all cells}
 
 \item{sizefactor}{a pData column containing the scran reported size factor for each cell}
 
 \item{lib_size}{a pData column containing the library size for each cell}
 
-\item{minCells}{minimum cell fraction the genes should be expressed in to be tested for DE (default = 10%)}
+\item{minCells}{minimum cell fraction the genes should be expressed in to be tested for DE}
 
-\item{pVal}{pvalue cutoff for reported results (default=1, reports all results)}
+\item{pVal}{pvalue cutoff for reported results, by default reports all results}
 
-\item{contrast}{a list of contrasts to be used for the DE analysis (default is a two-class comparison, with the second class as the comparison class)}
+\item{contrast}{a list of contrasts to be used for the DE analysis, default is a two-class comparison, with the second class as the comparison class}
 }
 \description{
 This will run edgeR to find differentially expressed genes. Use the wrapping functions findDEgenes or findDEmarkers to use pData columns and get the proper input
@@ -33,5 +33,4 @@ The result is a list with the contrast results, access each element for the DE t
 }
 \examples{
 myDEresults = edgeRDE(input, groups = mygroup, batch = beads, sizefactor = "sizefactor", lib_size = "lib_size")
-###
 }

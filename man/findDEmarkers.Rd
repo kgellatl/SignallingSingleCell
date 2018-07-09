@@ -2,7 +2,7 @@
 % Please edit documentation in R/findDEmarkers.R
 \name{findDEmarkers}
 \alias{findDEmarkers}
-\title{This will perform differential expression (DE) using edgeR to find markers for each cluster or group compared to all others}
+\title{This will perform differential expression using edgeR to find markers for each cluster or group compared to all others}
 \usage{
 findDEmarkers(input, pd = pData(input), DEgroup, batchID, sizefactor,
   lib_size, outdir = "DEmarkers/", outsuffix = "DEmarkers.tsv",
@@ -11,7 +11,7 @@ findDEmarkers(input, pd = pData(input), DEgroup, batchID, sizefactor,
 \arguments{
 \item{input}{Input expression set}
 
-\item{pd}{pData (optional) by default set to pData(input)}
+\item{pd}{pData, optional, by default set to pData of input}
 
 \item{DEgroup}{a pData variable}
 
@@ -21,23 +21,22 @@ findDEmarkers(input, pd = pData(input), DEgroup, batchID, sizefactor,
 
 \item{lib_size}{a pData column containing the library size for each cell}
 
-\item{outdir}{an output directory (default="DEmarkers/")}
+\item{outdir}{an output directory}
 
-\item{outsuffix}{an output file suffix (default="DEmarkers.tsv")}
+\item{outsuffix}{an output file suffix}
 
-\item{minCells}{minimum cell fraction the genes should be expressed in to be tested for DE (default = 10%)}
+\item{minCells}{minimum cell fraction the genes should be expressed in to be tested for DE}
 
-\item{pVal}{pvalue cutoff for reported results (default=1, reports all results)}
+\item{pVal}{pvalue cutoff for reported results, by default reports all results}
 
-\item{contrast}{a list of contrasts to be used for the DE analysis (default is a two-class comparison, with the second class as the comparison class)}
+\item{contrast}{a list of contrasts to be used for the DE analysis default is a two-class comparison, with the second class as the comparison class}
 }
 \description{
-This will perform differential expression (DE) using edgeR to find markers for each cluster or group compared to all others
+This will perform differential expression using edgeR to find markers for each cluster or group compared to all others
 }
 \details{
 Utilize information stored in pData to control the DE performed
 }
 \examples{
 findDEmarkers(input, pd = selected_table, DEgroup = "cluster", batchID = "beads", sizefactor="sizefactor", lib_size="lib_size")
-###
 }
