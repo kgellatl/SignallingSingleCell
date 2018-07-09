@@ -43,6 +43,6 @@ findDEmarkers = function(input,
     tab = edgeRDE(z, group, batch, sizefactor, lib_size, minCells)
     DEtableclsall = tab[['contrast_1']]
     outfile = paste(name, outsuffix, sep = "_")
-    write.table(DEtablecntr, paste(outdir, outfile, sep = ""), sep = "\t")
+    write.table(DEtableclsall, paste(outdir, outfile, sep = ""), sep = "\t")
   }
 }
