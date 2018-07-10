@@ -19,7 +19,8 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", color_pal = viridis::inferno(256), text_angle = 60, group_names = TRUE, gene_names = TRUE, facet_by = FALSE){
+plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", color_pal = viridis::inferno(256),
+                         text_angle = 60, group_names = TRUE, gene_names = TRUE, facet_by = FALSE, ncol = 3){
   if(type == "bulk"){
     heat_dat <- fData(input)[,grep("bulk", colnames(fData(input)))]
     heat_dat <- heat_dat[genes,]
@@ -59,12 +60,22 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   if(type == "single_cell"){
     heat_dat[which(heat_dat > 5)] <- 5
   }
-  if(facet_by != FALSE){
-   colnames(heat_dat) <- pData(input)[,facet_by]
-  }
+
   heat_dat <- as.data.frame(heat_dat)
+  colnames(heat_dat) <- sub("_num_.*", "", colnames(heat_dat))
   heat_dat_lng <- tidyr::gather(heat_dat, key = "group", "Expression", 1:ncol(heat_dat), factor_key = "TRUE")
   heat_dat_lng$genes <- rep(factor(rownames(heat_dat), levels = rownames(heat_dat)), ncol(heat_dat))
+  if(facet_by != FALSE){
+    facs <- unique(pData(input)[,facet_by])
+    heat_dat_lng$facet  <- NA
+    for (i in 1:length(facs)) {
+      int <- facs[i]
+      ind <- grep(paste0(int, "_"), heat_dat_lng$group)
+      heat_dat_lng$facet[ind] <- int
+    }
+    heat_dat_lng$facet <- factor(heat_dat_lng$facet)
+    colnames(heat_dat_lng)[ncol(heat_dat_lng)] <- facet_by
+  }
   g <- ggplot(heat_dat_lng, aes(group, genes))
   g <- g + geom_tile(aes(fill = Expression))
   g <- g + theme_classic()
@@ -84,6 +95,9 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   }
   if(gene_names == FALSE){
     g <- g + theme(axis.text.y=element_blank())
+  }
+  if(facet_by != FALSE){
+    g <- g + facet_wrap(reformulate(facet_by), scales = "free_x", ncol = ncol)
   }
   plot(g)
 }
