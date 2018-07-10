@@ -6,7 +6,7 @@
 \usage{
 plot_heatmap(input, genes, type, title = "Heatmap", scale_by = "row",
   cluster_by = "row", color_pal = viridis::inferno(256), text_angle = 60,
-  group_names = TRUE, gene_names = TRUE, facet_by = FALSE)
+  group_names = TRUE, gene_names = TRUE, facet_by = FALSE, ncol = 3)
 }
 \arguments{
 \item{input}{the input ex_sc}
