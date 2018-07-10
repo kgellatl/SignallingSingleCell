@@ -19,7 +19,8 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", color_pal = viridis::inferno(256), text_angle = 60, group_names = TRUE, gene_names = TRUE, facet_by = FALSE){
+plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", color_pal = viridis::inferno(256),
+                         text_angle = 60, group_names = TRUE, gene_names = TRUE, facet_by = FALSE){
   if(type == "bulk"){
     heat_dat <- fData(input)[,grep("bulk", colnames(fData(input)))]
     heat_dat <- heat_dat[genes,]
@@ -63,6 +64,7 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
    colnames(heat_dat) <- pData(input)[,facet_by]
   }
   heat_dat <- as.data.frame(heat_dat)
+  colnames(heat_dat) <- sub("_num_.*", "", colnames(heat_dat) )
   heat_dat_lng <- tidyr::gather(heat_dat, key = "group", "Expression", 1:ncol(heat_dat), factor_key = "TRUE")
   heat_dat_lng$genes <- rep(factor(rownames(heat_dat), levels = rownames(heat_dat)), ncol(heat_dat))
   g <- ggplot(heat_dat_lng, aes(group, genes))
