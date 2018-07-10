@@ -50,7 +50,11 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE){
     num_cells <- length(full_match)
     num_cells_vals <- c(num_cells_vals, num_cells)
     tmp <- exprs(input)[,full_match]
-    mean <- apply(tmp,1,mean)
+    if(ncol(tmp) > 1){
+      mean <- apply(tmp,1,mean)
+    } else {
+      mean <- rep(0, nrow(exprs(input)))
+    }
     expressed <- length(which(mean > 0))
     mean_vals <- c(mean_vals, mean)
     num_genes_vals <- c(num_genes_vals, expressed)
