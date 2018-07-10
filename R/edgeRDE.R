@@ -47,7 +47,7 @@ edgeRDE <- function(input,
   message('Doing likelihood ratio fit...');flush.console()
   fit <- edgeR::glmFit(y, design)
   tab <- list()
-  if (length(unique(contrast))==1) {
+  if (length(unique(batch))>1) {
     lrt <- edgeR::glmLRT(fit)
     tab[['contrast_1']] <- as.data.frame(edgeR::topTags(lrt, p.value=pVal, n=Inf, sort.by='logFC'))
   } else {
