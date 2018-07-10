@@ -38,7 +38,7 @@ plot_tsne_metadata <- function(input, title = "", color_by, facet_by = NA, ncol 
     tmp <- pData(input)[c("x", "y")]
     g <- g + geom_point(data = tmp, aes(x=x, y=y), shape = 20, col = "gray", size = size)
   }
-  if(class(pData(input)[,color_by]) == "double" | class(pData(input)[,color_by]) == "integer" ){
+  if(class(pData(input)[,color_by]) == "double" || class(pData(input)[,color_by]) == "integer" || class(pData(input)[,color_by]) == "numeric" ){
     g <- g +  geom_point(aes_string(x = "x", y = "y", col = color_by), shape = 20, size = size)
     g <- g +  scale_color_gradientn(colours=c('blue', 'red', 'yellow'))
   } else {

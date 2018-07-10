@@ -60,11 +60,9 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   if(type == "single_cell"){
     heat_dat[which(heat_dat > 5)] <- 5
   }
-  if(facet_by != FALSE){
-   colnames(heat_dat) <- pData(input)[,facet_by]
-  }
+
   heat_dat <- as.data.frame(heat_dat)
-  colnames(heat_dat) <- sub("_num_.*", "", colnames(heat_dat) )
+  colnames(heat_dat) <- sub("_num_.*", "", colnames(heat_dat))
   heat_dat_lng <- tidyr::gather(heat_dat, key = "group", "Expression", 1:ncol(heat_dat), factor_key = "TRUE")
   heat_dat_lng$genes <- rep(factor(rownames(heat_dat), levels = rownames(heat_dat)), ncol(heat_dat))
   g <- ggplot(heat_dat_lng, aes(group, genes))
@@ -86,6 +84,19 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   }
   if(gene_names == FALSE){
     g <- g + theme(axis.text.y=element_blank())
+  }
+  if(facet_by != FALSE){
+    facs <- unique(pData(input)[,facet_by])
+    heat_dat_lng$facet  <- NA
+    for (i in 1:length(facs)) {
+      int <- facs[i]
+      ind <- grep(int, heat_dat_lng$group)
+      heat_dat_lng$facet[ind] <- int
+
+    }
+    heat_dat_lng$facet <- factor(heat_dat_lng$facet)
+    colnames(heat_dat_lng)[ncol(heat_dat_lng)] <- facet_by
+    g <- g + facet_wrap(heat_dat_lng[,facet_by], scales = "free", nrow = 1)
   }
   plot(g)
 }
