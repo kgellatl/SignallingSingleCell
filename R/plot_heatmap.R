@@ -96,7 +96,7 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     }
     heat_dat_lng$facet <- factor(heat_dat_lng$facet)
     colnames(heat_dat_lng)[ncol(heat_dat_lng)] <- facet_by
-    g <- g + facet_wrap(heat_dat_lng[,facet_by], scales = "free", nrow = 1)
+    g <- g + facet_wrap(heat_dat_lng[,facet_by], scales = "free_x", nrow = 1)
   }
   plot(g)
 }
