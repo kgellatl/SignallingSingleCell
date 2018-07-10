@@ -49,8 +49,8 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE){
     }
     num_cells <- length(full_match)
     num_cells_vals <- c(num_cells_vals, num_cells)
-    tmp <- exprs(input)[,full_match]
-    if(ncol(tmp) > 1){
+    if(length(full_match) > 1){
+      tmp <- exprs(input)[,full_match]
       mean <- apply(tmp,1,mean)
     } else {
       mean <- rep(0, nrow(exprs(input)))
