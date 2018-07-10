@@ -70,6 +70,7 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     heat_dat_lng$facet  <- NA
     for (i in 1:length(facs)) {
       int <- facs[i]
+      int <- paste0(int, "_")
       ind <- grep(int, heat_dat_lng$group)
       heat_dat_lng$facet[ind] <- int
 

@@ -56,7 +56,8 @@ findDEgenes = function(input,
     z = construct_ex_sc(z)
     pData(z) = pd[idx,]
     # perform DE
-    tab = edgeRDE(z, group, batch, sizefactor, lib_size)
+    tab = edgeRDE(input = z, groups = group, batch = batch, sizefactor = sizefactor, lib_size = lib_size,
+                  minCells = minCells, pVal = pVal, contrast = contrast)
     # write DE result for pairwise comparison
     DEtablecntr = tab[['contrast_1']]
     outfile = paste(name, contrastID, outsuffix, sep = "_")
