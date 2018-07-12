@@ -36,31 +36,36 @@ findDEgenes = function(input,
                        contrast = list(c(-1,1))) {
   # select cells to perform DE
   for (i in 1:length(unique(pd[,facet_by]))) {
-    name = unique(as.character(pd[,facet_by]))[i]
+    name = sort(unique(as.character(pd[,facet_by])))[i]
+    print(paste0("Performing DE for ", name))
     idx = rownames(pd)[which(pd[,facet_by]==name)]
     cntr = rownames(pd)[which(pd[,facet_by]==name & pd[,DEgroup]==contrastID)]
     # select cells
     z = as.matrix(exprs(input))[,idx]
-    if (is.null(batchID)) {
-      # if batchID is null all cells are in the same batch
-      batch = as.factor(rep(1,ncol(input)))
-    } else {
-      # get batch factors from batchID column in pData
-      batch = as.factor(pd[idx,batchID])
+    if(ncol(z) > 2){
+      if (is.null(batchID)) {
+        # if batchID is null all cells are in the same batch
+        batch = as.factor(rep(1,ncol(input)))
+      } else {
+        # get batch factors from batchID column in pData
+        batch = as.factor(pd[idx,batchID])
+      }
+      # create reference group
+      groupList = rep(0, times=ncol(z))
+      # create contrast group
+      groupList[which(colnames(z) %in% cntr)] = 1
+      if(length(unique(groupList)) > 1){
+        group = factor(groupList)
+        z = construct_ex_sc(z)
+        pData(z) = pd[idx,]
+        # perform DE
+        tab = edgeRDE(input = z, groups = group, batch = batch, sizefactor = sizefactor, lib_size = lib_size,
+                      minCells = minCells, pVal = pVal, contrast = contrast)
+        # write DE result for pairwise comparison
+        DEtablecntr = tab[['contrast_1']]
+        outfile = paste(name, contrastID, outsuffix, sep = "_")
+        write.table(DEtablecntr, paste(outdir, outfile, sep = ""), sep = "\t")
+      }
     }
-    # create reference group
-    groupList = rep(0, times=ncol(z))
-    # create contrast group
-    groupList[which(colnames(z) %in% cntr)] = 1
-    group = factor(groupList)
-    z = construct_ex_sc(z)
-    pData(z) = pd[idx,]
-    # perform DE
-    tab = edgeRDE(input = z, groups = group, batch = batch, sizefactor = sizefactor, lib_size = lib_size,
-                  minCells = minCells, pVal = pVal, contrast = contrast)
-    # write DE result for pairwise comparison
-    DEtablecntr = tab[['contrast_1']]
-    outfile = paste(name, contrastID, outsuffix, sep = "_")
-    write.table(DEtablecntr, paste(outdir, outfile, sep = ""), sep = "\t")
   }
 }

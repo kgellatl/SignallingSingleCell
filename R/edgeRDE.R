@@ -53,7 +53,6 @@ edgeRDE <- function(input,
   } else {
     for (j in 1:length(contrast)) {
       cStr <- sprintf('contrast_%d', j)
-      message(sprintf('DE analysis for contrast %s...',cStr));flush.console()
       lrt <- edgeR::glmLRT(fit, contrast=contrast[[j]])
       tab[[cStr]] <- as.data.frame(edgeR::topTags(lrt, p.value=pVal, n=Inf, sort.by='logFC'))
     }
