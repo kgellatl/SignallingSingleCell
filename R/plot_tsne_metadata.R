@@ -9,13 +9,15 @@
 #' @param ncol How many columns if faceting
 #' @param size The size of the points
 #' @param colors What colors to utilize for categorial data. Be sure it is of the proper length!
+#' @param legend_dot_size Size of dot in legend
+
 #' @export
 #' @details
 #' Utilize information stored in pData to control the plot display.
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_tsne_metadata <- function(input, title = "", color_by, facet_by = NA, ncol = "NA", size = 1.5, colors = NA, theme = "classic"){
+plot_tsne_metadata <- function(input, title = "", color_by, facet_by = NA, ncol = "NA", size = 1.5, colors = NA, theme = "classic", legend_dot_size = 1.5){
 
   tmp <- pData(input)
   tmp <- tmp[sample(nrow(tmp)),]
@@ -54,6 +56,7 @@ plot_tsne_metadata <- function(input, title = "", color_by, facet_by = NA, ncol 
       g <- g +  facet_wrap(facets = reformulate(facet_by))
     }
   }
+  g <- g + guides(colour = guide_legend(override.aes = list(size=legend_dot_size)))
   plot(g)
 }
 
