@@ -265,6 +265,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
       vit_net <- visNetwork::visOptions(vit_net, highlightNearest = TRUE, selectedBy = "community")
     }
     visNetwork::visSave(vit_net, file="Interactive_Network.html")
+
+    plot_rl_results[[5]] <- vit_net
+    names(plot_rl_results) <- c("igraph_Network", "layout", "communities", "comparitive_table", "interactive")
+
   }
   return(plot_rl_results)
 }
