@@ -111,7 +111,9 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
       }
       new_dat$FC[i] <- FC
     }
-    new_dat <- new_dat[-remove,]
+    if(!is.null(remove)){
+      new_dat <- new_dat[-remove,]
+    }
     new_dat <- new_dat[,c(2,4,1,3,5,6)]
     tmpdat <- new_dat
     for (i in 1:nrow(tmpdat)) {
@@ -199,14 +201,18 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   plot_rl_results[[1]] <- net_graph
   plot_rl_results[[2]] <- l
 
-  if(comparitive!= FALSE){
-    plot_rl_results[[3]] <- new_dat_BACKUP
-  }
-
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
-  edge.curved=
     pdf("Fullnetwork_ranked.pdf", h = 8, w = 8, useDingbats = FALSE)
   plot(net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  cell_legend <- sort(unique(tmpdat[,3]))
+  legend(x=-1.5, y=0, cell_legend, pch=21,
+         col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
+  dev.off()
+
+  pdf("Fullnetwork_ranked_noname.pdf", h = 8, w = 8, useDingbats = FALSE)
+  net2 <- net_graph
+  V(net2)$name <- ""
+  plot(net2, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   cell_legend <- sort(unique(tmpdat[,3]))
   legend(x=-1.5, y=0, cell_legend, pch=21,
          col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
@@ -216,6 +222,16 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   cfg <- cluster_edge_betweenness(as.undirected(net_graph))
   plot(cfg, net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   dev.off()
+
+  plot_rl_results[[3]] <- cfg
+
+  names(plot_rl_results) <- c("igraph_Network", "layout", "communities")
+
+  if(comparitive!= FALSE){
+    plot_rl_results[[4]] <- new_dat_BACKUP
+    names(plot_rl_results) <- c("igraph_Network", "layout", "communities", "comparitive_table")
+
+  }
 
   #####
   #####
@@ -232,7 +248,6 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     nodes$label <- V(net_graph)$name
     links$value <- E(net_graph)$width
 
-    cfg <- cluster_edge_betweenness(as.undirected(net_graph))
     nodes$community <- cfg$membership
 
     nodes$nodes <- V(net_graph)$group
@@ -252,6 +267,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
       vit_net <- visNetwork::visOptions(vit_net, highlightNearest = TRUE, selectedBy = "community")
     }
     visNetwork::visSave(vit_net, file="Interactive_Network.html")
+
+    plot_rl_results[[5]] <- vit_net
+    names(plot_rl_results) <- c("igraph_Network", "layout", "communities", "comparitive_table", "interactive")
+
   }
   return(plot_rl_results)
 }
