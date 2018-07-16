@@ -111,7 +111,9 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
       }
       new_dat$FC[i] <- FC
     }
-    new_dat <- new_dat[-remove,]
+    if(!is.null(remove)){
+      new_dat <- new_dat[-remove,]
+    }
     new_dat <- new_dat[,c(2,4,1,3,5,6)]
     tmpdat <- new_dat
     for (i in 1:nrow(tmpdat)) {
