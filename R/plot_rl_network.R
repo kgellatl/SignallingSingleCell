@@ -158,7 +158,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   }
   V(net_graph)$group <- groups
   name_backup <- V(net_graph)$name
-  V(net_graph)$name <- names
+  # V(net_graph)$name <- names
   if(group_by != FALSE){
     V(net_graph)$group_by <- NA
     for (i in 1:length(V(net_graph))) {
