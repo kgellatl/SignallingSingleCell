@@ -13,6 +13,7 @@
 #' @param write_interactive whether or not to write an interactive visNetwork html object
 #' @param interactive_groups the dropdown menu for selection nodes, either "nodes", "group_by", or "community"
 #' @param nodesize The size of nodes
+#' @param size_by_connections if true will override node size and size by the degree of the node
 #' @param textsize The size of text
 #' into independent networks
 #' @export
@@ -22,7 +23,7 @@
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
 plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,  layout = "nicely",
-                            write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, textsize = 0.5){
+                            write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE, textsize = 0.5){
   ##### Colors to match ggplot #####
   plot_rl_results <- list()
   gg_color_hue <- function(n) {
@@ -201,6 +202,14 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   plot_rl_results[[1]] <- net_graph
   plot_rl_results[[2]] <- l
 
+  if(size_by_connections == TRUE){
+    deg <- degree(net_graph, mode="all")
+    V(net_graph)$size <- (10/max(deg)*deg)
+  }
+
+  deg <- degree(net_graph, mode="all")
+  V(net_graph)$size <- deg
+
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
     pdf("Fullnetwork_ranked.pdf", h = 8, w = 8, useDingbats = FALSE)
   plot(net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
@@ -247,6 +256,11 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
 
     nodes$label <- V(net_graph)$name
     links$value <- E(net_graph)$width
+
+    if(size_by_connections == TRUE){
+      deg <- degree(net_graph, mode="all")
+      nodes$value <- (10/max(deg)*deg)
+    }
 
     nodes$community <- cfg$membership
 
