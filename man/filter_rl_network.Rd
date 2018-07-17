@@ -4,16 +4,23 @@
 \alias{filter_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-filter_rl_network(input, filter_by, cutoff, direction, group_by = FALSE)
+filter_rl_network(input, filter_by, filter_type = "network",
+  DEfolder = NULL, cutoff, direction, absol = FALSE, group_by = FALSE)
 }
 \arguments{
 \item{input}{the output of calc_rl_network}
 
-\item{filter_by}{the column of full_network to summarize by}
+\item{filter_by}{the column to summarize by}
+
+\item{filter_type}{"network" or "DE"}
+
+\item{DEfolder}{the output location of findDEgenes}
 
 \item{cutoff}{value to filter by}
 
 \item{direction}{>, <, =}
+
+\item{absol}{whether or not to take the absolute value of the column}
 }
 \description{
 This function will map all RL interactions
