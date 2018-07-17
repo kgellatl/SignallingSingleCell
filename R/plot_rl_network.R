@@ -129,8 +129,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     }
     net_graph <- graph_from_data_frame(tmpdat[,c("V7", "V8")], directed = TRUE)
     new_dat_BACKUP <- new_dat
-    new_dat_BACKUP <- new_dat_BACKUP[-which(new_dat_BACKUP$FC == "ON"),]
-    new_dat_BACKUP <- new_dat_BACKUP[-which(new_dat_BACKUP$FC == "OFF"),]
+    if(length(which(new_dat_BACKUP$FC == "ON") >= 1) || length(which(new_dat_BACKUP$FC == "OFF") >= 1)){
+      new_dat_BACKUP <- new_dat_BACKUP[-which(new_dat_BACKUP$FC == "ON"),]
+      new_dat_BACKUP <- new_dat_BACKUP[-which(new_dat_BACKUP$FC == "OFF"),]
+    }
     max_val <- max(as.numeric(new_dat_BACKUP$FC))
     min_val <- min(as.numeric(new_dat_BACKUP$FC))
     new_dat$FC[which(new_dat$FC == "ON")] <- min_val
@@ -204,7 +206,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
 
   if(size_by_connections == TRUE){
     deg <- degree(net_graph, mode="all")
-    V(net_graph)$size <- (10/max(deg)*deg)
+    deg <- rank(-deg)
+    deg <- (3/max(deg)*deg)
+    V(net_graph)$size <- deg
+
   }
 
   deg <- degree(net_graph, mode="all")
@@ -259,7 +264,8 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
 
     if(size_by_connections == TRUE){
       deg <- degree(net_graph, mode="all")
-      nodes$value <- (10/max(deg)*deg)
+      deg <- rank(-deg)
+      deg <- (20/max(deg)*deg)
     }
 
     nodes$community <- cfg$membership
