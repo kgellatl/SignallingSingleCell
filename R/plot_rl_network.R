@@ -201,19 +201,17 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     l <- layout_in_circle(net_graph)
   }
 
-  plot_rl_results[[1]] <- net_graph
-  plot_rl_results[[2]] <- l
-
   if(size_by_connections == TRUE){
     deg <- degree(net_graph, mode="all")
-    deg <- rank(-deg)
+    deg <- rank(deg)
     deg <- (3/max(deg)*deg)
+    deg[which(deg < 0.5)] <- 0.5
     V(net_graph)$size <- deg
 
   }
 
-  deg <- degree(net_graph, mode="all")
-  V(net_graph)$size <- deg
+  plot_rl_results[[1]] <- net_graph
+  plot_rl_results[[2]] <- l
 
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
     pdf("Fullnetwork_ranked.pdf", h = 8, w = 8, useDingbats = FALSE)
@@ -264,8 +262,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
 
     if(size_by_connections == TRUE){
       deg <- degree(net_graph, mode="all")
-      deg <- rank(-deg)
+      deg <- rank(deg)
       deg <- (20/max(deg)*deg)
+      deg[which(deg < 0.5)] <- 0.5
+      nodes$value <- deg
     }
 
     nodes$community <- cfg$membership
