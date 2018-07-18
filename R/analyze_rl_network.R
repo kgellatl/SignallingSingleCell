@@ -12,6 +12,17 @@
 analyze_rl_network <- function(input, h = 5, w = 20){
 
   tmp_net <- input
+  l <- layout_nicely(tmp_net)
+
+  cfg <- cluster_edge_betweenness(as.undirected(tmp_net))
+
+  pdf("Fullnetwork_communities.pdf", h = 8, w = 8, useDingbats = FALSE)
+  plot(cfg, tmp_net, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  dev.off()
+
+  pdf("Dendrogram.pdf", height = 10, width = 50)
+  dendPlot(cfg, mode="hclust")
+  dev.off()
 
   deg <- degree(tmp_net, mode="all")
   deg <- sort(deg, decreasing = T)
@@ -45,8 +56,10 @@ analyze_rl_network <- function(input, h = 5, w = 20){
   results[[5]] <- deg_lig
   results[[6]] <- edg_rank
   results[[7]] <- hs
+  results[[8]] <- cfg
+
   names(results) <- c("Degree", "Node_degree", "Node_betweeness", "Node_authority",
-                      "Edge_degree", "Edge_betweeness", "Edge_hub")
+                      "Edge_degree", "Edge_betweeness", "Edge_hub", "Communities")
  return(results)
 }
 

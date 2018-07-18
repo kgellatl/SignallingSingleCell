@@ -11,7 +11,7 @@
 #' @param value the column of the full network to calculate foldChange on
 #' @param layout nicely, kk, circle
 #' @param write_interactive whether or not to write an interactive visNetwork html object
-#' @param interactive_groups the dropdown menu for selection nodes, either "nodes", "group_by", or "community"
+#' @param interactive_groups the dropdown menu for selection nodes, either "nodes", "group_by", or "cluster"
 #' @param nodesize The size of nodes
 #' @param size_by_connections if true will override node size and size by the degree of the node
 #' @param textsize The size of text
@@ -209,15 +209,12 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     V(net_graph)$size <- deg
   }
 
-  cfg <- cluster_edge_betweenness(as.undirected(net_graph))
-
   plot_rl_results[[1]] <- net_graph
   plot_rl_results[[2]] <- l
   plot_rl_results[[3]] <- igraph::clusters(net_graph)
   plot_rl_results[[4]] <- decompose.graph(net_graph)
-  plot_rl_results[[5]] <- cfg
 
-  names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "communities")
+  names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs")
 
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
     pdf("Fullnetwork_ranked.pdf", h = 8, w = 8, useDingbats = FALSE)
@@ -245,16 +242,12 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   }
 
   pdf("Fullnetwork_clusters.pdf", h = 8, w = 8, useDingbats = FALSE)
-  plot(net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", vertex.color = clusts, rescale = TRUE)
-  dev.off()
-
-  pdf("Fullnetwork_communities.pdf", h = 8, w = 8, useDingbats = FALSE)
-  plot(cfg, net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  plot(net2, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", vertex.color = clusts, rescale = TRUE)
   dev.off()
 
   if(comparitive!= FALSE){
-    plot_rl_results[[6]] <- new_dat_BACKUP
-    names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "communities", "comparitive_table")
+    plot_rl_results[[5]] <- new_dat_BACKUP
+    names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "comparitive_table")
   }
 
   #####
@@ -279,7 +272,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
       nodes$value <- deg
     }
 
-    nodes$community <- cfg$membership
+    nodes$cluster <- as.vector(plot_rl_results$clusters$membership)
 
     nodes$nodes <- V(net_graph)$group
     links$width <- 3
@@ -294,17 +287,17 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     if(interactive_groups == "condition"){
       vit_net <- visNetwork::visOptions(vit_net, highlightNearest = TRUE, selectedBy = "condition")
     }
-    if(interactive_groups == "community"){
-      vit_net <- visNetwork::visOptions(vit_net, highlightNearest = TRUE, selectedBy = "community")
+    if(interactive_groups == "cluster"){
+      vit_net <- visNetwork::visOptions(vit_net, highlightNearest = TRUE, selectedBy = "cluster")
     }
     visNetwork::visSave(vit_net, file="Interactive_Network.html")
 
     if(comparitive!= FALSE){
-    plot_rl_results[[7]] <- vit_net
-    names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "communities", "comparitive_table", "interactive")
+    plot_rl_results[[6]] <- vit_net
+    names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "comparitive_table", "interactive")
     } else {
-      plot_rl_results[[6]] <- vit_net
-      names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "communities", "interactive")
+      plot_rl_results[[5]] <- vit_net
+      names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "interactive")
     }
   }
   return(plot_rl_results)
