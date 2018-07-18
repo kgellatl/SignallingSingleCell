@@ -242,7 +242,9 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   }
 
   pdf("Fullnetwork_clusters.pdf", h = 8, w = 8, useDingbats = FALSE)
-  plot(net2, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", vertex.color = clusts, rescale = TRUE)
+  V(net2)$name <- plot_rl_results$clusters$membership
+  plot(net2, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black",
+       vertex.color = clusts, rescale = TRUE)
   dev.off()
 
   if(comparitive!= FALSE){
