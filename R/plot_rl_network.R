@@ -217,14 +217,14 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs")
 
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
-    pdf("Fullnetwork_ranked.pdf", h = 8, w = 8, useDingbats = FALSE)
+    pdf("Fullnetwork.pdf", h = 8, w = 8, useDingbats = FALSE)
   plot(net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   cell_legend <- sort(unique(tmpdat[,3]))
   legend(x=-1.5, y=0, cell_legend, pch=21,
          col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
   dev.off()
 
-  pdf("Fullnetwork_ranked_noname.pdf", h = 8, w = 8, useDingbats = FALSE)
+  pdf("Fullnetwork_noname.pdf", h = 8, w = 8, useDingbats = FALSE)
   net2 <- net_graph
   V(net2)$name <- ""
   plot(net2, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
