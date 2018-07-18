@@ -10,10 +10,8 @@
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
 analyze_rl_network <- function(input, h = 5, w = 20){
-  pdf("Dendrogram.pdf", height = h, width = w)
-  dendPlot(input$communities, mode="hclust")
-  dev.off()
-  tmp_net <- input$igraph_Network
+
+  tmp_net <- input
 
   deg <- degree(tmp_net, mode="all")
   deg <- sort(deg, decreasing = T)
