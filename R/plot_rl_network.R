@@ -207,11 +207,17 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     deg <- (3/max(deg)*deg)
     deg[which(deg < 0.5)] <- 0.5
     V(net_graph)$size <- deg
-
   }
+
+  cfg <- cluster_edge_betweenness(as.undirected(net_graph))
 
   plot_rl_results[[1]] <- net_graph
   plot_rl_results[[2]] <- l
+  plot_rl_results[[3]] <- igraph::clusters(net_graph)
+  plot_rl_results[[4]] <- decompose.graph(net_graph)
+  plot_rl_results[[5]] <- cfg
+
+  names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "communities")
 
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
     pdf("Fullnetwork_ranked.pdf", h = 8, w = 8, useDingbats = FALSE)
@@ -230,22 +236,27 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
          col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
   dev.off()
 
+  cols_clust <- gg_color_hue(length(unique(plot_rl_results$clusters$membership)))
+  clusts <- as.vector(plot_rl_results$clusters$membership)
+
+  for (i in 1:length(cols_clust)) {
+    cl <- cols_clust[i]
+    clusts[which(clusts == i)] <- cl
+  }
+
+  pdf("Fullnetwork_clusters.pdf", h = 8, w = 8, useDingbats = FALSE)
+  plot(net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", vertex.color = clusts, rescale = TRUE)
+  dev.off()
+
   pdf("Fullnetwork_communities.pdf", h = 8, w = 8, useDingbats = FALSE)
-  cfg <- cluster_edge_betweenness(as.undirected(net_graph))
   plot(cfg, net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   dev.off()
 
-  plot_rl_results[[3]] <- cfg
-
-  names(plot_rl_results) <- c("igraph_Network", "layout", "communities")
-
   if(comparitive!= FALSE){
-    plot_rl_results[[4]] <- new_dat_BACKUP
-    names(plot_rl_results) <- c("igraph_Network", "layout", "communities", "comparitive_table")
-
+    plot_rl_results[[6]] <- new_dat_BACKUP
+    names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "communities", "comparitive_table")
   }
 
-  #####
   #####
 
   if(write_interactive == TRUE){
@@ -288,9 +299,13 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     }
     visNetwork::visSave(vit_net, file="Interactive_Network.html")
 
-    plot_rl_results[[5]] <- vit_net
-    names(plot_rl_results) <- c("igraph_Network", "layout", "communities", "comparitive_table", "interactive")
-
+    if(comparitive!= FALSE){
+    plot_rl_results[[7]] <- vit_net
+    names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "communities", "comparitive_table", "interactive")
+    } else {
+      plot_rl_results[[6]] <- vit_net
+      names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "communities", "interactive")
+    }
   }
   return(plot_rl_results)
 }
