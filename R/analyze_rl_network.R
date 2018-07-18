@@ -50,9 +50,16 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   plot(tmp_net_cp, mark.groups = cfg, cols_clust2 = cols_clust2, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
   dev.off()
 
-  pdf(paste0(prefix, "Analyzed_Network_communities.pdf_nonames.pdf"), h = h, w = w, useDingbats = FALSE)
+
+  pdf(paste0(prefix, "Analyzed_Network_communities_nonames.pdf"), h = h, w = w, useDingbats = FALSE)
   plot(tmp_net_cp, mark.groups = cfg, vertex.label = "", cols_clust2 = cols_clust2, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
   dev.off()
+
+  pdf(paste0(prefix, "Analyzed_Network_communities_numbered.pdf"), h = h, w = w, useDingbats = FALSE)
+  V(tmp_net_cp)$name <- cfg$membership
+  plot(tmp_net_cp, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
+  dev.off()
+
 
   pdf(paste0(prefix, "Dendrogram.pdf"), height = 10, width = 50)
   dendPlot(cfg, mode="hclust")
