@@ -7,7 +7,8 @@
 plot_rl_network(input, input_full, group_by = FALSE, comparitive = FALSE,
   from = FALSE, to = FALSE, value = FALSE, layout = "nicely",
   write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3,
-  size_by_connections = TRUE, textsize = 0.5)
+  size_by_connections = TRUE, textsize = 0.5, h = 8, w = 8,
+  prefix = "")
 }
 \arguments{
 \item{input}{the input networked (usually filtered)}
@@ -28,13 +29,19 @@ plot_rl_network(input, input_full, group_by = FALSE, comparitive = FALSE,
 
 \item{write_interactive}{whether or not to write an interactive visNetwork html object}
 
-\item{interactive_groups}{the dropdown menu for selection nodes, either "nodes", "group_by", or "community"}
+\item{interactive_groups}{the dropdown menu for selection nodes, either "nodes", "group_by", or "cluster"}
 
 \item{nodesize}{The size of nodes}
 
 \item{size_by_connections}{if true will override node size and size by the degree of the node}
 
-\item{textsize}{The size of text
+\item{textsize}{The size of text}
+
+\item{h}{pdf height}
+
+\item{w}{pdf width}
+
+\item{prefix}{a character to be appeneded to the start of file names
 into independent networks}
 }
 \description{
