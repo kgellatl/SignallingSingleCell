@@ -11,8 +11,9 @@
 #' @param value the column of the full network to calculate foldChange on
 #' @param layout nicely, kk, circle
 #' @param write_interactive whether or not to write an interactive visNetwork html object
-#' @param interactive_groups the dropdown menu for selection nodes, either "nodes", "group_by", or "community"
+#' @param interactive_groups the dropdown menu for selection nodes, either "nodes", "group_by", or "cluster"
 #' @param nodesize The size of nodes
+#' @param size_by_connections if true will override node size and size by the degree of the node
 #' @param textsize The size of text
 #' into independent networks
 #' @export
@@ -22,7 +23,7 @@
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
 plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,  layout = "nicely",
-                            write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, textsize = 0.5){
+                            write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE, textsize = 0.5){
   ##### Colors to match ggplot #####
   plot_rl_results <- list()
   gg_color_hue <- function(n) {
@@ -128,8 +129,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     }
     net_graph <- graph_from_data_frame(tmpdat[,c("V7", "V8")], directed = TRUE)
     new_dat_BACKUP <- new_dat
-    new_dat_BACKUP <- new_dat_BACKUP[-which(new_dat_BACKUP$FC == "ON"),]
-    new_dat_BACKUP <- new_dat_BACKUP[-which(new_dat_BACKUP$FC == "OFF"),]
+    if(length(which(new_dat_BACKUP$FC == "ON") >= 1) || length(which(new_dat_BACKUP$FC == "OFF") >= 1)){
+      new_dat_BACKUP <- new_dat_BACKUP[-which(new_dat_BACKUP$FC == "ON"),]
+      new_dat_BACKUP <- new_dat_BACKUP[-which(new_dat_BACKUP$FC == "OFF"),]
+    }
     max_val <- max(as.numeric(new_dat_BACKUP$FC))
     min_val <- min(as.numeric(new_dat_BACKUP$FC))
     new_dat$FC[which(new_dat$FC == "ON")] <- min_val
@@ -158,7 +161,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   }
   V(net_graph)$group <- groups
   name_backup <- V(net_graph)$name
-  V(net_graph)$name <- names
+  # V(net_graph)$name <- names
   if(group_by != FALSE){
     V(net_graph)$group_by <- NA
     for (i in 1:length(V(net_graph))) {
@@ -198,8 +201,20 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     l <- layout_in_circle(net_graph)
   }
 
+  if(size_by_connections == TRUE){
+    deg <- degree(net_graph, mode="all")
+    deg <- rank(deg)
+    deg <- (3/max(deg)*deg)
+    deg[which(deg < 0.5)] <- 0.5
+    V(net_graph)$size <- deg
+  }
+
   plot_rl_results[[1]] <- net_graph
   plot_rl_results[[2]] <- l
+  plot_rl_results[[3]] <- igraph::clusters(net_graph)
+  plot_rl_results[[4]] <- decompose.graph(net_graph)
+
+  names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs")
 
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
     pdf("Fullnetwork_ranked.pdf", h = 8, w = 8, useDingbats = FALSE)
@@ -218,22 +233,23 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
          col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
   dev.off()
 
-  pdf("Fullnetwork_communities.pdf", h = 8, w = 8, useDingbats = FALSE)
-  cfg <- cluster_edge_betweenness(as.undirected(net_graph))
-  plot(cfg, net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
-  dev.off()
+  cols_clust <- gg_color_hue(length(unique(plot_rl_results$clusters$membership)))
+  clusts <- as.vector(plot_rl_results$clusters$membership)
 
-  plot_rl_results[[3]] <- cfg
-
-  names(plot_rl_results) <- c("igraph_Network", "layout", "communities")
-
-  if(comparitive!= FALSE){
-    plot_rl_results[[4]] <- new_dat_BACKUP
-    names(plot_rl_results) <- c("igraph_Network", "layout", "communities", "comparitive_table")
-
+  for (i in 1:length(cols_clust)) {
+    cl <- cols_clust[i]
+    clusts[which(clusts == i)] <- cl
   }
 
-  #####
+  pdf("Fullnetwork_clusters.pdf", h = 8, w = 8, useDingbats = FALSE)
+  plot(net2, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", vertex.color = clusts, rescale = TRUE)
+  dev.off()
+
+  if(comparitive!= FALSE){
+    plot_rl_results[[5]] <- new_dat_BACKUP
+    names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "comparitive_table")
+  }
+
   #####
 
   if(write_interactive == TRUE){
@@ -248,7 +264,15 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     nodes$label <- V(net_graph)$name
     links$value <- E(net_graph)$width
 
-    nodes$community <- cfg$membership
+    if(size_by_connections == TRUE){
+      deg <- degree(net_graph, mode="all")
+      deg <- rank(deg)
+      deg <- (20/max(deg)*deg)
+      deg[which(deg < 0.5)] <- 0.5
+      nodes$value <- deg
+    }
+
+    nodes$cluster <- as.vector(plot_rl_results$clusters$membership)
 
     nodes$nodes <- V(net_graph)$group
     links$width <- 3
@@ -263,14 +287,18 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     if(interactive_groups == "condition"){
       vit_net <- visNetwork::visOptions(vit_net, highlightNearest = TRUE, selectedBy = "condition")
     }
-    if(interactive_groups == "community"){
-      vit_net <- visNetwork::visOptions(vit_net, highlightNearest = TRUE, selectedBy = "community")
+    if(interactive_groups == "cluster"){
+      vit_net <- visNetwork::visOptions(vit_net, highlightNearest = TRUE, selectedBy = "cluster")
     }
     visNetwork::visSave(vit_net, file="Interactive_Network.html")
 
-    plot_rl_results[[5]] <- vit_net
-    names(plot_rl_results) <- c("igraph_Network", "layout", "communities", "comparitive_table", "interactive")
-
+    if(comparitive!= FALSE){
+    plot_rl_results[[6]] <- vit_net
+    names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "comparitive_table", "interactive")
+    } else {
+      plot_rl_results[[5]] <- vit_net
+      names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "interactive")
+    }
   }
   return(plot_rl_results)
 }

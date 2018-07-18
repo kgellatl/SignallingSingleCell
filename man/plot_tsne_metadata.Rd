@@ -5,7 +5,8 @@
 \title{tSNE Plot on metadata}
 \usage{
 plot_tsne_metadata(input, title = "", color_by, facet_by = NA,
-  ncol = "NA", size = 1.5, colors = NA, theme = "classic")
+  ncol = "NA", size = 1.5, colors = NA, theme = "classic",
+  legend_dot_size = 1.5)
 }
 \arguments{
 \item{input}{the input ex_sc.}
@@ -21,6 +22,8 @@ plot_tsne_metadata(input, title = "", color_by, facet_by = NA,
 \item{size}{The size of the points}
 
 \item{colors}{What colors to utilize for categorial data. Be sure it is of the proper length!}
+
+\item{legend_dot_size}{Size of dot in legend}
 }
 \description{
 This will plot information onto a 2d tsne plot
