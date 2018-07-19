@@ -4,10 +4,16 @@
 \alias{analyze_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-analyze_rl_network(input, h = 5, w = 20)
+analyze_rl_network(input, h = 8, w = 8, prefix = "")
 }
 \arguments{
 \item{input}{the input network from plot_rl_network}
+
+\item{h}{the height of images}
+
+\item{w}{the height of images}
+
+\item{prefix}{a character to be appended to start of file names}
 }
 \description{
 This function will map all RL interactions

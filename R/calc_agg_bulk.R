@@ -75,6 +75,12 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE){
   colnames(bulk) <- seq(1:ncol(bulk))
   for (l in 1:nrow(bulks)) {
     cname <- bulks[l,-c(match(c("numcells", "proportion", "numgenes"), colnames(bulks)))]
+    cname2 <- c()
+    for (i in 1:length(cname)) {
+      cint <- as.character(cname[[i]])
+      cname2 <- c(cname2, cint)
+    }
+    cname <- cname2
     cnum <- bulks[l,"numcells"]
     cpro <- bulks[l,"proportion"]
     cgen <- bulks[l,"numgenes"]
