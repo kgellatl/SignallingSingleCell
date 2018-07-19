@@ -141,7 +141,7 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
 
   vit_net <- visNetwork::visOptions(vit_net, highlightNearest = TRUE, selectedBy = "community", nodesIdSelection = TRUE)
 
-  visNetwork::visSave(vit_net, file=paste0(prefix, paste0(prefix, "Interactive_Network_analyzed.html")))
+  visNetwork::visSave(vit_net, file=paste0(prefix, "Interactive_Network_analyzed.html"))
 
   #####
 
