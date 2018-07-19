@@ -4,12 +4,14 @@
 \alias{extract_communities}
 \title{Identifies all R / L interactions}
 \usage{
-extract_communities(input, select)
+extract_communities(input, select, expand = TRUE)
 }
 \arguments{
 \item{input}{the input graph analysis object}
 
 \item{select}{the communities to select}
+
+\item{expand}{if true will expand to grab all communities that share an edge with the input community}
 }
 \description{
 This function will map all RL interactions
