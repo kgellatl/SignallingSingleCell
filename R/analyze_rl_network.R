@@ -68,10 +68,9 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   for (i in 1:length(unique(cfg$membership))) {
     int <- which(cfg$membership == i)
     vals <- vert_rank[int]
+    cluster_edge_btw[[i]] <- sort(vals, decreasing = T)
     vals <- rank(vals)
     size <- (3/max(vals)*vals)
-    vals2 <- sort(vals, decreasing = T)
-    cluster_edge_btw[[i]] <- vals2
     sizes[int] <- size
   }
 
@@ -158,9 +157,10 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   results[[9]] <- cluster_edge_btw
   results[[10]] <- comm_ind
   results[[11]] <- vit_net
+  results[[12]] <- input
 
   names(results) <- c("Degree", "Node_degree", "Node_betweeness", "Node_authority",
-                      "Edge_degree", "Edge_betweeness", "Edge_hub", "Communities", "Communities_betweeness", "Communities_individual", "Interactive")
+                      "Edge_degree", "Edge_betweeness", "Edge_hub", "Communities", "Communities_betweeness", "Communities_individual", "Interactive", "input")
   return(results)
 }
 
