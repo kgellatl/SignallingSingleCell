@@ -1,6 +1,6 @@
-#' Calculate mean expression values across pData values
+#' Calculate UPM expression values across pData values
 #'
-#' This will calculate mean expression values across pData columns. Useful for heatmaps and networking analysis.
+#' This will calculate UMIs per million UPM expression values across pData columns. Useful for heatmaps and networking analysis.
 #'
 #' @param input the input ex_sc.
 #' @param aggregate_by The pData variables to break by
@@ -33,7 +33,7 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE){
   bulks <- expand.grid(to_expand, stringsAsFactors = FALSE)
   colnames(bulks) <- c(aggregate_by)
   groups <- unique(pData(input)[,group_by])
-  mean_vals <- c()
+  upm_vals <- c()
   num_cells_vals <- c()
   num_genes_vals <- c()
   for (j in 1:nrow(bulks)) {
@@ -51,10 +51,10 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE){
     num_cells_vals <- c(num_cells_vals, num_cells)
     if(length(full_match) > 1){
       tmp <- exprs(input)[,full_match]
-      mean <- apply(tmp,1,mean)
+      upm <- (apply(tmp, 1, sum)/sum(tmp))*1000000
     }
-    expressed <- length(which(mean > 0))
-    mean_vals <- c(mean_vals, mean)
+    expressed <- length(which(upm > 0))
+    upm_vals <- c(upm_vals, upm)
     num_genes_vals <- c(num_genes_vals, expressed)
   }
   bulks$numcells <- num_cells_vals
@@ -70,7 +70,7 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE){
     total <- sum(bulks$numcells)
     bulks$proportion <- round((bulks$numcells/total)*100,2)
   }
-  bulk <- matrix(mean_vals, nrow = nrow(exprs(input)))
+  bulk <- matrix(upm_vals, nrow = nrow(exprs(input)))
   rownames(bulk) <- rownames(exprs(input))
   colnames(bulk) <- seq(1:ncol(bulk))
   for (l in 1:nrow(bulks)) {
@@ -90,4 +90,3 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE){
   fData(input) <- cbind(fData(input), bulk)
   return(input)
 }
-
