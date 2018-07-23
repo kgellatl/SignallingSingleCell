@@ -77,7 +77,7 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     colnames(heat_dat_lng)[ncol(heat_dat_lng)] <- facet_by
   }
   g <- ggplot(heat_dat_lng, aes(group, genes))
-  g <- g + geom_tile(aes(fill = Expression))
+  g <- g + geom_tile(aes(fill = Expression, colour=Expression))
   g <- g + theme_classic()
   g <- g + scale_fill_gradientn(colours = color_pal)
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
