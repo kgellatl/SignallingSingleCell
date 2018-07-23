@@ -80,6 +80,7 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   g <- g + geom_tile(aes(fill = Expression, colour=Expression))
   g <- g + theme_classic()
   g <- g + scale_fill_gradientn(colours = color_pal)
+  g <- g + scale_color_gradientn(colours = color_pal)
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   g <- g +  labs(title= title)
