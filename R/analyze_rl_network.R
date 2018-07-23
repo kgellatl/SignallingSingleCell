@@ -25,6 +25,9 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   tmp_net_cp <- tmp_net
   cfg <- cluster_edge_betweenness(as.undirected(tmp_net_cp))
 
+  cs2 <- crossing(cfg, tmp_net_cp)
+
+
   cols_clust <- gg_color_hue(length(unique(cfg$membership)))
   cols_clust2 <- adjustcolor(cols_clust, alpha.f = 1)
   clusts <- as.vector(cfg$membership)
@@ -107,6 +110,13 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   plot(tmp_net_cp2, mark.groups = cfg, vertex.label = "", cols_clust2 = cols_clust2, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
   dev.off()
 
+  pdf(paste0(prefix, "Analyzed_Network_communities_crossing_named.pdf"), h = h, w = w, useDingbats = FALSE)
+  keep_name <- unique(ends(tmp_net_cp2, names(cs2)[which(cs2 == TRUE)], names =  T))
+  V(tmp_net_cp2)$name[-match(keep_name, V(tmp_net_cp2)$name)] <- ""
+  plot(tmp_net_cp2, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
+  dev.off()
+
+
   pdf(paste0(prefix, "Analyzed_Network_communities_numbered.pdf"), h = h, w = w, useDingbats = FALSE)
   V(tmp_net_cp)$name <- cfg$membership
   plot(tmp_net_cp, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
@@ -128,8 +138,8 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   nodes$label <- V(tmp_net)$name
   links$value <- E(tmp_net)$width
 
-  deg <- (20/max(sizes)*sizes)
-  nodes$value <- deg
+  size2 <- (20/max(sizes)*sizes)
+  nodes$value <- size2
 
   nodes$community <- cfg$membership
 
@@ -154,13 +164,15 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   results[[6]] <- edg_rank
   results[[7]] <- hs
   results[[8]] <- cfg
-  results[[9]] <- cluster_edge_btw
-  results[[10]] <- comm_ind
-  results[[11]] <- vit_net
-  results[[12]] <- input
+  results[[9]] <- cs2
+  results[[10]] <- cluster_edge_btw
+  results[[11]] <- comm_ind
+  results[[12]] <- vit_net
+  results[[13]] <- input
 
   names(results) <- c("Degree", "Node_degree", "Node_betweeness", "Node_authority",
-                      "Edge_degree", "Edge_betweeness", "Edge_hub", "Communities", "Communities_betweeness", "Communities_individual", "Interactive", "input")
+                      "Edge_degree", "Edge_betweeness", "Edge_hub", "Communities", "Crossing",
+                      "Communities_betweeness", "Communities_individual", "Interactive", "input")
   return(results)
 }
 
