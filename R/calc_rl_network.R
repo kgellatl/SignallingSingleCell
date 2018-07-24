@@ -150,8 +150,6 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     }
   }
   full_network <- full_network[-remove,]
-  full_network$Ligand_expression <- full_network$Ligand_expression*1E6
-  full_network$Receptor_expression <- full_network$Receptor_expression*1E6
   full_network$Connection_product <- full_network$Ligand_expression*full_network$Receptor_expression
   full_network$Connection_ratio <- full_network$Ligand_expression/full_network$Receptor_expression
   ##### Summarize Interactions #####
