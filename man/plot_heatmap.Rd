@@ -5,8 +5,10 @@
 \title{Plots a heatmap}
 \usage{
 plot_heatmap(input, genes, type, title = "Heatmap", scale_by = "row",
-  cluster_by = "row", color_pal = viridis::inferno(256), text_angle = 60,
-  group_names = TRUE, gene_names = TRUE, facet_by = FALSE, ncol = 3)
+  cluster_by = "row", ceiling = FALSE, color_pal = viridis::magma(256),
+  facet_by = FALSE, color_facets = FALSE, group_names = TRUE,
+  gene_names = TRUE, text_size = 3, text_angle = 90,
+  pdf_format = "raster")
 }
 \arguments{
 \item{input}{the input ex_sc}
@@ -21,15 +23,22 @@ plot_heatmap(input, genes, type, title = "Heatmap", scale_by = "row",
 
 \item{cluster_by}{either "row", col, or both}
 
+\item{ceiling}{A value above which to truncate}
+
 \item{color_pal}{The color pallete to be used}
 
-\item{text_angle}{The desired angle for text on the group labels}
+\item{facet_by}{will create breaks in the heatmap by some pData Variable}
+
+\item{color_facets}{if true will use colors instead of text labels for the facets
+# note that this option cannot be saved with save_ggplot(), and also is time consuming for single cell heatmaps}
 
 \item{group_names}{whether groups should be labelled}
 
 \item{gene_names}{whether genes should be labelled}
 
-\item{facet_by}{will create breaks in the heatmap by some pData Variable}
+\item{text_angle}{The desired angle for text on the group labels}
+
+\item{pdf_format}{can be "tile" or "raster." tile is generally higher quality while raster is more efficient}
 }
 \description{
 Makes either a single cell or bulk heatmap,
