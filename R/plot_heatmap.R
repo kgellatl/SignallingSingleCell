@@ -15,14 +15,17 @@
 #' @param facet_by will create breaks in the heatmap by some pData Variable
 #' @param pdf_format can be "tile" or "raster." tile is generally higher quality while raster is more efficient
 #' @param ceiling A value above which to truncate
+#' @param color_facets if true will use colors instead of text labels for the facets
 #' @export
 #' @details
 #' Utilize information stored in pData to control the plot display.
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", color_pal = viridis::magma(256),
-                         text_angle = 60, group_names = TRUE, gene_names = TRUE, facet_by = FALSE, pdf_format = "raster", ceiling = FALSE){
+plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", ceiling = FALSE,
+                         color_pal = viridis::magma(256), facet_by = FALSE,color_facets = FALSE,
+                         group_names = TRUE, gene_names = TRUE, text_size = 3, text_angle = 90,
+                         pdf_format = "raster"){
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
@@ -120,8 +123,12 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   g <- g + scale_color_gradientn(colours = color_pal)
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
-  g <- g +  labs(title= title)
+  g <- g + labs(title= title)
   g <- g + theme(axis.text.x = element_text(angle = text_angle, hjust = 1))
+  g <- g + theme(axis.text = element_text(size = text_size))
+  g <- g + theme(legend.text=element_text(size=text_size))
+  g <- g + theme(legend.title=element_text(size=text_size))
+  g <- g + theme(panel.spacing = unit(0.02, "lines"))
   g <- g +
     theme(axis.title.x=element_blank(),
           axis.title.y=element_blank(),
@@ -136,10 +143,49 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   }
   if(facet_by != FALSE){
     g <- g + facet_grid(reformulate(facet_by), scales = "free_x", space = "free_x")
-    # g <- g + facet_wrap(reformulate(facet_by), scales = "free_x", ncol = ncol)
-   # https://github.com/tidyverse/ggplot2/issues/2096
-    #https://stackoverflow.com/questions/19440069/ggplot2-facet-wrap-strip-color-based-on-variable-in-data-set
+    if(color_facets != TRUE){
+      plot(g)
+    }
+    if(color_facets == TRUE) {
+      dummy <- ggplot(data = heat_dat_lng, aes(fill = CellType, colour=CellType), size = 0.5)+ facet_grid(reformulate(facet_by)) +
+        geom_rect(aes(colour=CellType), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) +
+        theme_minimal() + scale_colour_manual(values = dynamic_colors)
+
+      g1 <- ggplotGrob(g)
+      g2 <- ggplotGrob(dummy)
+
+      gtable_select <- function (x, ...)
+      {
+        matches <- c(...)
+        x$layout <- x$layout[matches, , drop = FALSE]
+        x$grobs <- x$grobs[matches]
+        x
+      }
+
+      #library grid
+      #library gtable
+      panels <- grepl(pattern="panel", g2$layout$name)
+      strips <- grepl(pattern="strip_t", g2$layout$name)
+      g2$layout$t[panels] <- g2$layout$t[panels] - 1
+      g2$layout$b[panels] <- g2$layout$b[panels] - 1
+
+      new_strips <- gtable_select(g2, panels | strips)
+      grid.newpage()
+      grid.draw(new_strips)
+
+      gtable_stack <- function(g1, g2){
+        g1$grobs <- c(g1$grobs, g2$grobs)
+        g1$layout <- transform(g1$layout, z= z-max(z), name="g2")
+        g1$layout <- rbind(g1$layout, g2$layout)
+        g1
+      }
+
+      ## ideally you'd remove the old strips, for now they're just covered
+      new_plot <- gtable_stack(g1, new_strips)
+      grid.newpage()
+      grid.draw(new_plot)
+      #####
+      }
   }
-  plot(g)
 }
 
