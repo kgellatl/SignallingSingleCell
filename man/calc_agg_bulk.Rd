@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc_agg_bulk.R
 \name{calc_agg_bulk}
 \alias{calc_agg_bulk}
-\title{Calculate mean expression values across pData values}
+\title{Calculate UPM expression values across pData values}
 \usage{
 calc_agg_bulk(input, aggregate_by, group_by = FALSE)
 }
@@ -15,7 +15,7 @@ calc_agg_bulk(input, aggregate_by, group_by = FALSE)
 This is used to calculate portions internally to this group}
 }
 \description{
-This will calculate mean expression values across pData columns. Useful for heatmaps and networking analysis.
+This will calculate UMIs per million UPM expression values across pData columns. Useful for heatmaps and networking analysis.
 }
 \details{
 Utilize information stored in pData to control the plot display.
