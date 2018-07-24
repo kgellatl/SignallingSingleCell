@@ -16,6 +16,7 @@
 #' @param pdf_format can be "tile" or "raster." tile is generally higher quality while raster is more efficient
 #' @param ceiling A value above which to truncate
 #' @param color_facets if true will use colors instead of text labels for the facets
+#' # note that this option cannot be saved with save_ggplot(), and also is time consuming for single cell heatmaps
 #' @export
 #' @details
 #' Utilize information stored in pData to control the plot display.
@@ -140,6 +141,9 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   }
   if(gene_names == FALSE){
     g <- g + theme(axis.text.y=element_blank())
+  }
+  if(facet_by == FALSE){
+    plot(g)
   }
   if(facet_by != FALSE){
     g <- g + facet_grid(reformulate(facet_by), scales = "free_x", space = "free_x")
