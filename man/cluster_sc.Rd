@@ -4,7 +4,7 @@
 \alias{cluster_sc}
 \title{Cluster Single Cell}
 \usage{
-cluster_sc(input, dimension, method, num_clust, s = 2)
+cluster_sc(input, dimension, method, num_clust = NA, s = 2)
 }
 \arguments{
 \item{input}{the input ex_sc}
