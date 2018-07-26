@@ -4,7 +4,7 @@
 \alias{calc_agg_bulk}
 \title{Calculate UPM expression values across pData values}
 \usage{
-calc_agg_bulk(input, aggregate_by, group_by = FALSE)
+calc_agg_bulk(input, aggregate_by, group_by = FALSE, cutoff = FALSE)
 }
 \arguments{
 \item{input}{the input ex_sc.}
@@ -13,6 +13,9 @@ calc_agg_bulk(input, aggregate_by, group_by = FALSE)
 
 \item{group_by}{The pData variables that contains distinct groups if included in aggregate_by (eg Timepoint, Condition, etc)
 This is used to calculate portions internally to this group}
+
+\item{cutoff}{a  value below which gene expression values will be set to 0 for the mean.
+This is useful for removing nodes from networks that contain only a couple of cells.}
 }
 \description{
 This will calculate UMIs per million UPM expression values across pData columns. Useful for heatmaps and networking analysis.

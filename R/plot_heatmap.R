@@ -13,20 +13,35 @@
 #' @param group_names whether groups should be labelled
 #' @param gene_names whether genes should be labelled
 #' @param facet_by will create breaks in the heatmap by some pData Variable
+#' @param pdf_format can be "tile" or "raster." tile is generally higher quality while raster is more efficient
+#' @param ceiling A value above which to truncate
+#' @param color_facets if true will use colors instead of text labels for the facets
+#' # note that this option cannot be saved with save_ggplot(), and also is time consuming for single cell heatmaps
 #' @export
 #' @details
 #' Utilize information stored in pData to control the plot display.
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", color_pal = viridis::inferno(256),
-                         text_angle = 60, group_names = TRUE, gene_names = TRUE, facet_by = FALSE, ncol = 3){
+plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", ceiling = FALSE,
+                         color_pal = viridis::magma(256), facet_by = FALSE,color_facets = FALSE,
+                         group_names = TRUE, gene_names = TRUE, text_size = 3, text_angle = 90,
+                         pdf_format = "raster"){
+  gg_color_hue <- function(n) {
+    hues = seq(15, 375, length = n + 1)
+    hcl(h = hues, l = 65, c = 100)[1:n]
+  }
+  if(facet_by != FALSE){
+    n = length(unique(pData(input)[,facet_by]))
+    dynamic_colors = gg_color_hue(n)
+  }
   if(type == "bulk"){
     heat_dat <- fData(input)[,grep("bulk", colnames(fData(input)))]
     heat_dat <- heat_dat[genes,]
   }
   if(type == "single_cell"){
     heat_dat <- exprs(input)[genes,]
+    metadata <- pData(input)[,facet_by]
   }
   if(scale_by == "row"){
     heat_dat_2 <- t(apply(heat_dat,1,scale))
@@ -47,6 +62,9 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     d <- dist(t(heat_dat), method = "euclidean")
     hc1 <- hclust(d, method = "complete" )
     heat_dat <- heat_dat[,hc1$order]
+    if(type == "single_cell"){
+      metadata <- metadata[hc1$order]
+    }
   }
   if(cluster_by == "both"){
     d <- dist(heat_dat, method = "euclidean")
@@ -55,35 +73,63 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     d <- dist(t(heat_dat), method = "euclidean")
     hc1 <- hclust(d, method = "complete" )
     heat_dat <- heat_dat[,hc1$order]
+    if(type == "single_cell"){
+      metadata <- metadata[hc1$order]
+    }
   }
   #####
-  if(type == "single_cell"){
-    heat_dat[which(heat_dat > 5)] <- 5
+  if(ceiling  != FALSE){
+    heat_dat[which(heat_dat > ceiling)] <- ceiling
   }
 
   heat_dat <- as.data.frame(heat_dat)
-  colnames(heat_dat) <- sub("_num_.*", "", colnames(heat_dat))
+  if(type == "bulk"){
+    colnames(heat_dat) <- sub("_num_.*", "", colnames(heat_dat))
+  }
   heat_dat_lng <- tidyr::gather(heat_dat, key = "group", "Expression", 1:ncol(heat_dat), factor_key = "TRUE")
   heat_dat_lng$genes <- rep(factor(rownames(heat_dat), levels = rownames(heat_dat)), ncol(heat_dat))
   if(facet_by != FALSE){
     facs <- unique(pData(input)[,facet_by])
+    facs <- sort(facs)
     heat_dat_lng$facet  <- NA
-    for (i in 1:length(facs)) {
-      int <- facs[i]
-      ind <- grep(paste0(int, "_"), heat_dat_lng$group)
-      heat_dat_lng$facet[ind] <- int
+    if(type == "bulk"){
+      for (i in 1:length(facs)) {
+        int <- facs[i]
+        vals <- strsplit(as.character(heat_dat_lng$group), split = "_")
+        vals <- matrix(unlist(vals), ncol = length(vals[[1]]), byrow = T)
+        for (j in 1:nrow(vals)) {
+          int2 <- vals[j,]
+          ind <- match(int, int2)
+          if(!is.na(ind)){
+            heat_dat_lng$facet[j] <- int
+          }
+        }
+      }
+      heat_dat_lng$facet <- factor(heat_dat_lng$facet)
+      colnames(heat_dat_lng)[ncol(heat_dat_lng)] <- facet_by
+    } else {
+      heat_dat_lng$facet <- rep(metadata, each = length(genes))
+      colnames(heat_dat_lng)[ncol(heat_dat_lng)] <- facet_by
     }
-    heat_dat_lng$facet <- factor(heat_dat_lng$facet)
-    colnames(heat_dat_lng)[ncol(heat_dat_lng)] <- facet_by
   }
   g <- ggplot(heat_dat_lng, aes(group, genes))
-  g <- g + geom_tile(aes(fill = Expression))
+  if(pdf_format == "raster"){
+    g <- g + geom_raster(aes(fill = Expression))
+  }
+  if(pdf_format == "tile"){
+    g <- g + geom_tile(aes(fill = Expression, colour=Expression))
+  }
   g <- g + theme_classic()
   g <- g + scale_fill_gradientn(colours = color_pal)
+  g <- g + scale_color_gradientn(colours = color_pal)
   g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
-  g <- g +  labs(title= title)
+  g <- g + labs(title= title)
   g <- g + theme(axis.text.x = element_text(angle = text_angle, hjust = 1))
+  g <- g + theme(axis.text = element_text(size = text_size))
+  g <- g + theme(legend.text=element_text(size=text_size))
+  g <- g + theme(legend.title=element_text(size=text_size))
+  g <- g + theme(panel.spacing = unit(0.02, "lines"))
   g <- g +
     theme(axis.title.x=element_blank(),
           axis.title.y=element_blank(),
@@ -96,9 +142,54 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   if(gene_names == FALSE){
     g <- g + theme(axis.text.y=element_blank())
   }
-  if(facet_by != FALSE){
-    g <- g + facet_wrap(reformulate(facet_by), scales = "free_x", ncol = ncol)
+  if(facet_by == FALSE){
+    plot(g)
   }
-  plot(g)
+  if(facet_by != FALSE){
+    g <- g + facet_grid(reformulate(facet_by), scales = "free_x", space = "free_x")
+    if(color_facets != TRUE){
+      plot(g)
+    }
+    if(color_facets == TRUE) {
+      dummy <- ggplot(data = heat_dat_lng, aes(fill = CellType, colour=CellType), size = 0.5)+ facet_grid(reformulate(facet_by)) +
+        geom_rect(aes(colour=CellType), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) +
+        theme_minimal() + scale_colour_manual(values = dynamic_colors)
+
+      g1 <- ggplotGrob(g)
+      g2 <- ggplotGrob(dummy)
+
+      gtable_select <- function (x, ...)
+      {
+        matches <- c(...)
+        x$layout <- x$layout[matches, , drop = FALSE]
+        x$grobs <- x$grobs[matches]
+        x
+      }
+
+      #library grid
+      #library gtable
+      panels <- grepl(pattern="panel", g2$layout$name)
+      strips <- grepl(pattern="strip_t", g2$layout$name)
+      g2$layout$t[panels] <- g2$layout$t[panels] - 1
+      g2$layout$b[panels] <- g2$layout$b[panels] - 1
+
+      new_strips <- gtable_select(g2, panels | strips)
+      grid.newpage()
+      grid.draw(new_strips)
+
+      gtable_stack <- function(g1, g2){
+        g1$grobs <- c(g1$grobs, g2$grobs)
+        g1$layout <- transform(g1$layout, z= z-max(z), name="g2")
+        g1$layout <- rbind(g1$layout, g2$layout)
+        g1
+      }
+
+      ## ideally you'd remove the old strips, for now they're just covered
+      new_plot <- gtable_stack(g1, new_strips)
+      grid.newpage()
+      grid.draw(new_plot)
+      #####
+      }
+  }
 }
 
