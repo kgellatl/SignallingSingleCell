@@ -28,6 +28,7 @@ Imports:
     scater,
     ggridges,
     densityClust,
+    mgcv,
     edgeR,
     caret,
     SingleCellExperiment,
