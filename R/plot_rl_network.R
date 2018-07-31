@@ -143,7 +143,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     new_dat$FC <- as.numeric(new_dat$FC)
     new_dat$color <- NA
     col2s <- rev(viridis::plasma(7))
-    col2s[3:5] <- "gray"
+    # col2s[3:5] <- "gray"
     colfunc <- colorRampPalette(col2s)
     cols2 <- colfunc(nrow(new_dat))
     new_dat$color[order(new_dat$FC)] <- cols2

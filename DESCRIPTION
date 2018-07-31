@@ -31,7 +31,9 @@ Imports:
     edgeR,
     caret,
     SingleCellExperiment,
-    visNetwork
+    visNetwork,
+    grid,
+    gtable
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1

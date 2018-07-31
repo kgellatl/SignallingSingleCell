@@ -9,6 +9,8 @@
 #' @param color_pal The color pallete to be used
 #' @param scale_by scale across "row" (genes), "col" (groups), or FALSE
 #' @param cluster_by either "row", col, or both
+#' @param cluster_type "kmeans" or "hierarchical"
+#' @param k if cluster type is kmeans must provide k
 #' @param text_angle The desired angle for text on the group labels
 #' @param group_names whether groups should be labelled
 #' @param gene_names whether genes should be labelled
@@ -23,7 +25,7 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", ceiling = FALSE,
+plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", cluster_type = "hierarchical", k = NULL, ceiling = FALSE,
                          color_pal = viridis::magma(256), facet_by = FALSE,color_facets = FALSE,
                          group_names = TRUE, gene_names = TRUE, text_size = 3, text_angle = 90,
                          pdf_format = "raster"){
@@ -31,50 +33,96 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
   }
+  #####
   if(facet_by != FALSE){
     n = length(unique(pData(input)[,facet_by]))
     dynamic_colors = gg_color_hue(n)
   }
+  #####
   if(type == "bulk"){
     heat_dat <- fData(input)[,grep("bulk", colnames(fData(input)))]
     heat_dat <- heat_dat[genes,]
   }
+  #####
   if(type == "single_cell"){
     heat_dat <- exprs(input)[genes,]
     metadata <- pData(input)[,facet_by]
   }
+  #####
   if(scale_by == "row"){
     heat_dat_2 <- t(apply(heat_dat,1,scale))
     colnames(heat_dat_2) <- colnames(heat_dat)
     heat_dat <- heat_dat_2
   }
+  #####
   if(scale_by == "col"){
     heat_dat_2 <- apply(heat_dat,2,scale)
     rownames(heat_dat_2) <- rownames(heat_dat)
     heat_dat <- heat_dat_2
   }
+  #####
   if(cluster_by == "row"){
-    d <- dist(heat_dat, method = "euclidean")
-    hc1 <- hclust(d, method = "complete" )
-    heat_dat <- heat_dat[hc1$order,]
-  }
-  if(cluster_by == "col"){
-    d <- dist(t(heat_dat), method = "euclidean")
-    hc1 <- hclust(d, method = "complete" )
-    heat_dat <- heat_dat[,hc1$order]
-    if(type == "single_cell"){
-      metadata <- metadata[hc1$order]
+    if(cluster_type == "hierarchical"){
+      d <- dist(heat_dat, method = "euclidean")
+      hc1 <- hclust(d, method = "complete" )
+      heat_dat <- heat_dat[hc1$order,]
+    }
+    if(cluster_type == "kmeans"){
+      if(is.null(k)){
+        stop("Must provide a k for kmeans clustering")
+      }
+      res <- kmeans(heat_dat, centers = k, nstart = 25)
+      reord <- order(res$cluster)
+      heat_dat <- heat_dat[reord,]
+      set.seed(100)
+      for (i in 1:length(1:k)) {
+        int <- c(1:k)[i]
+        s1 <- names(res$cluster[which(res$cluster == int)])
+        ind <- match(s1, rownames(heat_dat))
+        tmp <- heat_dat[ind,]
+        d <- dist(tmp, method = "euclidean")
+        hc1 <- hclust(d, method = "complete" )
+        tmp <- tmp[hc1$order,]
+        if(i == 1){
+          new_dat <- tmp
+        } else {
+          new_dat <- rbind(new_dat, tmp)
+        }
+      }
+      heat_dat <- new_dat
     }
   }
+  #####
+  if(cluster_by == "col"){
+    if(cluster_type == "hierarchical"){
+      d <- dist(t(heat_dat), method = "euclidean")
+      hc1 <- hclust(d, method = "complete" )
+      heat_dat <- heat_dat[,hc1$order]
+      if(type == "single_cell"){
+        metadata <- metadata[hc1$order]
+      }
+    }
+    if(cluster_type == "kmeans"){
+      if(is.null(k)){
+        stop("Dont do kmeans on cols")
+      }
+    }
+  }
+  #####
   if(cluster_by == "both"){
-    d <- dist(heat_dat, method = "euclidean")
-    hc1 <- hclust(d, method = "complete" )
-    heat_dat <- heat_dat[hc1$order,]
-    d <- dist(t(heat_dat), method = "euclidean")
-    hc1 <- hclust(d, method = "complete" )
-    heat_dat <- heat_dat[,hc1$order]
-    if(type == "single_cell"){
-      metadata <- metadata[hc1$order]
+    if(cluster_type == "hierarchical"){
+      d <- dist(heat_dat, method = "euclidean")
+      hc1 <- hclust(d, method = "complete" )
+      heat_dat <- heat_dat[hc1$order,]
+      d <- dist(t(heat_dat), method = "euclidean")
+      hc1 <- hclust(d, method = "complete" )
+      heat_dat <- heat_dat[,hc1$order]
+      if(type == "single_cell"){
+        metadata <- metadata[hc1$order]
+      }
+    }
+    if(cluster_type == "kmeans"){
+      stop("Dont do kmeans on both")
     }
   }
   #####
@@ -165,17 +213,14 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
         x$grobs <- x$grobs[matches]
         x
       }
-
-      #library grid
-      #library gtable
       panels <- grepl(pattern="panel", g2$layout$name)
       strips <- grepl(pattern="strip_t", g2$layout$name)
       g2$layout$t[panels] <- g2$layout$t[panels] - 1
       g2$layout$b[panels] <- g2$layout$b[panels] - 1
 
       new_strips <- gtable_select(g2, panels | strips)
-      grid.newpage()
-      grid.draw(new_strips)
+      grid::grid.newpage()
+      grid::grid.draw(new_strips)
 
       gtable_stack <- function(g1, g2){
         g1$grobs <- c(g1$grobs, g2$grobs)
@@ -186,10 +231,14 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
 
       ## ideally you'd remove the old strips, for now they're just covered
       new_plot <- gtable_stack(g1, new_strips)
-      grid.newpage()
-      grid.draw(new_plot)
+      grid::grid.newpage()
+      grid::grid.draw(new_plot)
       #####
-      }
+    }
+  }
+  if(cluster_type == "kmeans"){
+    kmean_res <- res
+    return(kmean_res)
   }
 }
 
