@@ -27,7 +27,6 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
 
   cs2 <- crossing(cfg, tmp_net_cp)
 
-
   cols_clust <- gg_color_hue(length(unique(cfg$membership)))
   cols_clust2 <- adjustcolor(cols_clust, alpha.f = 1)
   clusts <- as.vector(cfg$membership)
@@ -60,17 +59,22 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   edg_rank <- sort(edg_rank, decreasing = T)
 
   hs <- hub_score(tmp_net, weights=NA)$vector #Outgoing (ligands)
-  hs <- sort(hs, decreasing = T)
+  hs_srt <- sort(hs, decreasing = T)
 
   as <- authority_score(tmp_net, weights=NA)$vector # Incoming (receptors)
-  as <- sort(as, decreasing = T)
+  as_srt <- sort(as, decreasing = T)
 
   cluster_edge_btw <- vector(mode = "list", length = length(unique(cfg$membership)))
+  cluster_edge_hub <- vector(mode = "list", length = length(unique(cfg$membership)))
+  cluster_node_authority <- vector(mode = "list", length = length(unique(cfg$membership)))
+
   sizes <- rep(0, length(V(tmp_net)))
 
   for (i in 1:length(unique(cfg$membership))) {
     int <- which(cfg$membership == i)
     vals <- vert_rank[int]
+    cluster_edge_hub[[i]] <- sort(hs[int], decreasing = T)
+    cluster_node_authority[[i]] <- sort(as[int], decreasing = T)
     cluster_edge_btw[[i]] <- sort(vals, decreasing = T)
     vals <- rank(vals)
     size <- (3/max(vals)*vals)
@@ -172,21 +176,22 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   results[[1]] <- deg
   results[[2]] <- deg_rec
   results[[3]] <- vert_rank_srt
-  results[[4]] <- as
+  results[[4]] <- as_srt
   results[[5]] <- deg_lig
   results[[6]] <- edg_rank
-  results[[7]] <- hs
-  results[[8]] <- cfg
-  results[[9]] <- cs2
-  results[[10]] <- cluster_edge_btw
-  results[[11]] <- as.data.frame(matrix(c(names(cluster_centers), cluster_centers), ncol = 2))
-  results[[12]] <- comm_ind
-  results[[13]] <- vit_net
-  results[[14]] <- input
+  results[[7]] <- hs_srt
+  results[[8]] <- cs2
+  results[[9]] <- cfg
+  results[[10]] <- comm_ind
+  results[[11]] <- cluster_edge_btw
+  results[[12]] <- cluster_edge_hub
+  results[[13]] <- cluster_node_authority
+  results[[14]] <- vit_net
+  results[[15]] <- input
 
   names(results) <- c("Degree", "Node_degree", "Node_betweeness", "Node_authority",
-                      "Edge_degree", "Edge_betweeness", "Edge_hub", "Communities", "Crossing",
-                      "Communities_betweeness", "Community_centers", "Communities_individual", "Interactive", "input")
+                      "Edge_degree", "Edge_betweeness", "Edge_hub", "Crossing", "Clusters_Results", "Clusters_individual",
+                      "Clusters_betweeness", "Clusters_edge_hub","Clusters_node_authority", "Interactive", "input")
   return(results)
 }
 
