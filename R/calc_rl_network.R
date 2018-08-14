@@ -360,6 +360,7 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   #####
   results <- vector(mode = "list", 2)
   results[[1]] <- summary
+  rownames(full_network) <- seq(1:nrow(full_network))
   results[[2]] <- full_network
   names(results) <- c("Summary", "full_network")
   return(results)
