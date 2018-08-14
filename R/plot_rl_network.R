@@ -27,7 +27,10 @@
 
 plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,  layout = "nicely",
                             write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE, textsize = 0.5, h = 8, w = 8, prefix = ""){
+  ###############################################################################################
   ##### Colors to match ggplot #####
+  ###############################################################################################
+
   plot_rl_results <- list()
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
@@ -36,7 +39,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   n = length(unique(as.character(input$Summary[,"Lig_produce"])))
   dynamic_colors = gg_color_hue(n)
 
+  ###############################################################################################
   ##### Group by  #####
+  ###############################################################################################
+
   if(group_by != FALSE){
     tmpdat <- input$full_network[,c(2,4,1,3,5)]
     for (i in 1:nrow(tmpdat)) {
@@ -52,7 +58,11 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     }
     net_graph <- graph_from_data_frame(tmpdat[,c("V6", "V7")], directed = TRUE)
   }
+
+  ###############################################################################################
   ##### No Group  by  #####
+  ###############################################################################################
+
   if(group_by == FALSE){
     tmpdat <- input$full_network[,c(2,4,1,3)]
     for (i in 1:nrow(tmpdat)) {
@@ -68,7 +78,11 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     }
     net_graph <- graph_from_data_frame(tmpdat[,c("V5", "V6")], directed = TRUE)
   }
+
+  ###############################################################################################
   ##### Color Edges  #####
+  ###############################################################################################
+
   cols <- sort(unique(c(tmpdat[,3], tmpdat[,4])))
   dynamic_colors = gg_color_hue(length(cols))
   cols <- matrix(c(cols, dynamic_colors), ncol = 2)
@@ -78,7 +92,11 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     col <- cols[ind,2]
     colors_edge <- c(colors_edge, col)
   }
+
+  ###############################################################################################
   ##### Color Edges  FOR COMPARITIVE MUCH MORE COMPLICATED #####
+  ###############################################################################################
+
   if(comparitive == TRUE){
     if(group_by == FALSE || from == FALSE || to == FALSE || value == FALSE){
       stop("Comparisons are only valid across groups, provide a group_by, from, and to")
@@ -149,7 +167,11 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     new_dat$color[order(new_dat$FC)] <- cols2
     colors_edge <- new_dat$color
   }
+
+  ###############################################################################################
   ##### Color Vertices and get groups (nodes by default) #####
+  ###############################################################################################
+
   colors_vert <- c()
   vertcol <- names(V(net_graph))
   names <- c()
@@ -173,7 +195,11 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
       V(net_graph)$group_by[i] <- sk
     }
   }
+
+  ###############################################################################################
   ##### Graphing parameters #####
+  ###############################################################################################
+
   V(net_graph)$size <- nodesize
   V(net_graph)$label.cex <- textsize
   V(net_graph)$label.color <- "black"
@@ -211,6 +237,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     deg[which(deg < 0.5)] <- 0.5
     V(net_graph)$size <- deg
   }
+
+  ###############################################################################################
+  ##### Write out results #####
+  ###############################################################################################
 
   plot_rl_results[[1]] <- net_graph
   plot_rl_results[[2]] <- l
@@ -255,7 +285,9 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "comparitive_table")
   }
 
-  #####
+  ###############################################################################################
+  ##### Interactive #####
+  ###############################################################################################
 
   if(write_interactive == TRUE){
     V(net_graph)$name <- name_backup
