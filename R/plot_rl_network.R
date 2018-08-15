@@ -106,7 +106,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     new_dat <- as.data.frame(matrix(unlist(strsplit(search, split = "_")), ncol = 4, byrow = T))
     new_dat$FC <- 0
     new_dat$expression <- 0
-    search_full <- apply( input_full$full_network[ , 1:4 ] , 1 , paste , collapse = "_" )
+    if(!is.null(input$full_network$keep)){
+      new_dat$significant <- FALSE
+    }
+    search_full <- apply(input_full$full_network[ , 1:4 ] , 1 , paste , collapse = "_" )
     remove <- c()
     for (i in 1:length(search)) {
       int <- search[i]
@@ -132,10 +135,16 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
         }
       }
       new_dat$FC[i] <- FC
+      if(!is.null(input$full_network$keep)){
+        tmpvals <- input$full_network$keep[ind]
+        state <- unique(tmpvals)
+        new_dat$significant[i] <- state
+      }
     }
     if(!is.null(remove)){
       new_dat <- new_dat[-remove,]
     }
+    new_dat_keep <- new_dat
     new_dat <- new_dat[,c(2,4,1,3,5,6)]
     tmpdat <- new_dat
     for (i in 1:nrow(tmpdat)) {
@@ -160,12 +169,28 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     new_dat$FC[which(new_dat$FC == "OFF")] <- max_val
     new_dat$FC <- as.numeric(new_dat$FC)
     new_dat$color <- NA
-    col2s <- rev(viridis::plasma(7))
-    # col2s[3:5] <- "gray"
-    colfunc <- colorRampPalette(col2s)
-    cols2 <- colfunc(nrow(new_dat))
-    new_dat$color[order(new_dat$FC)] <- cols2
+
+    ##### Need to take this and split into positive and negative sections
+    col2s <- (viridis::cividis(15))
+    # plot(seq(1:15), col = col2s, pch = 20)
+
+    colfunc_low <- colorRampPalette(col2s[1:5])
+    lowind <- which(new_dat$FC > 0)
+    cols2_down <- colfunc_low(length(lowind))
+    new_dat$color[lowind][order(-new_dat$FC[lowind])] <- cols2_down
+
+    colfunc_high <- colorRampPalette(col2s[11:15])
+    highind <- which(new_dat$FC < 0)
+    cols2_up <- colfunc_high(length(highind))
+    new_dat$color[highind][order(-new_dat$FC[highind])] <- cols2_up
+
     colors_edge <- new_dat$color
+    #####
+
+    if(!is.null(input$full_network$keep)){
+      grayout <- which(new_dat_keep$significant == FALSE)
+      colors_edge[grayout] <- col2s[8]
+    }
   }
 
   ###############################################################################################
@@ -250,7 +275,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs")
 
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
-    pdf(paste0(prefix, "Fullnetwork.pdf"), h = h, w = w, useDingbats = FALSE)
+  pdf(paste0(prefix, "Fullnetwork.pdf"), h = h, w = w, useDingbats = FALSE)
   plot(net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   cell_legend <- sort(unique(tmpdat[,3]))
   legend(x=-1.5, y=0, cell_legend, pch=21,
@@ -332,8 +357,8 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     visNetwork::visSave(vit_net, file=paste0(prefix, "Fullnetwork_interactive.html"))
 
     if(comparitive!= FALSE){
-    plot_rl_results[[6]] <- vit_net
-    names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "comparitive_table", "interactive")
+      plot_rl_results[[6]] <- vit_net
+      names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "comparitive_table", "interactive")
     } else {
       plot_rl_results[[5]] <- vit_net
       names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "interactive")
