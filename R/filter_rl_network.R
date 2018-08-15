@@ -21,6 +21,7 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
     result <- eval(call)
     result
   }
+  rownames(input$full_network) <- seq(1:nrow(input$full_network))
   if(filter_type != "DE" && filter_type != "network"){
     stop("Filter types can be 'DE' or 'network'")
   }
