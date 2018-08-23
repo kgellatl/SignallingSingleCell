@@ -26,7 +26,8 @@
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
 plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,  layout = "nicely",
-                            write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE, textsize = 0.5, h = 8, w = 8, prefix = ""){
+                            write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE,
+                            textsize = 0.5, h = 8, w = 8, prefix = ""){
   ###############################################################################################
   ##### Colors to match ggplot #####
   ###############################################################################################
@@ -191,6 +192,14 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
       grayout <- which(new_dat_keep$significant == FALSE)
       colors_edge[grayout] <- col2s[8]
     }
+
+    alternative_colors <- c()
+    for (i in 1:nrow(tmpdat)) {
+      ind <- match(tmpdat[i,3], cols[,1])
+      col <- cols[ind,2]
+      alternative_colors <- c(alternative_colors, col)
+    }
+
   }
 
   ###############################################################################################
@@ -230,6 +239,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   V(net_graph)$label.color <- "black"
   V(net_graph)$vertex.frame.color <- NA
   V(net_graph)$color <- colors_vert
+
+  if(comparitive!=FALSE){
+    E(net_graph)$color2 <- alternative_colors
+  }
 
   if(comparitive!=FALSE){
     newsize <- new_dat$expression
@@ -276,7 +289,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
 
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
   pdf(paste0(prefix, "Fullnetwork.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  plot(net_graph, layout = l, vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   cell_legend <- sort(unique(tmpdat[,3]))
   legend(x=-1.5, y=0, cell_legend, pch=21,
          col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
@@ -285,11 +298,21 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   pdf(paste0(prefix, "Fullnetwork_noname.pdf"), h = h, w = w, useDingbats = FALSE)
   net2 <- net_graph
   V(net2)$name <- ""
-  plot(net2, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  plot(net2, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   cell_legend <- sort(unique(tmpdat[,3]))
   legend(x=-1.5, y=0, cell_legend, pch=21,
          col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
   dev.off()
+
+  if(comparitive == TRUE){
+    pdf(paste0(prefix, "Fullnetwork_noname_color2.pdf"), h = h, w = w, useDingbats = FALSE)
+    E(net2)$color <- E(net_graph)$color2
+    plot(net2, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+    cell_legend <- sort(unique(tmpdat[,3]))
+    legend(x=-1.5, y=0, cell_legend, pch=21,
+           col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
+    dev.off()
+  }
 
   cols_clust <- gg_color_hue(length(unique(plot_rl_results$clusters$membership)))
   clusts <- as.vector(plot_rl_results$clusters$membership)
@@ -301,7 +324,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
 
   pdf(paste0(prefix, "Fullnetwork_clusters.pdf"), h = h, w = w, useDingbats = FALSE)
   V(net2)$name <- plot_rl_results$clusters$membership
-  plot(net2, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black",
+  plot(net2, layout = l,  vertex.frame.color = NA, cex.col= "black",
        vertex.color = clusts, rescale = TRUE)
   dev.off()
 
