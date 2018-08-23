@@ -126,7 +126,7 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     }
   }
   #####
-  if(ceiling  != FALSE){
+  if(ceiling != FALSE){
     heat_dat[which(heat_dat > ceiling)] <- ceiling
   }
 
