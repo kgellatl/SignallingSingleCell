@@ -15,7 +15,8 @@
 #' This will use the calc_agg_bulk results to ID networks
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
-filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolder = NULL, cutoff, direction, absol = FALSE, group_by = FALSE, keep = FALSE){
+filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolder = NULL, cutoff, direction, absol = FALSE,
+                              group_by = FALSE, keep = FALSE){
   f <- function(a, b, op=direction) {
     call <- call(op, a, b)
     result <- eval(call)
