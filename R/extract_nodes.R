@@ -12,7 +12,7 @@
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
 extract_nodes <- function(input, nodes, expand = 0){
-
+  path <- c()
   for (i in 1:length(nodes)) {
     if(i < length(nodes)){
       int1 <- nodes[i]
@@ -21,6 +21,11 @@ extract_nodes <- function(input, nodes, expand = 0){
       walk <- unlist(walk$vpath)
       path <- c(path, walk)
     } else {
+      int1 <- nodes[i]
+      int2 <- nodes[1]
+      walk <- shortest_paths(graph = input, from = int1, to = int2, mode = "all")
+      walk <- unlist(walk$vpath)
+      path <- c(path, walk)
       path <- unique(path)
       path <- names(V(input))[path]
     }
