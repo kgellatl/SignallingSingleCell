@@ -2,22 +2,22 @@
 % Please edit documentation in R/plot_tsne_gene.R
 \name{plot_tsne_gene}
 \alias{plot_tsne_gene}
-\title{tSNE Plot on a gene or genes}
+\title{tSNE Plot on a gene or gene}
 \usage{
-plot_tsne_gene(input, genes, title = "", density = FALSE, facet_by = "NA",
+plot_tsne_gene(input, gene, title = "", density = FALSE, facet_by = "NA",
   colors_points = c("gray", "blue", "red", "yellow"), size = 1.5,
   ncol = 2, resolution = 500, cutoff = 0.2)
 }
 \arguments{
 \item{input}{The input data}
 
-\item{genes}{the gene or genes to ploy}
+\item{gene}{the gene or gene to ploy}
 
 \item{title}{The title}
 
 \item{density}{If true will color a density of the points}
 
-\item{facet_by}{If ONE gene is being plotted it can be faceted. You cannot facet multiple genes}
+\item{facet_by}{If ONE gene is being plotted it can be faceted. You cannot facet multiple gene}
 
 \item{colors_points}{Colors for the cells}
 
