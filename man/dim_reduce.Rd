@@ -5,7 +5,7 @@
 \title{Dimension Reduction}
 \usage{
 dim_reduce(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15,
-  tSNE_perp = 30, iterations = 1000, print_progress = TRUE)
+  tSNE_perp = 30, iterations = 1000, print_progress = TRUE, nVar = NA)
 }
 \arguments{
 \item{input}{the input ex_sc}
@@ -21,6 +21,8 @@ dim_reduce(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15,
 \item{iterations}{The number of iterations for tSNE to perform.}
 
 \item{print_progress}{will print progress if TRUE}
+
+\item{nVar}{cutoff for percent of variance explained from PCs}
 }
 \description{
 This function will do dimensionality reduction.

@@ -4,7 +4,7 @@
 \alias{cluster_sc}
 \title{Cluster Single Cell}
 \usage{
-cluster_sc(input, dimension, method, num_clust)
+cluster_sc(input, dimension, method, num_clust = NA, s = 2)
 }
 \arguments{
 \item{input}{the input ex_sc}
@@ -14,6 +14,8 @@ cluster_sc(input, dimension, method, num_clust)
 \item{method}{can either be "spectral" or "density" which is on 2d}
 
 \item{num_clust}{the number of clusters}
+
+\item{s}{the number of standard deviations from the curve to select cluster centers}
 }
 \description{
 This will perform clustering on your single cell data.
