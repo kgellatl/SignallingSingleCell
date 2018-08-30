@@ -23,18 +23,16 @@ Imports:
     Rtsne,
     kknn,
     MASS,
-    scran,
     limSolve,
-    scater,
     ggridges,
     densityClust,
     mgcv,
     edgeR,
     caret,
-    SingleCellExperiment,
     visNetwork,
     grid,
     gtable
+biocViews: SingleCellExperiment, scran, scater
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1
