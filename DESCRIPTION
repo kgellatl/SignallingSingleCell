@@ -31,8 +31,11 @@ Imports:
     caret,
     visNetwork,
     grid,
-    gtable
-biocViews: SingleCellExperiment, scran, scater
+    gtable,
+    SingleCellExperiment, 
+    scran, 
+    scater
+biocViews: Single Cell, Networking
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1
