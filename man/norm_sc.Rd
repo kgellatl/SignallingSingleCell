@@ -4,13 +4,23 @@
 \alias{norm_sc}
 \title{Normalization}
 \usage{
-norm_sc(input, genelist = gene_subset, pool_sizes = c(20, 30, 40, 50),
+norm_sc(input, gene_frac = 0.25, gene_var = 0.75, sf_keep = 0.975,
+  genelist = NULL, norm_by = "Cluster", pool_sizes = c(20, 30, 40, 50),
   positive = TRUE)
 }
 \arguments{
 \item{input}{the input ex_sc}
 
-\item{genelist}{the subset of genes to use for calculating size factors.}
+\item{gene_frac}{the fraction of cells expressing a given gene to be included in normalization}
+
+\item{gene_var}{the percentile of least variable genes to keep (ie 0.75 removes the 25% most variable genes)}
+
+\item{sf_keep}{size factors can be greatly skewed in some cells. This will filter (based on z score thresholding of the size factors)
+cells whose size factor is an outlier.}
+
+\item{genelist}{the subset of genes to use for calculating size factors. Defaults to null. Provide to overrule internal gene selection.}
+
+\item{norm_by}{the pdata variable on which to perform internal normalization before normalizing across this variable.}
 
 \item{positive}{enforces positive size factors}
 
