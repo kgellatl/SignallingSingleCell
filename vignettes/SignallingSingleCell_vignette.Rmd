@@ -82,13 +82,13 @@ plot_tsne_metadata(ex_sc, color_by = "UMI_sum", title = "Total UMIs per cell")
 Now that we have dimension reduced data we can try clustering it!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 3) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
-ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 3) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
-
-ex_sc <- id_markers(ex_sc, print_progress = TRUE) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
-
+ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 7) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
+# ex_sc <- cluster_sc(ex_sc, dimension = "2d", method = "density", num_clust = 7) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
 
 plot_tsne_metadata(ex_sc, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
+
+ex_sc <- id_markers(ex_sc, print_progress = TRUE) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
+markers <- return_markers(ex_sc, num_markers = 10) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
 
 plot_density(ex_sc, title = "UMIs per cluster", val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 
