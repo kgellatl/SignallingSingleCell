@@ -55,7 +55,7 @@ The first step is to filter your data to remove low quality cells. Often creatin
 ex_sc <- calc_libsize(ex_sc) # sums counts for each cell
 plot_density(ex_sc, title = "UMI Density", val = "UMI_sum", statistic = "mean") # Density function. Note how many low UMI count cells are in the data!
 
-ex_sc <- pre_filter(ex_sc, threshold = 1, minCells = 10, minUMI = 1000, maxUMI = 10000, print_progress = TRUE) # filters cells and genes
+ex_sc <- pre_filter(ex_sc, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10,  print_progress = TRUE) # filters cells and genes
 ex_sc <- calc_libsize(ex_sc)
 plot_density(ex_sc, title = "UMI Density",  val = "UMI_sum", statistic = "mean")  
 
@@ -82,7 +82,11 @@ plot_tsne_metadata(ex_sc, color_by = "UMI_sum", title = "Total UMIs per cell")
 Now that we have dimension reduced data we can try clustering it!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 6) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
+ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 3) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
+ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 3) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
+
+ex_sc <- id_markers(ex_sc, print_progress = TRUE) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
+
 
 plot_tsne_metadata(ex_sc, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
 
@@ -96,20 +100,9 @@ plot_density_ridge(ex_sc, title = "UMIs per cluster", val = "UMI_sum", color_by 
 Now that the data has preliminary clusters, we can normalize. SCRAN normalization will first normalize internally in clusters, before normalizing across clusters. Once the data is normalized we can run the same steps as above before visualization. The first step is to select the genes to be used for normalization. One method would be to first only use genes expressed in more than n cells, and then remove the most variable genes.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-gene_subset_exp <- subset_genes(ex_sc, method = "Expression", threshold = 3, minCells = .05*(ncol(exprs(ex_sc)))) # filter genes on expression
+table(pData(ex_sc)$Cluster)
 
-gene_subset_var <- subset_genes(ex_sc, method = "PCA", threshold = 3, minCells = .05*(ncol(exprs(ex_sc))), nComp = 10, cutoff = 0.85) # filter genes on variability
-
-stable_genes <- gene_subset_exp[!gene_subset_exp %in% gene_subset_var] # remove variable genes
-
-clusters <- pData(ex_sc)[,"Cluster"]
-c_sizes <- c()
-for(i in 1:length(unique(pData(ex_sc)$Cluster))){
-    c_sizes <- c(c_sizes, length(which(clusters == paste0("Cluster", i))))
-}
-min(c_sizes) # This is the maximum pool size. We generally aim for 5 sets of pool sizes. If one cluster is much too small it can be merged into a larger cluster.
-
-ex_sc_norm <- norm_sc(ex_sc, genelist = stable_genes,  pool_sizes = c(20,30,40,50,60))
+ex_sc_norm <- norm_sc(ex_sc, pool_sizes = c(20,25,30,35,40))
 ```
 
 ## Post Normalization Pre-processing
@@ -117,8 +110,7 @@ ex_sc_norm <- norm_sc(ex_sc, genelist = stable_genes,  pool_sizes = c(20,30,40,5
 Now that we have normalized, it is time to reprocess the data as before, this time on the normalized counts!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc_norm <- calc_libsize(ex_sc_norm)
-plot_density(ex_sc_norm, title = "UMI Density", val = "UMI_sum", statistic = "mean") 
+plot_density(ex_sc_norm, title = "size_factors", val = "size_factor", statistic = "mean") 
 
 gene_subset <- subset_genes(ex_sc_norm, method = "PCA", threshold = 1, minCells = 30, nComp = 10, cutoff = 0.85)
 
