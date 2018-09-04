@@ -13,7 +13,7 @@ norm_sc(input, gene_frac = 0.25, gene_var = 0.75, sf_keep = 0.975,
 
 \item{gene_frac}{the fraction of cells expressing a given gene to be included in normalization}
 
-\item{gene_var}{the percentile of least variable genes to keep (ie 0.75 removes the 25% most variable genes)}
+\item{gene_var}{the percentile of least variable genes to keep (ie 0.75 removes the 25 percent most variable genes)}
 
 \item{sf_keep}{size factors can be greatly skewed in some cells. This will filter (based on z score thresholding of the size factors)
 cells whose size factor is an outlier.}

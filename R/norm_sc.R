@@ -4,7 +4,7 @@
 #'
 #' @param input the input ex_sc
 #' @param gene_frac the fraction of cells expressing a given gene to be included in normalization
-#' @param gene_var the percentile of least variable genes to keep (ie 0.75 removes the 25% most variable genes)
+#' @param gene_var the percentile of least variable genes to keep (ie 0.75 removes the 25 percent most variable genes)
 #' @param sf_keep size factors can be greatly skewed in some cells. This will filter (based on z score thresholding of the size factors)
 #' cells whose size factor is an outlier.
 #' @param genelist the subset of genes to use for calculating size factors. Defaults to null. Provide to overrule internal gene selection.
