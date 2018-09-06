@@ -26,8 +26,12 @@
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
 plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,  layout = "nicely",
-                            write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE, textsize = 0.5, h = 8, w = 8, prefix = ""){
+                            write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE,
+                            textsize = 0.5, h = 8, w = 8, prefix = ""){
+  ###############################################################################################
   ##### Colors to match ggplot #####
+  ###############################################################################################
+
   plot_rl_results <- list()
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
@@ -36,7 +40,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   n = length(unique(as.character(input$Summary[,"Lig_produce"])))
   dynamic_colors = gg_color_hue(n)
 
+  ###############################################################################################
   ##### Group by  #####
+  ###############################################################################################
+
   if(group_by != FALSE){
     tmpdat <- input$full_network[,c(2,4,1,3,5)]
     for (i in 1:nrow(tmpdat)) {
@@ -52,7 +59,11 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     }
     net_graph <- graph_from_data_frame(tmpdat[,c("V6", "V7")], directed = TRUE)
   }
+
+  ###############################################################################################
   ##### No Group  by  #####
+  ###############################################################################################
+
   if(group_by == FALSE){
     tmpdat <- input$full_network[,c(2,4,1,3)]
     for (i in 1:nrow(tmpdat)) {
@@ -68,7 +79,11 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     }
     net_graph <- graph_from_data_frame(tmpdat[,c("V5", "V6")], directed = TRUE)
   }
+
+  ###############################################################################################
   ##### Color Edges  #####
+  ###############################################################################################
+
   cols <- sort(unique(c(tmpdat[,3], tmpdat[,4])))
   dynamic_colors = gg_color_hue(length(cols))
   cols <- matrix(c(cols, dynamic_colors), ncol = 2)
@@ -78,7 +93,11 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     col <- cols[ind,2]
     colors_edge <- c(colors_edge, col)
   }
+
+  ###############################################################################################
   ##### Color Edges  FOR COMPARITIVE MUCH MORE COMPLICATED #####
+  ###############################################################################################
+
   if(comparitive == TRUE){
     if(group_by == FALSE || from == FALSE || to == FALSE || value == FALSE){
       stop("Comparisons are only valid across groups, provide a group_by, from, and to")
@@ -88,7 +107,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     new_dat <- as.data.frame(matrix(unlist(strsplit(search, split = "_")), ncol = 4, byrow = T))
     new_dat$FC <- 0
     new_dat$expression <- 0
-    search_full <- apply( input_full$full_network[ , 1:4 ] , 1 , paste , collapse = "_" )
+    if(!is.null(input$full_network$keep)){
+      new_dat$significant <- FALSE
+    }
+    search_full <- apply(input_full$full_network[ , 1:4 ] , 1 , paste , collapse = "_" )
     remove <- c()
     for (i in 1:length(search)) {
       int <- search[i]
@@ -114,10 +136,16 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
         }
       }
       new_dat$FC[i] <- FC
+      if(!is.null(input$full_network$keep)){
+        tmpvals <- input$full_network$keep[ind]
+        state <- unique(tmpvals)
+        new_dat$significant[i] <- state
+      }
     }
     if(!is.null(remove)){
       new_dat <- new_dat[-remove,]
     }
+    new_dat_keep <- new_dat
     new_dat <- new_dat[,c(2,4,1,3,5,6)]
     tmpdat <- new_dat
     for (i in 1:nrow(tmpdat)) {
@@ -142,14 +170,42 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     new_dat$FC[which(new_dat$FC == "OFF")] <- max_val
     new_dat$FC <- as.numeric(new_dat$FC)
     new_dat$color <- NA
-    col2s <- rev(viridis::plasma(7))
-    col2s[3:5] <- "gray"
-    colfunc <- colorRampPalette(col2s)
-    cols2 <- colfunc(nrow(new_dat))
-    new_dat$color[order(new_dat$FC)] <- cols2
+
+    ##### Need to take this and split into positive and negative sections
+    col2s <- (viridis::cividis(15))
+    # plot(seq(1:15), col = col2s, pch = 20)
+
+    colfunc_low <- colorRampPalette(col2s[1:5])
+    lowind <- which(new_dat$FC > 0)
+    cols2_down <- colfunc_low(length(lowind))
+    new_dat$color[lowind][order(-new_dat$FC[lowind])] <- cols2_down
+
+    colfunc_high <- colorRampPalette(col2s[11:15])
+    highind <- which(new_dat$FC < 0)
+    cols2_up <- colfunc_high(length(highind))
+    new_dat$color[highind][order(-new_dat$FC[highind])] <- cols2_up
+
     colors_edge <- new_dat$color
+    #####
+
+    if(!is.null(input$full_network$keep)){
+      grayout <- which(new_dat_keep$significant == FALSE)
+      colors_edge[grayout] <- col2s[8]
+    }
+
+    alternative_colors <- c()
+    for (i in 1:nrow(tmpdat)) {
+      ind <- match(tmpdat[i,3], cols[,1])
+      col <- cols[ind,2]
+      alternative_colors <- c(alternative_colors, col)
+    }
+
   }
+
+  ###############################################################################################
   ##### Color Vertices and get groups (nodes by default) #####
+  ###############################################################################################
+
   colors_vert <- c()
   vertcol <- names(V(net_graph))
   names <- c()
@@ -173,12 +229,20 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
       V(net_graph)$group_by[i] <- sk
     }
   }
+
+  ###############################################################################################
   ##### Graphing parameters #####
+  ###############################################################################################
+
   V(net_graph)$size <- nodesize
   V(net_graph)$label.cex <- textsize
   V(net_graph)$label.color <- "black"
   V(net_graph)$vertex.frame.color <- NA
   V(net_graph)$color <- colors_vert
+
+  if(comparitive!=FALSE){
+    E(net_graph)$color2 <- alternative_colors
+  }
 
   if(comparitive!=FALSE){
     newsize <- new_dat$expression
@@ -212,6 +276,10 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     V(net_graph)$size <- deg
   }
 
+  ###############################################################################################
+  ##### Write out results #####
+  ###############################################################################################
+
   plot_rl_results[[1]] <- net_graph
   plot_rl_results[[2]] <- l
   plot_rl_results[[3]] <- igraph::clusters(net_graph)
@@ -220,8 +288,8 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs")
 
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
-    pdf(paste0(prefix, "Fullnetwork.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(net_graph, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  pdf(paste0(prefix, "Fullnetwork.pdf"), h = h, w = w, useDingbats = FALSE)
+  plot(net_graph, layout = l, vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   cell_legend <- sort(unique(tmpdat[,3]))
   legend(x=-1.5, y=0, cell_legend, pch=21,
          col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
@@ -230,11 +298,21 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   pdf(paste0(prefix, "Fullnetwork_noname.pdf"), h = h, w = w, useDingbats = FALSE)
   net2 <- net_graph
   V(net2)$name <- ""
-  plot(net2, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  plot(net2, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   cell_legend <- sort(unique(tmpdat[,3]))
   legend(x=-1.5, y=0, cell_legend, pch=21,
          col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
   dev.off()
+
+  if(comparitive == TRUE){
+    pdf(paste0(prefix, "Fullnetwork_noname_color2.pdf"), h = h, w = w, useDingbats = FALSE)
+    E(net2)$color <- E(net_graph)$color2
+    plot(net2, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+    cell_legend <- sort(unique(tmpdat[,3]))
+    legend(x=-1.5, y=0, cell_legend, pch=21,
+           col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
+    dev.off()
+  }
 
   cols_clust <- gg_color_hue(length(unique(plot_rl_results$clusters$membership)))
   clusts <- as.vector(plot_rl_results$clusters$membership)
@@ -246,7 +324,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
 
   pdf(paste0(prefix, "Fullnetwork_clusters.pdf"), h = h, w = w, useDingbats = FALSE)
   V(net2)$name <- plot_rl_results$clusters$membership
-  plot(net2, layout = l, edge.curved=curve_multiple(net_graph), vertex.frame.color = NA, cex.col= "black",
+  plot(net2, layout = l,  vertex.frame.color = NA, cex.col= "black",
        vertex.color = clusts, rescale = TRUE)
   dev.off()
 
@@ -255,7 +333,9 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "comparitive_table")
   }
 
-  #####
+  ###############################################################################################
+  ##### Interactive #####
+  ###############################################################################################
 
   if(write_interactive == TRUE){
     V(net_graph)$name <- name_backup
@@ -300,8 +380,8 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     visNetwork::visSave(vit_net, file=paste0(prefix, "Fullnetwork_interactive.html"))
 
     if(comparitive!= FALSE){
-    plot_rl_results[[6]] <- vit_net
-    names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "comparitive_table", "interactive")
+      plot_rl_results[[6]] <- vit_net
+      names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "comparitive_table", "interactive")
     } else {
       plot_rl_results[[5]] <- vit_net
       names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs", "interactive")

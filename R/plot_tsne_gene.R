@@ -1,15 +1,15 @@
-#' tSNE Plot on a gene or genes
+#' tSNE Plot on a gene or gene
 #'
 #' This will plot gene information onto a 2d tsne plot
 #'
 #' @param input The input data
-#' @param genes the gene or genes to ploy
+#' @param gene the gene or gene to ploy
 #' @param title The title
 #' @param colors_points Colors for the cells
 #' @param density If true will color a density of the points
 #' @param resolution Control the density drawing resolution. Higher values will increase file size
 #' @param cutoff removes points from density below this threshold. Lower values will increase file size
-#' @param facet_by If ONE gene is being plotted it can be faceted. You cannot facet multiple genes
+#' @param facet_by If ONE gene is being plotted it can be faceted. You cannot facet multiple gene
 #' @param ncol controls the number of columns if faceting
 #' @param size The size of the points
 #' @param xcol pData column to use for x axis
@@ -60,21 +60,21 @@ plot_tsne_gene <- function(input, genes,
     vals <- as.vector(geneColored3)
     geneColored1$vals <- vals
     gene_final <- c()
-    for(i in 1:length(genes)){
-      genesvec <- rep(genes[i], ncol(exprs(input)))
-      gene_final <- c(gene_final, genesvec)
+    for(i in 1:length(gene)){
+      genevec <- rep(gene[i], ncol(exprs(input)))
+      gene_final <- c(gene_final, genevec)
     }
     geneColored1$gene <- gene_final
     final_dfdens_norm <- data.frame()
     if(density == TRUE){
-      for(i in 1:length(genes)){
-        index <- grep(genes[i], geneColored1[,"gene"])
+      for(i in 1:length(gene)){
+        index <- grep(gene[i], geneColored1[,"gene"])
         subset <- geneColored1[index,]
         dens <- kde2d_weighted(subset[,xcol], subset[,ycol], subset$vals, n = resolution)
         dfdens <- data.frame(expand.grid(x=dens[,xcol], y=dens[,ycol]), z=as.vector(dens$z))
         dfdens_norm <- dfdens
         dfdens_norm[,3] <- dfdens_norm[,3]/max(dfdens_norm[,3])
-        dfdens_norm$gene <- genes[i]
+        dfdens_norm$gene <- gene[i]
         final_dfdens_norm <- rbind(dfdens_norm, final_dfdens_norm)
       }
       remove <- which(final_dfdens_norm[,"z"] < cutoff)
@@ -96,18 +96,18 @@ plot_tsne_gene <- function(input, genes,
     g <- g +  scale_color_gradientn(colours=colors_points)
     g <- g +  geom_point(data= geneColored1, aes_string(x=xcol, y=ycol, col="vals"), shape=20, size = size)
     if(title == ""){
-      title <- genes
+      title <- gene
       g <- g +  labs(title= title, col= "UMIs", x = "tSNE[1]", y = "tSNE[2]")
     } else {
       g <- g +  labs(title= title, col= "UMIs", x = "tSNE[1]", y = "tSNE[2]")
     }
   } else { #This will allow plotting of 1 gene, faceted by variable in pData
-    if(length(genes) > 1){
-      stop("You cannot facet multiple genes")
+    if(length(gene) > 1){
+      stop("You cannot facet multiple gene")
     }
     geneColored1 <- pData(input)[,c(xcol, ycol, facet_by)]
     geneColored1 <- as.data.frame(geneColored1)
-    values <- log2(t(exprs(input)[genes,])+2)-1
+    values <- log2(t(exprs(input)[gene,])+2)-1
     values <- as.vector(values)
     geneColored1$vals <- values
     final_dfdens_norm <- data.frame()
@@ -145,7 +145,7 @@ plot_tsne_gene <- function(input, genes,
     g <- g +  scale_color_gradientn(colours=colors_points)
     g <- g +  geom_point(data= geneColored1, aes_string(x=xcol, y=ycol, col="vals"), shape=20, size = size)
     if(title == ""){
-      title <- genes
+      title <- gene
       g <- g +  labs(title= title, col= "UMIs", x = "tSNE[1]", y = "tSNE[2]")
     } else {
       g <- g +  labs(title= title, col= "UMIs", x = "tSNE[1]", y = "tSNE[2]")

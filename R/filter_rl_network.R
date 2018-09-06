@@ -9,17 +9,20 @@
 #' @param absol whether or not to take the absolute value of the column
 #' @param cutoff value to filter by
 #' @param direction >, <, =
+#' @param keep if true will retain all edges and annotate them as passing the filter or not
 #' @export
 #' @details
 #' This will use the calc_agg_bulk results to ID networks
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
-filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolder = NULL, cutoff, direction, absol = FALSE, group_by = FALSE){
+filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolder = NULL, cutoff, direction, absol = FALSE,
+                              group_by = FALSE, keep = FALSE){
   f <- function(a, b, op=direction) {
     call <- call(op, a, b)
     result <- eval(call)
     result
   }
+  rownames(input$full_network) <- seq(1:nrow(input$full_network))
   if(filter_type != "DE" && filter_type != "network"){
     stop("Filter types can be 'DE' or 'network'")
   }
@@ -34,9 +37,8 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
       bool <- f(qr, cutoff)
       bools <- c(bools, bool)
     }
-    ind <- which(bools == TRUE)
-    val <- input$full_network[ind,]
-    input$full_network <- val
+    ind_keep <- which(bools == TRUE)
+    val <- input$full_network[ind_keep,]
     if(group_by != FALSE){
       summary <- plyr::count(val[,c(1,3,5)])
       data1 <- apply( summary[ , 1:3 ] , 1 , paste , collapse = "-" )
@@ -53,6 +55,19 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
       ind <- match(int, data2)
       input$Summary[ind,ncol(input$Summary)] <- summary$freq[i]
     }
+    if (keep == TRUE) {
+      if(is.null(input$full_network$keep)){
+        input$full_network$keep <- FALSE
+        input$full_network$keep[ind_keep] <- TRUE
+      } else {
+        keep2 <- which(input$full_network$keep == TRUE)
+        ind <- intersect(ind_keep, keep2)
+        input$full_network$keep <- FALSE
+        input$full_network$keep[ind_keep] <- TRUE
+      }
+    } else {
+      input$full_network <- val
+    }
   }
   if(filter_type == "DE"){
     if(is.null(DEfolder)){
@@ -60,10 +75,19 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
     }
     filelist <- list.files(DEfolder)
     filelist <- paste0(DEfolder, "/", filelist)
-    keep_row <- c()
-    genes <- c()
+    types <- unique(input$full_network[,1])
+    rows_keep <- c()
     for (i in 1:length(filelist)) {
       int <- filelist[i]
+      interested <- c()
+      for (j in 1:length(types)) {
+        match <- grep(types[j], int)
+        if(length(match > 0)){
+          if(match == 1){
+            interested <- types[j]
+          }
+        }
+      }
       tmp <- read.table(int, sep = "\t", row.names = 1, header = T)
       vec <- tmp[,filter_by]
       if(absol == TRUE){
@@ -71,18 +95,36 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
       }
       bool <- f(vec, cutoff)
       int_gene <- rownames(tmp)[bool]
-      genes <- unique(c(genes, int_gene))
-    }
-    pairs <- paste0(input$full_network$Ligand, "_", input$full_network$Receptor)
-    for (i in 1:length(genes)) {
-      int <- genes[i]
-      keep <- grep(int, pairs)
-      keep_row <- unique(keep_row)
-      if(length(keep)>0){
-        keep_row <- c(keep_row, keep)
+      indices <-  grep(interested, input$full_network[,1])
+      kint2 <- input$full_network[grep(interested, input$full_network[,1]),]
+      rec <- kint2$Receptor
+      ligs <- kint2$Ligand
+      mfin <- c()
+      for (k in 1:length(int_gene)) {
+        gene2 <- int_gene[k]
+        rec_match <- grep(paste0("^", gene2, "$"), rec)
+        lig_match <- grep(paste0("^", gene2, "$"), ligs)
+        fin <- c(rec_match, lig_match)
+        mfin <- c(mfin, fin)
+        mfin <- unique(mfin)
       }
+      genes_keep <- kint2[mfin,]
+      rows_keep <- c(rows_keep, rownames(genes_keep))
+      rows_keep <- unique(rows_keep)
     }
-    input$full_network <- input$full_network[sort(keep_row),]
+    if (keep == TRUE) {
+      if(is.null(input$full_network$keep)){
+        input$full_network$keep <- FALSE
+        input$full_network$keep[as.numeric(rows_keep)] <- TRUE
+      } else {
+        keep2 <- which(input$full_network$keep == TRUE)
+        ind <- intersect(as.numeric(rows_keep), keep2)
+        input$full_network$keep <- FALSE
+        input$full_network$keep[as.numeric(rows_keep)] <- TRUE
+      }
+    } else {
+      input$full_network <- input$full_network[sort(as.numeric(rows_keep)),]
+    }
   }
   return(input)
 }

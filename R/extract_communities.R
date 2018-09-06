@@ -13,7 +13,7 @@
 
 extract_communities <- function(input, select, expand = TRUE){
 
-  members <- input$Communities$membership
+  members <- input$Clusters_Results$membership
   keep <- c()
   for (i in 1:length(select)) {
     int <- select[i]
