@@ -5,8 +5,8 @@
 \title{This will create a violin plot}
 \usage{
 plot_violin(input, title = "", color_by, gene, facet_by = "NA",
-  ncol = "NA", sig = 3, size = 1, colors = "NA", plot_mean = TRUE,
-  theme = "classic")
+  ncol = "NA", sig = 3, size = 1, colors = "NA",
+  plot_mean = TRUE, theme = "classic")
 }
 \arguments{
 \item{input}{The input data}
