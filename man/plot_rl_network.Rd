@@ -4,9 +4,10 @@
 \alias{plot_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-plot_rl_network(input, input_full, group_by = FALSE, comparitive = FALSE,
-  from = FALSE, to = FALSE, value = FALSE, layout = "nicely",
-  write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3,
+plot_rl_network(input, input_full, group_by = FALSE,
+  comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,
+  layout = "nicely", write_interactive = TRUE,
+  interactive_groups = "nodes", nodesize = 3,
   size_by_connections = TRUE, textsize = 0.5, h = 8, w = 8,
   prefix = "")
 }

@@ -4,9 +4,10 @@
 \alias{plot_tsne_gene}
 \title{tSNE Plot on a gene or gene}
 \usage{
-plot_tsne_gene(input, gene, title = "", density = FALSE, facet_by = "NA",
-  colors_points = c("gray", "blue", "red", "yellow"), size = 1.5,
-  ncol = 2, resolution = 500, cutoff = 0.2)
+plot_tsne_gene(input, gene, title = "", density = FALSE,
+  facet_by = "NA", colors_points = c("gray", "blue", "red", "yellow"),
+  size = 1.5, ncol = 2, resolution = 500, cutoff = 0.2,
+  xcol = "x", ycol = "y")
 }
 \arguments{
 \item{input}{The input data}
@@ -28,6 +29,10 @@ plot_tsne_gene(input, gene, title = "", density = FALSE, facet_by = "NA",
 \item{resolution}{Control the density drawing resolution. Higher values will increase file size}
 
 \item{cutoff}{removes points from density below this threshold. Lower values will increase file size}
+
+\item{xcol}{pData column to use for x axis}
+
+\item{ycol}{pData column to use for y axis}
 }
 \description{
 This will plot gene information onto a 2d tsne plot
