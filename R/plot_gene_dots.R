@@ -6,7 +6,7 @@
 #' @param genes What to color points by, either "UMI_sum", or pData categorial variable, ignored if gene is provided
 #' @param break_by a pData variable to break the x axis by
 #' @param title The title
-#' @param scale_by Whether each gene should be scaled by break_by ("rows") or gene ("cols")
+#' @param scale_by Whether each gene should be scaled by break_by ("col") or gene ("row")
 #' @export
 #' @details
 #' Utilize information stored in pData to control the plot display.
@@ -25,12 +25,12 @@ plot_gene_dots <- function(input, genes, break_by, title = "", scale_by = FALSE)
     vals <- apply(exprs(input)[genes,cells],1,mean)
     plot_dat[i,] <- vals
   }
-  if(scale_by == "rows"){
+  if(scale_by == "col"){
     plot_dat <- t(apply(plot_dat,1,scale))
     rownames(plot_dat) <- vars
     colnames(plot_dat) <- genes
   }
-  if(scale_by == "cols"){
+  if(scale_by == "row"){
     plot_dat <- apply(plot_dat,2,scale)
     rownames(plot_dat) <- vars
   }
