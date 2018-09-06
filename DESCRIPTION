@@ -38,6 +38,6 @@ Imports:
 biocViews: Single Cell, Networking
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Suggests: knitr,
     rmarkdown

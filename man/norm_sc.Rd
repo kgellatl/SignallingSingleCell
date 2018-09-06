@@ -5,8 +5,8 @@
 \title{Normalization}
 \usage{
 norm_sc(input, gene_frac = 0.25, gene_var = 0.75, sf_keep = 0.975,
-  genelist = NULL, norm_by = "Cluster", pool_sizes = c(20, 30, 40, 50),
-  positive = TRUE)
+  genelist = NULL, norm_by = "Cluster", pool_sizes = c(20, 30, 40,
+  50), positive = TRUE)
 }
 \arguments{
 \item{input}{the input ex_sc}
