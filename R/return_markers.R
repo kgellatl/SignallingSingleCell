@@ -13,11 +13,13 @@
 
 return_markers <- function(input, return_by = "Cluster", num_markers = 10){
   dat <- fData(input)
-  Clusters <- sort(unique(pData(input)[,return_by]))
+  Clusters <- (unique(pData(input)[,return_by]))
+  Clusters <- as.character(Clusters)
+  Clusters <- sort(Clusters)
   markers <- vector(mode = "list", length = length(Clusters))
   for(i in 1:length(Clusters)){
     cint <- Clusters[i]
-    ind <- grep(paste0(cint, "_marker_score_", return_by), colnames(dat))
+    ind <- grep(paste0("^", cint, "_marker_score_", return_by, "$"), colnames(dat))
     ind2 <- match(seq(1:num_markers), dat[,ind])
     marker_final <- rownames(dat)[ind2]
     markers[[i]] <- marker_final

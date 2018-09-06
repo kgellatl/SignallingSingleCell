@@ -5,7 +5,8 @@
 \title{Identifies all R / L interactions}
 \usage{
 filter_rl_network(input, filter_by, filter_type = "network",
-  DEfolder = NULL, cutoff, direction, absol = FALSE, group_by = FALSE)
+  DEfolder = NULL, cutoff, direction, absol = FALSE, group_by = FALSE,
+  keep = FALSE)
 }
 \arguments{
 \item{input}{the output of calc_rl_network}
@@ -21,6 +22,8 @@ filter_rl_network(input, filter_by, filter_type = "network",
 \item{direction}{>, <, =}
 
 \item{absol}{whether or not to take the absolute value of the column}
+
+\item{keep}{if true will retain all edges and annotate them as passing the filter or not}
 }
 \description{
 This function will map all RL interactions

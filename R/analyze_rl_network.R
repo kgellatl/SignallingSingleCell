@@ -23,10 +23,9 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   l <- layout_nicely(tmp_net)
 
   tmp_net_cp <- tmp_net
-  cfg <- cluster_edge_betweenness(as.undirected(tmp_net_cp))
+  cfg <- cluster_edge_betweenness(as.undirected(tmp_net_cp), weights = NULL)
 
   cs2 <- crossing(cfg, tmp_net_cp)
-
 
   cols_clust <- gg_color_hue(length(unique(cfg$membership)))
   cols_clust2 <- adjustcolor(cols_clust, alpha.f = 1)
@@ -60,21 +59,32 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   edg_rank <- sort(edg_rank, decreasing = T)
 
   hs <- hub_score(tmp_net, weights=NA)$vector #Outgoing (ligands)
-  hs <- sort(hs, decreasing = T)
+  hs_srt <- sort(hs, decreasing = T)
 
   as <- authority_score(tmp_net, weights=NA)$vector # Incoming (receptors)
-  as <- sort(as, decreasing = T)
+  as_srt <- sort(as, decreasing = T)
 
   cluster_edge_btw <- vector(mode = "list", length = length(unique(cfg$membership)))
+  cluster_edge_hub <- vector(mode = "list", length = length(unique(cfg$membership)))
+  cluster_node_authority <- vector(mode = "list", length = length(unique(cfg$membership)))
+
   sizes <- rep(0, length(V(tmp_net)))
 
   for (i in 1:length(unique(cfg$membership))) {
     int <- which(cfg$membership == i)
     vals <- vert_rank[int]
+    cluster_edge_hub[[i]] <- sort(hs[int], decreasing = T)
+    cluster_node_authority[[i]] <- sort(as[int], decreasing = T)
     cluster_edge_btw[[i]] <- sort(vals, decreasing = T)
     vals <- rank(vals)
     size <- (3/max(vals)*vals)
     sizes[int] <- size
+  }
+
+  cluster_centers <- c()
+  for(i in 1:length(cluster_edge_btw)){
+    name_center <- cluster_edge_btw[[i]][1]
+    cluster_centers <- c(cluster_centers,name_center)
   }
 
   V(tmp_net_cp)$size <- sizes
@@ -85,41 +95,58 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   #####
 
   pdf(paste0(prefix, "Analyzed_Network.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(tmp_net, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  plot(tmp_net, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   dev.off()
 
   pdf(paste0(prefix, "Analyzed_Network_noname.pdf"), h = h, w = w, useDingbats = FALSE)
   net2 <- tmp_net
   V(net2)$name <- ""
-  plot(net2, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  plot(net2, layout = l,  cex.col= "black", vertex.frame.color = 'white', rescale = TRUE)
   dev.off()
 
+
+  if(!is.null(E(input)$color2)){
+    pdf(paste0(prefix, "Analyzed_Network_noname_color2.pdf"), h = h, w = w, useDingbats = FALSE)
+    net3 <- net2
+    E(net3)$color <- E(input)$color2
+    plot(net3, layout = l,  cex.col= "black", vertex.frame.color = 'white', rescale = TRUE)
+    dev.off()
+  }
+
+
   pdf(paste0(prefix, "Analyzed_Network_communities.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(tmp_net_cp, mark.groups = cfg, cols_clust2 = cols_clust2, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
+  plot(tmp_net_cp, mark.groups = cfg,  layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
   dev.off()
 
 
   pdf(paste0(prefix, "Analyzed_Network_communities_nonames.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(tmp_net_cp, mark.groups = cfg, vertex.label = "", cols_clust2 = cols_clust2, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
+  plot(tmp_net_cp, mark.groups = cfg, vertex.label = "",  layout = l,  vertex.frame.color = 'white', vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
   dev.off()
 
   pdf(paste0(prefix, "Analyzed_Network_communities_crossing.pdf"), h = h, w = w, useDingbats = FALSE)
   tmp_net_cp2 <- tmp_net_cp
-  E(tmp_net_cp2)$color <- "black"
+  E(tmp_net_cp2)$color <- "gray"
   E(tmp_net_cp2)$color[crossing(cfg,tmp_net_cp2)] <- "red"
-  plot(tmp_net_cp2, mark.groups = cfg, vertex.label = "", cols_clust2 = cols_clust2, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
+  plot(tmp_net_cp2, mark.groups = cfg, vertex.label = "",  layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
   dev.off()
 
   pdf(paste0(prefix, "Analyzed_Network_communities_crossing_named.pdf"), h = h, w = w, useDingbats = FALSE)
   keep_name <- unique(ends(tmp_net_cp2, names(cs2)[which(cs2 == TRUE)], names =  T))
   V(tmp_net_cp2)$name[-match(keep_name, V(tmp_net_cp2)$name)] <- ""
-  plot(tmp_net_cp2, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
+  plot(tmp_net_cp2, layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
+  dev.off()
+
+  pdf(paste0(prefix, "Analyzed_Network_communities_centers_named.pdf"), h = h, w = w, useDingbats = FALSE)
+  tmp_net3 <-  tmp_net_cp
+  keep_center <- match(names(cluster_centers), names(V(tmp_net3)))
+  V(tmp_net3)$name[-keep_center] <- ""
+  plot(tmp_net3,  layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
   dev.off()
 
 
   pdf(paste0(prefix, "Analyzed_Network_communities_numbered.pdf"), h = h, w = w, useDingbats = FALSE)
   V(tmp_net_cp)$name <- cfg$membership
-  plot(tmp_net_cp, layout = l, edge.curved=curve_multiple(tmp_net), vertex.frame.color = 'black', cex.col= "black", rescale = TRUE)
+  plot(tmp_net_cp, layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
   dev.off()
 
   # pdf(paste0(prefix, "Dendrogram.pdf"), height = 10, width = 50)
@@ -159,20 +186,23 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
   results[[1]] <- deg
   results[[2]] <- deg_rec
   results[[3]] <- vert_rank_srt
-  results[[4]] <- as
+  results[[4]] <- as_srt
   results[[5]] <- deg_lig
   results[[6]] <- edg_rank
-  results[[7]] <- hs
-  results[[8]] <- cfg
-  results[[9]] <- cs2
-  results[[10]] <- cluster_edge_btw
-  results[[11]] <- comm_ind
-  results[[12]] <- vit_net
-  results[[13]] <- input
+  results[[7]] <- hs_srt
+  results[[8]] <- cs2
+  results[[9]] <- cfg
+  results[[10]] <- comm_ind
+  results[[11]] <- cluster_edge_btw
+  results[[12]] <- cluster_edge_hub
+  results[[13]] <- cluster_node_authority
+  results[[14]] <- vit_net
+  results[[15]] <- input
+  results[[16]] <- l
 
   names(results) <- c("Degree", "Node_degree", "Node_betweeness", "Node_authority",
-                      "Edge_degree", "Edge_betweeness", "Edge_hub", "Communities", "Crossing",
-                      "Communities_betweeness", "Communities_individual", "Interactive", "input")
+                      "Edge_degree", "Edge_betweeness", "Edge_hub", "Crossing", "Clusters_Results", "Clusters_individual",
+                      "Clusters_betweeness", "Clusters_edge_hub","Clusters_node_authority", "Interactive", "input", "layout")
   return(results)
 }
 

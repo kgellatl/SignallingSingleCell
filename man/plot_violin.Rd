@@ -5,7 +5,7 @@
 \title{This will create a violin plot}
 \usage{
 plot_violin(input, title = "", color_by, gene, facet_by = "NA",
-  ncol = "NA", size = 1, colors = "NA", plot_mean = TRUE,
+  ncol = "NA", sig = 3, size = 1, colors = "NA", plot_mean = TRUE,
   theme = "classic")
 }
 \arguments{
@@ -20,6 +20,8 @@ plot_violin(input, title = "", color_by, gene, facet_by = "NA",
 \item{facet_by}{a pData variable}
 
 \item{ncol}{How many columns if faceting}
+
+\item{sig}{Number of sig figs in fraction expression text}
 
 \item{size}{The size of the points}
 

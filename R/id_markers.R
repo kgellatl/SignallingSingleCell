@@ -17,7 +17,9 @@
 
 id_markers <- function(input, id_by = "Cluster", print_progress = TRUE, overwrite = FALSE){
   marker_input <- input
-  cols <- sort(unique(pData(input)[,id_by]))
+  cols <- (unique(pData(input)[,id_by]))
+  cols <- as.character(cols)
+  cols <- sort(cols)
   vals <- paste0(cols, "_marker_score_", id_by)
   ind <- match(vals, colnames(fData(marker_input)))
   if(unique(is.na(ind)) == FALSE){
