@@ -20,7 +20,8 @@
 #' @examples
 #' plot_tsne_gene(ex_sc_example, gene = "Tnf", title = "Tnf over Time", facet_by = "Timepoint", density = TRUE)
 #'
-plot_tsne_gene <- function(input, genes,
+plot_tsne_gene <- function(input,
+                           gene,
                            title = "",
                            density = FALSE,
                            facet_by = "NA",
@@ -49,10 +50,10 @@ plot_tsne_gene <- function(input, genes,
     z <- (matrix(rep(w,n), nrow=n, ncol=nx, byrow=TRUE)*matrix(dnorm(ax), n, nx)) %*% t(matrix(dnorm(ay), n, nx))/(sum(w) * h[1] * h[2]) # z is the density
     return(list(x = gx, y = gy, z = z))
   }
-  if(facet_by == "NA"){ #This will allow plotting of 1 - n genes
+  if(facet_by == "NA"){ #This will allow plotting of 1 - n gene
     geneColored1 <- pData(input)[,c(xcol, ycol)]
-    geneColored1 <- do.call(rbind, replicate(length(genes), geneColored1, simplify=FALSE))
-    geneColored3 <- t(exprs(input)[genes,])
+    geneColored1 <- do.call(rbind, replicate(length(gene), geneColored1, simplify=FALSE))
+    geneColored3 <- t(exprs(input)[gene,])
     for(i in 1:ncol(geneColored3)){
       vals <- geneColored3[,i]
       geneColored3[,i] <- log2(vals+2)-1
