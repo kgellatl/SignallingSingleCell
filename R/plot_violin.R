@@ -8,6 +8,7 @@
 #' @param color_by a pData variable
 #' @param facet_by a pData variable
 #' @param plot_mean If true will create a secondary axis to plot the mean expression value
+#' @param sig Number of sig figs in fraction expression text
 #' @param ncol How many columns if faceting
 #' @param size The size of the points
 #' @param colors What colors to utilize for categorial data. Be sure it is of the proper length!
@@ -17,7 +18,7 @@
 #' @examples
 #' plot_violin(input, title = "Actb across clusters", gene = "Actb", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
 
-plot_violin <- function(input, title = "", color_by, gene, facet_by = "NA", ncol = "NA", size = 1, colors = "NA", plot_mean = TRUE, theme = "classic"){
+plot_violin <- function(input, title = "", color_by, gene, facet_by = "NA", ncol = "NA", sig = 3, size = 1, colors = "NA", plot_mean = TRUE, theme = "classic"){
   if(facet_by == "NA"){
     geneColored1 <- pData(input)[,c("x", "y", color_by)]
     geneColored1 <- cbind(geneColored1, log2(exprs(input)[gene,]+2)-1)
@@ -36,7 +37,7 @@ plot_violin <- function(input, title = "", color_by, gene, facet_by = "NA", ncol
     return(c(y=-0.1, label=length(x)))
   }
   fracSC = function(x){
-    return(c(y = -.2, label = round(mean(x), 2)))
+    return(c(y = -.2, label = round(mean(x), sig)))
   }
   colnames(geneColored1) <- gsub("-", "", colnames(geneColored1))
   gene <- gsub("-", "", gene)
