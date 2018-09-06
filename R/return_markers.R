@@ -13,7 +13,7 @@
 
 return_markers <- function(input, return_by = "Cluster", num_markers = 10){
   dat <- fData(input)
-  Clusters <- (unique(pData(input)[,id_by]))
+  Clusters <- (unique(pData(input)[,return_by]))
   Clusters <- as.character(Clusters)
   Clusters <- sort(Clusters)
   markers <- vector(mode = "list", length = length(Clusters))
