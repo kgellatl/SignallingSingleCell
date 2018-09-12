@@ -14,7 +14,7 @@
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
 id_rl <- function(input){
-  data("Receptor_Ligand_Data")
+  Receptor_Ligand_Data <- SignallingSingleCell:::Receptor_Ligand_Data
   ligs <- unique(Receptor_Ligand_Data$Ligand.ApprovedSymbol)
   recs <- unique(Receptor_Ligand_Data$Receptor.ApprovedSymbol)
   expressed_genes <- rownames(fData(input))
@@ -26,7 +26,7 @@ id_rl <- function(input){
   fData(input)$networks_Receptors[which(is.na(match(expressed_genes, recs)) == FALSE)] <- TRUE
   for (i in 1:nrow(Receptor_Ligand_Data)) {
     int <- Receptor_Ligand_Data[i,]
-    pair <- unlist(strsplit(int$Pair.Name, split = "_"))
+    pair <- unlist(strsplit(as.character(int$Pair.Name), split = "_"))
     ind_lig <- match(pair[1], rownames(fData(input)))
     ind_rec <- match(pair[2], rownames(fData(input)))
     lig_state <- fData(input)$networks_ligands[ind_lig]

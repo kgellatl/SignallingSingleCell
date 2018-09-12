@@ -15,7 +15,7 @@ plot_gene_dots(input, genes, break_by, title = "", scale_by = FALSE)
 
 \item{title}{The title}
 
-\item{scale_by}{Whether each gene should be scaled by break_by ("rows") or gene ("cols")}
+\item{scale_by}{Whether each gene should be scaled by break_by ("col") or gene ("row")}
 }
 \description{
 This will plot information onto a 2d tsne plot
