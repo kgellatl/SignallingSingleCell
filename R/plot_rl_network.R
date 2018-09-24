@@ -139,7 +139,6 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
       if(!is.null(input$full_network$keep)){
         tmpvals <- input$full_network$keep[ind]
         state <- unique(tmpvals)
-        print(paste0(i, state))
         new_dat$significant[i] <- state
       }
     }
