@@ -55,7 +55,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
           tmpdat[i,7] <- paste0(unlist(int[,c(j,c(4,5))]), collapse = "_")
         }
       }
-      tmpdat$expression <- input$full_network$log10_Connection_product
+      tmpdat$expression <- input$full_network[,value]
     }
     net_graph <- graph_from_data_frame(tmpdat[,c("V6", "V7")], directed = TRUE)
   }
@@ -75,7 +75,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
           tmpdat[i,6] <- paste0(unlist(int[,c(j,c(4))]), collapse = "_")
         }
       }
-      tmpdat$expression <- input$full_network$log10_Connection_product
+      tmpdat$expression <- input$full_network[,value]
     }
     net_graph <- graph_from_data_frame(tmpdat[,c("V5", "V6")], directed = TRUE)
   }
@@ -114,7 +114,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     remove <- c()
     for (i in 1:length(search)) {
       int <- search[i]
-      ind <- grep(int, search_full)
+      ind <- grep(paste0("^", int, "$"), search_full)
       int2 <- input_full$full_network[ind, ]
       vals <- int2[,group_by]
       pos1 <- match(from, vals)
@@ -122,7 +122,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
       from_val <- int2[pos1,value]
       to_val <- int2[pos2,value]
       FC <- from_val - to_val
-      exp <- max(int2$log10_Connection_product)
+      exp <- max(int2[,value])
       new_dat$expression[i] <- exp
       if(all(is.na(c(from_val, to_val)))){
         remove <- c(remove, i)
