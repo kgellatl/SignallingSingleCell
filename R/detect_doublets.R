@@ -13,7 +13,7 @@
 #' @examples
 #' detect_doublets()
 
-detect_doublets2 <- function(input, id_by, num_markers, remove){
+detect_doublets <- function(input, id_by, num_markers, remove){
   questionable <- c()
   search <- paste0("marker_score_", id_by)
   ind <- grep(search,(colnames(fData(input))))
