@@ -4,7 +4,7 @@
 \alias{flow_filter}
 \title{Construct Expression Set Class}
 \usage{
-flow_filter(input, panels, title)
+flow_filter(input, panels, title = "Flow Gating")
 }
 \arguments{
 \item{input}{the input data ex_sc}
