@@ -13,7 +13,7 @@
 #' @examples
 #' detect_doublets()
 
-detect_doublets <- function(input, id_by, num_markers, remove){
+detect_doublets2 <- function(input, id_by, num_markers, remove){
   questionable <- c()
   search <- paste0("marker_score_", id_by)
   ind <- grep(search,(colnames(fData(input))))
@@ -42,15 +42,18 @@ detect_doublets <- function(input, id_by, num_markers, remove){
       questionable <- c(questionable, ratio)
     }
   }
+  pData(input)$Doublets <- "Good"
   bad <- questionable
   very_bad1 <- which(is.na(bad))
   very_bad2 <- which(!is.finite(bad))
   removed <- c(very_bad1, very_bad2)
   very_bad <- c(unique(names(c(very_bad1, very_bad2))))
+  pData(input)[very_bad,]$Doublets <- "Questionable"
   bad <- bad[-removed]
   outlier <- sort(-bad)
   num_remove <- round(remove*ncol(input))
   outlier <- outlier[(1:num_remove)]
   total <- unique(c(names(outlier),very_bad))
-  return(total)
+  pData(input)[total,]$Doublets <- "Doublet"
+  return(input)
 }
