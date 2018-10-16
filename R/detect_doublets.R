@@ -29,14 +29,14 @@ detect_doublets <- function(input, id_by, num_markers, remove){
     out_groups <- groups[-i]
     ind <- grep(int_group,pData(input)[,id_by])
     group_cells <- tmp[,ind]
-    int_genes <- marks[[grep(int_group, names(marks))]]
+    int_genes <- marks[[grep(paste0("^", int_group, "$"), matrix(c(unlist(strsplit(names(marks), "_"))), ncol = 2, byrow = T)[,1])]]
     internal_sums <- apply(exprs(group_cells)[int_genes,],2,sum)
     # if(min(internal_sums) == 0){
     #   stop("Some Cells have zero expression, increase num_markers")
     # }
     for (j in 1:length(out_groups)) {
       out_group <- out_groups[j]
-      out_genes <- marks[[grep(out_group, names(marks))]]
+      out_genes <- marks[[grep(paste0("^", out_group, "$"), matrix(c(unlist(strsplit(names(marks), "_"))), ncol = 2, byrow = T)[,1])]]
       external_sums <- apply(exprs(group_cells)[out_genes,],2,sum)
       ratio <- external_sums/internal_sums
       questionable <- c(questionable, ratio)
