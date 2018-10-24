@@ -19,7 +19,8 @@ plot_density <- function(input, val, title = "", color_by = "NA", statistic = "m
     hcl(h = hues, l = 65, c = 100)[1:n]
   }
   dat <- pData(input)
-  if(val != "UMI_sum"){
+  ind1 <- grep(val, colnames(dat))
+  if(length(ind1) == 0){
     dat <- cbind(dat, log2(exprs(input)[val,]+2)-1)
     colnames(dat) <- c(colnames(dat[2:ncol(dat)-1]), val)
   }

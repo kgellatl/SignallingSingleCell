@@ -72,7 +72,7 @@ plot_tsne_gene <- function(input,
         index <- grep(gene[i], geneColored1[,"gene"])
         subset <- geneColored1[index,]
         dens <- kde2d_weighted(subset[,xcol], subset[,ycol], subset$vals, n = resolution)
-        dfdens <- data.frame(expand.grid(x=dens[,xcol], y=dens[,ycol]), z=as.vector(dens$z))
+        dfdens <- data.frame(expand.grid(x=dens$x, y=dens$y), z=as.vector(dens$z))
         dfdens_norm <- dfdens
         dfdens_norm[,3] <- dfdens_norm[,3]/max(dfdens_norm[,3])
         dfdens_norm$gene <- gene[i]

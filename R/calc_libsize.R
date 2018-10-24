@@ -9,8 +9,13 @@
 #' @examples
 #' ex_sc_example <- calc_libsize(input = ex_sc_example)
 
-calc_libsize <- function(input){
+calc_libsize <- function(input, suffix = NA){
   libsizes <- apply(exprs(input),2,sum)
-  pData(input)$UMI_sum <- libsizes
+  if(!is.na(suffix)){
+    column <- paste0("UMI_sum", "_", suffix)
+  } else {
+    column <- "UMI_sum"
+  }
+  pData(input)[,column] <- libsizes
   return(input)
 }

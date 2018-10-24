@@ -11,15 +11,20 @@
 #' @examples
 #' flow_filter(input = sc_dat, panels = panel_list)
 
-flow_filter <- function(input, panels, title){
+flow_filter <- function(input, panels, title = "Flow Gating"){
   cells <- list()
   for(i in 1:length(panels)){
     panel_n <- panels[[i]]
     tmpdat <- exprs(input)[panel_n,]
     tmpdat[tmpdat > 0] <- 1
-    sums <- apply(tmpdat, 2, sum)
-    pass_gate <- which(sums == length(panel_n))
-    cells_passgate_n <- colnames(tmpdat)[pass_gate]
+    if (is.null(dim(tmpdat))) {
+      pass_gate <- which(tmpdat == length(panel_n))
+      cells_passgate_n <- names(pass_gate)
+      } else {
+      sums <- apply(tmpdat, 2, sum)
+      pass_gate <- which(sums == length(panel_n))
+      cells_passgate_n <- colnames(tmpdat)[pass_gate]
+    }
     cells[[i]] <- cells_passgate_n
   }
   cells_tab <- table(unlist(cells))

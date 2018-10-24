@@ -30,7 +30,7 @@ norm_sc <- function(input, gene_frac = 0.25, gene_var = 0.75, sf_keep = 0.975, g
     for (i in 1:length(unique(clusters))) {
       int <- unique(clusters)[i]
       ind <- grep(int, clusters)
-      frac <- apply(frac_mat[,ind], 1, mean)
+      frac <- apply(exprs(frac_mat)[,ind], 1, mean)
       set <- names(which(frac > gene_frac))
       gene_set <- c(gene_set, set)
     }

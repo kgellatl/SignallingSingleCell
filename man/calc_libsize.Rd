@@ -4,7 +4,7 @@
 \alias{calc_libsize}
 \title{Calculate Library Size}
 \usage{
-calc_libsize(input)
+calc_libsize(input, suffix = NA)
 }
 \arguments{
 \item{input}{the input ex_sc}
