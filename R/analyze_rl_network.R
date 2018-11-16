@@ -12,7 +12,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
+analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1){
 
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
@@ -94,8 +94,23 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = ""){
 
   #####
 
+  E(tmp_net)$width <- E(tmp_net)$width*mult
+  V(tmp_net)$size <- V(tmp_net)$size*mult
+  E(tmp_net_cp)$width <- E(tmp_net_cp)$width*mult
+  V(tmp_net_cp)$size <- V(tmp_net_cp)$size*mult
+
+
   pdf(paste0(prefix, "Analyzed_Network.pdf"), h = h, w = w, useDingbats = FALSE)
   plot(tmp_net, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  dev.off()
+
+  tmp_net3 <- tmp_net
+
+  E(tmp_net3)$color <- E(input)$color2
+  V(tmp_net3)$name <- ""
+
+  pdf(paste0(prefix, "Analyzed_Network_thick_simple2.pdf"), h = h, w = w, useDingbats = FALSE)
+  plot(tmp_net3, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
   dev.off()
 
   pdf(paste0(prefix, "Analyzed_Network_noname.pdf"), h = h, w = w, useDingbats = FALSE)
