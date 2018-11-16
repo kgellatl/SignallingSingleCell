@@ -6,7 +6,9 @@
 #' @param aggregate_by The pData variables to break by
 #' @param group_by The pData variables that contains distinct groups if included in aggregate_by (eg Timepoint, Condition, etc)
 #' This is used to calculate portions internally to this group
-#' @param cutoff a  value below which gene expression values will be set to 0 for the mean.
+#' @param cutoff_frac a  fraction expressing value below which gene expression values will be set to 0 for the mean.
+#' @param cutoff_num a total number cells expressing value below which gene expression values will be set to 0 for the mean.
+
 #' This is useful for removing nodes from networks that contain only a couple of cells.
 #' @export
 #' @details
@@ -14,7 +16,7 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff = FALSE){
+calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff_frac = FALSE, cutoff_num = FALSE){
   if(group_by != FALSE){
     ind <- match(group_by, aggregate_by)
     if(ind != 1){
@@ -54,13 +56,20 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff = FALSE)
     if(length(full_match) > 1){
       tmp <- exprs(input)[,full_match]
       upm <- (apply(tmp, 1, sum)/sum(tmp))*1000000
-      if(cutoff != FALSE){
+      if(cutoff_frac != FALSE || cutoff_num != FALSE){
+        zero_out_frac <- c()
+        zero_out_num <- c()
         tmp2 <- tmp
         tmp2[which(tmp2 > 0)] <- 1
         gSums <- apply(tmp2,1,sum)
-        frac <- gSums / num_cells
-        zero_out <- which(frac < cutoff)
-        upm[zero_out] <- 0
+        if(cutoff_frac != FALSE){
+          frac <- gSums / num_cells
+          zero_out_frac <- which(frac < cutoff_frac)
+        }
+        if(cutoff_num != FALSE){
+          zero_out_num <- which(gSums < cutoff_num)
+        }
+        upm[c(zero_out_num, zero_out_frac)] <- 0
       }
     }
     expressed <- length(which(upm > 0))#not right!!!! for the fraction calc is different..
