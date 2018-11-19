@@ -4,30 +4,41 @@
 \alias{plot_violin}
 \title{This will create a violin plot}
 \usage{
-plot_violin(input, title = "", color_by, gene, facet_by = "NA",
-  ncol = "NA", sig = 3, size = 1, colors = "NA",
-  plot_mean = TRUE, theme = "classic")
+plot_violin(input, title = "", gene, color_by, colors = NA,
+  facet_by = "NA", ncol = "NA", jitter_pts = T, plot_mean = TRUE,
+  size = 1, sig = 3, number_labels = T, text_sizes = c(20, 10, 5,
+  10, 5, 5), alpha = 0.25, theme = "classic")
 }
 \arguments{
 \item{input}{The input data}
 
 \item{title}{The title}
 
+\item{gene}{if provided will color_by the gene}
+
 \item{color_by}{a pData variable}
 
-\item{gene}{if provided will color_by the gene}
+\item{colors}{What colors to utilize for categorial data. Be sure it is of the proper length!}
 
 \item{facet_by}{a pData variable}
 
 \item{ncol}{How many columns if faceting}
 
-\item{sig}{Number of sig figs in fraction expression text}
+\item{jitter_pts}{if true adds jitter points}
+
+\item{plot_mean}{If true will create a secondary axis to plot the mean expression value}
 
 \item{size}{The size of the points}
 
-\item{colors}{What colors to utilize for categorial data. Be sure it is of the proper length!}
+\item{sig}{Number of sig figs in fraction expression text}
 
-\item{plot_mean}{If true will create a secondary axis to plot the mean expression value}
+\item{number_labels}{if true will add number of cells and fraction expressing}
+
+\item{text_sizes}{a vector of title_size, axis_title, axis_text, legend_title, legend_text, facet_text, faults too c(20,10,5,10,5,5)}
+
+\item{alpha}{for the transparency of jitter points}
+
+\item{theme}{the plot theme}
 }
 \description{
 This will plot a given gene via violin plot
