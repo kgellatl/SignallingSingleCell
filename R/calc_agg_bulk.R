@@ -31,7 +31,8 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff_frac = F
   for(i in 1:length(aggregate_by)) {
     var <- aggregate_by[i]
     vars <- unique(pData(input)[,var])
-    to_expand[[i]] <- sort(vars)
+    vars <- sort(vars)
+    to_expand[[i]] <- vars
   }
   names(to_expand) <- aggregate_by
   bulks <- expand.grid(to_expand, stringsAsFactors = FALSE)
@@ -40,6 +41,7 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff_frac = F
   upm_vals <- c()
   num_cells_vals <- c()
   num_genes_vals <- c()
+  rem_genes <- vector(mode = "list", length = nrow(bulks))
   for (j in 1:nrow(bulks)) {
     int <- bulks[j,]
     full_match <- c()
@@ -69,13 +71,18 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff_frac = F
         if(cutoff_num != FALSE){
           zero_out_num <- which(gSums < cutoff_num)
         }
-        upm[c(zero_out_num, zero_out_frac)] <- 0
+        if(group_by != FALSE){
+          rem_genes[[j]] <- unique(names(c(zero_out_num, zero_out_frac)))
+        } else {
+          upm[unique(c(zero_out_num, zero_out_frac))] <- 0
+        }
       }
     }
     expressed <- length(which(upm > 0))#not right!!!! for the fraction calc is different..
     upm_vals <- c(upm_vals, upm)
     num_genes_vals <- c(num_genes_vals, expressed)
   }
+  names(rem_genes) <- apply(bulks,1, FUN = paste, collapse = "_")
   bulks$numcells <- num_cells_vals
   bulks$numgenes <- num_genes_vals
   bulks$proportion <- 0
@@ -105,6 +112,16 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff_frac = F
     cgen <- bulks[l,"numgenes"]
     cname <- paste0(c(cname, "num_genes", cgen, "num_cells", cnum, "percent", cpro, "bulk"), collapse = "_")
     colnames(bulk)[l] <- cname
+  }
+  if(group_by != FALSE){
+    for (i in 1:length(vars)) {
+      int_cell <- vars[i]
+      ind <- grep(int_cell, names(rem_genes))
+      vals <- table(unlist(rem_genes[ind]))
+      zero_out <- names(which(vals == max(vals)))
+      bulk[zero_out,ind] <- 0
+    }
+
   }
   fData(input) <- cbind(fData(input), bulk)
   return(input)
