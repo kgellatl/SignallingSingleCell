@@ -93,6 +93,8 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
         }
       }
       heat_dat <- new_dat
+      res$cluster <- sort(res$cluster)
+      res$cluster <- res$cluster[match(rownames(heat_dat), names(res$cluster))]
     }
   }
   #####
