@@ -4,6 +4,7 @@
 #'
 #' @param input The input data
 #' @param gene the gene or gene to ploy
+#' @param log_scale if true will log2(value)
 #' @param title The title
 #' @param colors_points Colors for the cells
 #' @param density If true will color a density of the points
@@ -22,6 +23,7 @@
 #'
 plot_tsne_gene <- function(input,
                            gene,
+                           log_scale = F,
                            title = "",
                            density = FALSE,
                            facet_by = "NA",
@@ -56,7 +58,11 @@ plot_tsne_gene <- function(input,
     geneColored3 <- t(exprs(input)[gene,])
     for(i in 1:ncol(geneColored3)){
       vals <- geneColored3[,i]
-      geneColored3[,i] <- log2(vals+2)-1
+      if(log_scale == TRUE){
+        geneColored3[,i] <- log2(vals+2)-1
+      } else {
+        geneColored3[,i] <- vals
+      }
     }
     vals <- as.vector(geneColored3)
     geneColored1$vals <- vals

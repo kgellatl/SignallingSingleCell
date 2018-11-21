@@ -4,15 +4,17 @@
 \alias{plot_tsne_gene}
 \title{tSNE Plot on a gene or gene}
 \usage{
-plot_tsne_gene(input, gene, title = "", density = FALSE,
-  facet_by = "NA", colors_points = c("gray", "blue", "red", "yellow"),
-  size = 1.5, ncol = 2, resolution = 500, cutoff = 0.2,
-  xcol = "x", ycol = "y")
+plot_tsne_gene(input, gene, log_scale = F, title = "",
+  density = FALSE, facet_by = "NA", colors_points = c("gray", "blue",
+  "red", "yellow"), size = 1.5, ncol = 2, resolution = 500,
+  cutoff = 0.2, xcol = "x", ycol = "y")
 }
 \arguments{
 \item{input}{The input data}
 
 \item{gene}{the gene or gene to ploy}
+
+\item{log_scale}{if true will log2(value)}
 
 \item{title}{The title}
 
