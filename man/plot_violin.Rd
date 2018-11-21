@@ -4,10 +4,11 @@
 \alias{plot_violin}
 \title{This will create a violin plot}
 \usage{
-plot_violin(input, title = "", gene, color_by, colors = NA,
-  facet_by = "NA", ncol = "NA", jitter_pts = T, plot_mean = TRUE,
-  size = 1, sig = 3, number_labels = T, text_sizes = c(20, 10, 5,
-  10, 5, 5), alpha = 0.25, theme = "classic")
+plot_violin(input, title = "", gene, color_by, log_scale = F,
+  colors = NA, facet_by = "NA", ncol = "NA", jitter_pts = T,
+  plot_mean = TRUE, size = 1, sig = 3, number_labels = T,
+  text_sizes = c(20, 10, 5, 10, 5, 5), alpha = 0.25,
+  theme = "classic")
 }
 \arguments{
 \item{input}{The input data}
@@ -17,6 +18,8 @@ plot_violin(input, title = "", gene, color_by, colors = NA,
 \item{gene}{if provided will color_by the gene}
 
 \item{color_by}{a pData variable}
+
+\item{log_scale}{if true will log2(values)}
 
 \item{colors}{What colors to utilize for categorial data. Be sure it is of the proper length!}
 

@@ -6,6 +6,7 @@
 #' @param title The title
 #' @param gene if provided will color_by the gene
 #' @param color_by a pData variable
+#' @param log_scale if true will log2(values)
 #' @param colors What colors to utilize for categorial data. Be sure it is of the proper length!
 #' @param facet_by a pData variable
 #' @param ncol How many columns if faceting
@@ -23,16 +24,24 @@
 #' @examples
 #' plot_violin(input, title = "Actb across clusters", gene = "Actb", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
 
-plot_violin <- function(input, title = "", gene, color_by, colors = NA, facet_by = "NA", ncol = "NA",
+plot_violin <- function(input, title = "", gene, color_by, log_scale = F, colors = NA, facet_by = "NA", ncol = "NA",
                         jitter_pts = T, plot_mean = TRUE, size = 1, sig = 3, number_labels = T,
                         text_sizes = c(20,10,5,10,5,5), alpha = 0.25, theme = "classic"){
   if(facet_by == "NA"){
     geneColored1 <- pData(input)[,c("x", "y", color_by)]
-    geneColored1 <- cbind(geneColored1, log2(exprs(input)[gene,]+2)-1)
+    if(log_scale == TRUE){
+      geneColored1 <- cbind(geneColored1, log2(exprs(input)[gene,]+2)-1)
+    } else {
+      geneColored1 <- cbind(geneColored1, exprs(input)[gene,])
+    }
     colnames(geneColored1)<-c("x","y", color_by, gene)
   } else {
     geneColored1 <- pData(input)[,c("x", "y", color_by, facet_by)]
-    geneColored1 <- cbind(geneColored1, log2(exprs(input)[gene,]+2)-1)
+    if(log_scale == TRUE){
+      geneColored1 <- cbind(geneColored1, log2(exprs(input)[gene,]+2)-1)
+    } else {
+      geneColored1 <- cbind(geneColored1, exprs(input)[gene,])
+    }
     colnames(geneColored1)<-c("x","y", color_by, facet_by, gene)
   }
   gg_color_hue <- function(n) {
