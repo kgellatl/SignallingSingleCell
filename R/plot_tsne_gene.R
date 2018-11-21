@@ -31,6 +31,7 @@ plot_tsne_gene <- function(input,
                            size = 1.5,
                            ncol = 2,
                            resolution = 500,
+                           theme = "classic",
                            cutoff = 0.2,
                            xcol="x",
                            ycol="y"){
@@ -93,7 +94,11 @@ plot_tsne_gene <- function(input,
       geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,3])), ]
     }
     g <- ggplot(geneColored1)
-    g <- g +  theme_classic()
+    if(theme == "bw") {
+      g <- g + theme_bw();
+    } else {
+      g <- g + theme_classic()
+    }
     g <- g +  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 10), legend.title = element_text(size = 10), legend.text=element_text(size=5))
     g <- g +  theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
     g <- g +  facet_wrap(~gene, ncol = ncol)
