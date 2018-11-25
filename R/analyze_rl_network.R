@@ -145,6 +145,14 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1){
   plot(tmp_net_cp2, mark.groups = cfg, vertex.label = "",  layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
   dev.off()
 
+  if(!is.null(E(input)$color2)){
+  pdf(paste0(prefix, "Analyzed_Network_communities_crossing_default_colors.pdf"), h = h, w = w, useDingbats = FALSE)
+  E(tmp_net_cp2)$color <- E(input)$color2
+  V(tmp_net_cp2)$color <- V(tmp_net)$color
+  plot(tmp_net_cp2, mark.groups = cfg, vertex.label = "",  layout = l, cex.col= "black", rescale = TRUE)
+  dev.off()
+  }
+
   pdf(paste0(prefix, "Analyzed_Network_communities_crossing_named.pdf"), h = h, w = w, useDingbats = FALSE)
   keep_name <- unique(ends(tmp_net_cp2, names(cs2)[which(cs2 == TRUE)], names =  T))
   V(tmp_net_cp2)$name[-match(keep_name, V(tmp_net_cp2)$name)] <- ""
