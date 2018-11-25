@@ -27,6 +27,6 @@ agg_gene <- function(input, gene_set, gene_name = NA){
   pData(input_bound) <- pData(input)
   fData(input_bound) <- rbind(fData(input), c(rep(NA, ncol(fData(input)))))
   rownames(fData(input_bound)) <- c(rownames(fData(input)), gene_name)
-  fData(input_bound)[gene_name,]$agg_gene <-  paste0(gene_set, collapse = "_")
+  fData(input_bound)[gene_name,"agg_gene"] <-  paste0(gene_set, collapse = "_")
   return(input_bound)
 }
