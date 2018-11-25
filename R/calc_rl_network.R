@@ -149,17 +149,28 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       remove <- c(remove, i)
     }
   }
-  full_network <- full_network[-remove,]
+
   full_network$Connection_product <- full_network$Ligand_expression*full_network$Receptor_expression
-  full_network$Connection_ratio <- full_network$Ligand_expression/full_network$Receptor_expression
+  pos_con_prod <- which(full_network$Connection_product > 0)
+  full_network$log10_Connection_product <- 0
+  full_network$log10_Connection_product[pos_con_prod] <- log10(full_network$Connection_product[pos_con_prod])
+
+  full_network$Connection_ratio <- 0
+  pos_rec <- which(full_network$Receptor_expression > 0)
+  full_network$Connection_ratio[pos_rec] <- full_network$Ligand_expression[pos_rec]/full_network$Receptor_expression[pos_rec]
+  pos_rat <- which(full_network$Connection_ratio > 0)
+  full_network$log10_Connection_ratio <- 0
+  full_network$log10_Connection_ratio[pos_rat] <- log10(full_network$Connection_ratio[pos_rat])
+
   ##### Summarize Interactions #####
+  full_network_for_summary <- full_network[-remove,] # TMP DISABLE
   if(print_progress == TRUE){
     print("Summarizing Interactions")
   }
-  vec1 <- full_network[,1]
-  vec2 <- full_network[,3]
+  vec1 <- full_network_for_summary[,1]
+  vec2 <- full_network_for_summary[,3]
   if(group_by != FALSE){
-    vec3 <- full_network[,5]
+    vec3 <- full_network_for_summary[,5]
     dat <- matrix(c(vec1, vec2, vec3), ncol = 3)
   } else {
     dat <- matrix(c(vec1, vec2), ncol = 2)
@@ -227,8 +238,6 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     }
   }
   ##### Rank Connections by L * R coarse (within cell type A to anyone!) #####
-  full_network$log10_Connection_product <- log10(full_network$Connection_product)
-  full_network$log10_Connection_ratio <- log10(full_network$Connection_ratio)
   full_network$Connection_rank_coarse <- NA
   full_network$Connection_Z_coarse <- NA
   if(print_progress == TRUE){
@@ -360,9 +369,11 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
   #####
   results <- vector(mode = "list", 2)
   results[[1]] <- summary
+  full_network2 <- full_network[-remove,]
   rownames(full_network) <- seq(1:nrow(full_network))
-  results[[2]] <- full_network
-  names(results) <- c("Summary", "full_network")
+  results[[2]] <- full_network2
+  results[[3]] <- full_network
+  names(results) <- c("Summary", "full_network", "full_network_raw")
   return(results)
   #####
 }
