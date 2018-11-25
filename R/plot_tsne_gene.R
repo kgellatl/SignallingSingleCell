@@ -34,7 +34,8 @@ plot_tsne_gene <- function(input,
                            theme = "classic",
                            cutoff = 0.2,
                            xcol="x",
-                           ycol="y"){
+                           ycol="y",
+                           text_sizes = c(20,10,5,10,5,5)){
   kde2d_weighted <- function (x, y, w, h, n , lims = c(range(x), range(y))) {
     nx <- length(x)
     if (length(y) != nx)
@@ -99,7 +100,7 @@ plot_tsne_gene <- function(input,
     } else {
       g <- g + theme_classic()
     }
-    g <- g +  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 10), legend.title = element_text(size = 10), legend.text=element_text(size=5))
+    g <- g + theme(plot.title = element_text(size = text_sizes[1]), axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]), legend.title = element_text(size = text_sizes[4]), legend.text=element_text(size=text_sizes[5]))
     g <- g +  theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
     g <- g +  facet_wrap(~gene, ncol = ncol)
     if(density == TRUE){
@@ -151,7 +152,7 @@ plot_tsne_gene <- function(input,
     }
     g <- g +  geom_point(data= tmp, aes_string(x=xcol, y=ycol), shape=20, size = size, col = "gray")
     g <- g +  theme_classic()
-    g <- g +  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 10), legend.title = element_text(size = 10), legend.text=element_text(size=5))
+    g <- g + theme(plot.title = element_text(size = text_sizes[1]), axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]), legend.title = element_text(size = text_sizes[4]), legend.text=element_text(size=text_sizes[5]))
     g <- g +  theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
     g <- g +  facet_wrap(facets = reformulate(facet_by), ncol = ncol)
     g <- g +  scale_color_gradientn(colours=colors_points)
