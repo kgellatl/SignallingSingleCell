@@ -28,8 +28,8 @@
 
 plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", cluster_type = "hierarchical", k = NULL, ceiling = FALSE,
                          color_pal = viridis::magma(256), facet_by = FALSE,color_facets = FALSE,
-                         group_names = TRUE, gene_names = TRUE, text_size = 3, text_angle = 90,
-                         pdf_format = "raster", interactive = FALSE){
+                         group_names = TRUE, gene_names = TRUE, text_angle = 90,
+                         pdf_format = "raster", interactive = FALSE, text_sizes = c(20,10,5,10,5,5)){
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
@@ -179,13 +179,10 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   g <- g + theme_classic()
   g <- g + scale_fill_gradientn(colours = color_pal)
   g <- g + scale_color_gradientn(colours = color_pal)
-  g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
+  g <- g + theme(plot.title = element_text(size = text_sizes[1]), axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]), legend.title = element_text(size = text_sizes[4]), legend.text=element_text(size=text_sizes[5]))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   g <- g + labs(title= title)
   g <- g + theme(axis.text.x = element_text(angle = text_angle, hjust = 1))
-  g <- g + theme(axis.text = element_text(size = text_size))
-  g <- g + theme(legend.text=element_text(size=text_size))
-  g <- g + theme(legend.title=element_text(size=text_size))
   g <- g + theme(panel.spacing = unit(0.02, "lines"))
   g <- g +
     theme(axis.title.x=element_blank(),
