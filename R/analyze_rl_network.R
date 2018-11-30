@@ -12,15 +12,24 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1){
+analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layout = NULL){
 
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
   }
 
-  tmp_net <- input
-  l <- layout_nicely(tmp_net)
+  tmp_net <- input$igraph_Network
+
+  if(is.null(layout)){
+    l <- input$layout
+    if(nrow(l) != length(V(tmp_net))){
+      stop("You must recalculate the layout if the number of nodes is not equal to your layout table")
+    }
+  } else {
+    l <- layout_with_kk(tmp_net)
+  }
+
 
   tmp_net_cp <- tmp_net
   cfg <- cluster_edge_betweenness(as.undirected(tmp_net_cp), weights = NULL)
@@ -101,16 +110,16 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1){
 
 
   pdf(paste0(prefix, "Analyzed_Network.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(tmp_net, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  plot(tmp_net, layout = l,  vertex.frame.color = "white", cex.col= "black", rescale = TRUE)
   dev.off()
 
   tmp_net3 <- tmp_net
 
-  E(tmp_net3)$color <- E(input)$color2
+  E(tmp_net3)$color <- E(input$igraph_Network)$color2
   V(tmp_net3)$name <- ""
 
   pdf(paste0(prefix, "Analyzed_Network_thick_simple2.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(tmp_net3, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  plot(tmp_net3, layout = l,  vertex.frame.color = "white", cex.col= "black", rescale = TRUE)
   dev.off()
 
   pdf(paste0(prefix, "Analyzed_Network_noname.pdf"), h = h, w = w, useDingbats = FALSE)
@@ -120,10 +129,10 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1){
   dev.off()
 
 
-  if(!is.null(E(input)$color2)){
+  if(!is.null(E(input$igraph_Network)$color2)){
     pdf(paste0(prefix, "Analyzed_Network_noname_color2.pdf"), h = h, w = w, useDingbats = FALSE)
     net3 <- net2
-    E(net3)$color <- E(input)$color2
+    E(net3)$color <- E(input$igraph_Network)$color2
     plot(net3, layout = l,  cex.col= "black", vertex.frame.color = 'white', rescale = TRUE)
     dev.off()
   }
@@ -135,7 +144,7 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1){
 
 
   pdf(paste0(prefix, "Analyzed_Network_communities_nonames.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(tmp_net_cp, mark.groups = cfg, vertex.label = "",  layout = l,  vertex.frame.color = 'white', vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
+  plot(tmp_net_cp, mark.groups = cfg, vertex.label = "",  layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
   dev.off()
 
   pdf(paste0(prefix, "Analyzed_Network_communities_crossing.pdf"), h = h, w = w, useDingbats = FALSE)
@@ -145,9 +154,9 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1){
   plot(tmp_net_cp2, mark.groups = cfg, vertex.label = "",  layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
   dev.off()
 
-  if(!is.null(E(input)$color2)){
+  if(!is.null(E(input$igraph_Network)$color2)){
   pdf(paste0(prefix, "Analyzed_Network_communities_crossing_default_colors.pdf"), h = h, w = w, useDingbats = FALSE)
-  E(tmp_net_cp2)$color <- E(input)$color2
+  E(tmp_net_cp2)$color <- E(input$igraph_Network)$color2
   V(tmp_net_cp2)$color <- V(tmp_net)$color
   plot(tmp_net_cp2, mark.groups = cfg, vertex.label = "",  layout = l, cex.col= "black", rescale = TRUE)
   dev.off()
@@ -220,12 +229,12 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1){
   results[[12]] <- cluster_edge_hub
   results[[13]] <- cluster_node_authority
   results[[14]] <- vit_net
-  results[[15]] <- input
+  results[[15]] <- tmp_net
   results[[16]] <- l
 
   names(results) <- c("Degree", "Node_degree", "Node_betweeness", "Node_authority",
                       "Edge_degree", "Edge_betweeness", "Edge_hub", "Crossing", "Clusters_Results", "Clusters_individual",
-                      "Clusters_betweeness", "Clusters_edge_hub","Clusters_node_authority", "Interactive", "input", "layout")
+                      "Clusters_betweeness", "Clusters_edge_hub","Clusters_node_authority", "Interactive", "igraph_Network", "layout")
   return(results)
 }
 

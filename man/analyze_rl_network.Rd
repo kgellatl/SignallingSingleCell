@@ -4,7 +4,8 @@
 \alias{analyze_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-analyze_rl_network(input, h = 8, w = 8, prefix = "", mult = 1)
+analyze_rl_network(input, h = 8, w = 8, prefix = "", mult = 1,
+  layout = NULL)
 }
 \arguments{
 \item{input}{the input network from plot_rl_network}

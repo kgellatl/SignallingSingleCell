@@ -9,7 +9,6 @@
 #' @param from the comparitive reference
 #' @param to the condition to compare to reference
 #' @param value the column of the full network to calculate foldChange on
-#' @param layout nicely, kk, circle
 #' @param write_interactive whether or not to write an interactive visNetwork html object
 #' @param interactive_groups the dropdown menu for selection nodes, either "nodes", "group_by", or "cluster"
 #' @param nodesize The size of nodes
@@ -25,7 +24,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,  layout = "nicely",
+plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,
                             write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE,
                             textsize = 0.5, h = 8, w = 8, prefix = ""){
   ###############################################################################################
@@ -237,7 +236,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   V(net_graph)$size <- nodesize
   V(net_graph)$label.cex <- textsize
   V(net_graph)$label.color <- "black"
-  V(net_graph)$vertex.frame.color <- NA
+  V(net_graph)$vertex.frame.color <- "white"
   V(net_graph)$color <- colors_vert
 
   if(comparitive!=FALSE){
@@ -258,15 +257,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   E(net_graph)$arrow.size <- 0.1
   E(net_graph)$color <- colors_edge
 
-  if(layout == "nicely"){
-    l <- layout_nicely(net_graph)
-  }
-  if(layout == "kk"){
-    l <- layout_with_kk(net_graph)
-  }
-  if(layout == "circle"){
-    l <- layout_in_circle(net_graph)
-  }
+  l <- layout_components(net_graph, layout = layout_with_kk)
 
   if(size_by_connections == TRUE){
     deg <- degree(net_graph, mode="all")
@@ -289,7 +280,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
 
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
   pdf(paste0(prefix, "Fullnetwork.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(net_graph, layout = l, vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  plot(net_graph, layout = l, vertex.frame.color = "white", cex.col= "black", rescale = TRUE)
   cell_legend <- sort(unique(tmpdat[,3]))
   legend(x=-1.5, y=0, cell_legend, pch=21,
          col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
@@ -298,7 +289,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   pdf(paste0(prefix, "Fullnetwork_noname.pdf"), h = h, w = w, useDingbats = FALSE)
   net2 <- net_graph
   V(net2)$name <- ""
-  plot(net2, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+  plot(net2, layout = l,  vertex.frame.color = "white", cex.col= "black", rescale = TRUE)
   cell_legend <- sort(unique(tmpdat[,3]))
   legend(x=-1.5, y=0, cell_legend, pch=21,
          col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
@@ -307,7 +298,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   if(comparitive == TRUE){
     pdf(paste0(prefix, "Fullnetwork_noname_color2.pdf"), h = h, w = w, useDingbats = FALSE)
     E(net2)$color <- E(net_graph)$color2
-    plot(net2, layout = l,  vertex.frame.color = NA, cex.col= "black", rescale = TRUE)
+    plot(net2, layout = l,  vertex.frame.color = "white", cex.col= "black", rescale = TRUE)
     cell_legend <- sort(unique(tmpdat[,3]))
     legend(x=-1.5, y=0, cell_legend, pch=21,
            col="#777777", pt.bg=rev(dynamic_colors), pt.cex=2, cex=.8, bty="n", ncol=1)
@@ -324,7 +315,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
 
   pdf(paste0(prefix, "Fullnetwork_clusters.pdf"), h = h, w = w, useDingbats = FALSE)
   V(net2)$name <- plot_rl_results$clusters$membership
-  plot(net2, layout = l,  vertex.frame.color = NA, cex.col= "black",
+  plot(net2, layout = l,  vertex.frame.color = "white", cex.col= "black",
        vertex.color = clusts, rescale = TRUE)
   dev.off()
 
