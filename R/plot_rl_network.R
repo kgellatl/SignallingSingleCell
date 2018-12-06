@@ -299,15 +299,16 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
     dev.off()
   }
 
-  cols_clust <- gg_color_hue(length(unique(plot_rl_results$clusters$membership)))
-  clusts <- as.vector(plot_rl_results$clusters$membership)
+  subgraphs <- igraph::clusters(net_graph)
+  cols_clust <- gg_color_hue(length(unique(subgraphs$membership)))
+  clusts <- as.vector(subgraphs$membership)
   for (i in 1:length(cols_clust)) {
     cl <- cols_clust[i]
     clusts[which(clusts == i)] <- cl
   }
 
   pdf(paste0(prefix, "Fullnetwork_clusters.pdf"), h = h, w = w, useDingbats = FALSE)
-  V(net_graph)$name_membership <- plot_rl_results$clusters$membership
+  V(net_graph)$name_membership <- subgraphs$membership
   V(net_graph)$color_membership <- clusts
   plot(net_graph, layout = l, rescale = TRUE,
        vertex.color = V(net_graph)$color_membership,
@@ -317,7 +318,7 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
 
   plot_rl_results[[1]] <- net_graph
   plot_rl_results[[2]] <- l
-  plot_rl_results[[3]] <- igraph::clusters(net_graph)
+  plot_rl_results[[3]] <- subgraphs
   plot_rl_results[[4]] <- decompose.graph(net_graph)
   names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs")
 
