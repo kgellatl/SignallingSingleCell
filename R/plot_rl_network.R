@@ -272,13 +272,6 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
   ##### Write out results #####
   ###############################################################################################
 
-  plot_rl_results[[1]] <- net_graph
-  plot_rl_results[[2]] <- l
-  plot_rl_results[[3]] <- igraph::clusters(net_graph)
-  plot_rl_results[[4]] <- decompose.graph(net_graph)
-
-  names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs")
-
   l <- norm_coords(l, ymin=0, ymax=1, xmin=0, xmax=1)
   pdf(paste0(prefix, "Fullnetwork.pdf"), h = h, w = w, useDingbats = FALSE)
   plot(net_graph, layout = l, rescale = TRUE,
@@ -321,6 +314,12 @@ plot_rl_network <- function(input, input_full, group_by = FALSE, comparitive = F
        edge.color = E(net_graph)$color_celltype,
        vertex.label = V(net_graph)$name_membership)
   dev.off()
+
+  plot_rl_results[[1]] <- net_graph
+  plot_rl_results[[2]] <- l
+  plot_rl_results[[3]] <- igraph::clusters(net_graph)
+  plot_rl_results[[4]] <- decompose.graph(net_graph)
+  names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs")
 
   if(comparitive!= FALSE){
     plot_rl_results[[5]] <- new_dat_BACKUP
