@@ -12,29 +12,43 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layout = NULL){
+analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layout = FALSE, subset = FALSE, subset_on = "connected"){
 
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
   }
 
-  tmp_net <- input$igraph_Network
+  ###############################################################################################
+  ##### Subsetting and determining layout #####
+  ###############################################################################################
 
-  if(is.null(layout)){
-    l <- input$layout
-    if(nrow(l) != length(V(tmp_net))){
-      stop("You must recalculate the layout if the number of nodes is not equal to your layout table")
+  if(subset != FALSE){
+    if(subset_on == "connected"){
+      tmp_net <- input$clusters_subgraphs[[subset]]
+      ind2 <- match(names(V(tmp_net)), names(V(input$igraph_Network)))
+      l  <- input$layout[ind2,]
+    }
+    if(subset_on == "clusters"){
+      tmp_net <- input$Clusters_individual[[subset]]
+      ind2 <- match(names(V(tmp_net)), names(V(input$igraph_Network)))
+      l  <- input$layout[ind2,]
     }
   } else {
+    tmp_net <- input$igraph_Network
+    l <- input$layout
+  }
+
+  if(layout){
     l <- layout_with_kk(tmp_net)
   }
 
+  ###############################################################################################
+  ##### Subsetting and determining layout #####
+  ###############################################################################################
 
-  tmp_net_cp <- tmp_net
-  cfg <- cluster_edge_betweenness(as.undirected(tmp_net_cp), weights = NULL)
-
-  cs2 <- crossing(cfg, tmp_net_cp)
+  cfg <- cluster_edge_betweenness(as.undirected(tmp_net), weights = NULL)
+  cs2 <- crossing(cfg, tmp_net)
 
   cols_clust <- gg_color_hue(length(unique(cfg$membership)))
   cols_clust2 <- adjustcolor(cols_clust, alpha.f = 1)
@@ -45,9 +59,11 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layou
     clusts[which(clusts == i)] <- cl
   }
 
-  V(tmp_net_cp)$color <- clusts
+  V(tmp_net)$color_clusters <- clusts
 
-  #####
+  ###############################################################################################
+  ##### Calc stats #####
+  ###############################################################################################
 
   deg <- degree(tmp_net, mode="all")
   deg <- sort(deg, decreasing = T)
@@ -96,103 +112,139 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layou
     cluster_centers <- c(cluster_centers,name_center)
   }
 
-  V(tmp_net_cp)$size <- sizes
+  V(tmp_net)$size <- sizes
 
   coGrph <- delete_edges(tmp_net, E(tmp_net)[crossing(cfg, tmp_net)])
   comm_ind <- igraph::decompose.graph(coGrph)
 
-  #####
+  ###############################################################################################
+  ##### Format outputs #####
+  ###############################################################################################
 
   E(tmp_net)$width <- E(tmp_net)$width*mult
   V(tmp_net)$size <- V(tmp_net)$size*mult
-  E(tmp_net_cp)$width <- E(tmp_net_cp)$width*mult
-  V(tmp_net_cp)$size <- V(tmp_net_cp)$size*mult
-
 
   pdf(paste0(prefix, "Analyzed_Network.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(tmp_net, layout = l,  vertex.frame.color = "white", cex.col= "black", rescale = TRUE)
-  dev.off()
-
-  tmp_net3 <- tmp_net
-
-  E(tmp_net3)$color <- E(input$igraph_Network)$color2
-  V(tmp_net3)$name <- ""
-
-  pdf(paste0(prefix, "Analyzed_Network_thick_simple2.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(tmp_net3, layout = l,  vertex.frame.color = "white", cex.col= "black", rescale = TRUE)
+  plot(tmp_net, layout = l, rescale = TRUE,
+       vertex.color = V(tmp_net)$color_celltype,
+       edge.color = E(tmp_net)$color_celltype)
   dev.off()
 
   pdf(paste0(prefix, "Analyzed_Network_noname.pdf"), h = h, w = w, useDingbats = FALSE)
-  net2 <- tmp_net
-  V(net2)$name <- ""
-  plot(net2, layout = l,  cex.col= "black", vertex.frame.color = 'white', rescale = TRUE)
+  plot(tmp_net, layout = l, rescale = TRUE,
+       vertex.color = V(tmp_net)$color_celltype,
+       edge.color = E(tmp_net)$color_celltype,
+       vertex.label = V(tmp_net)$name_blank)
   dev.off()
 
+  pdf(paste0(prefix, "Analyzed_Network_communities.pdf"), h = h, w = w, useDingbats = FALSE)
+  plot(tmp_net, layout = l, rescale = TRUE,
+       mark.groups = cfg,
+       vertex.color = V(tmp_net)$color_celltype,
+       edge.color = E(tmp_net)$color_celltype)
+  dev.off()
 
-  if(!is.null(E(input$igraph_Network)$color2)){
-    pdf(paste0(prefix, "Analyzed_Network_noname_color2.pdf"), h = h, w = w, useDingbats = FALSE)
-    net3 <- net2
-    E(net3)$color <- E(input$igraph_Network)$color2
-    plot(net3, layout = l,  cex.col= "black", vertex.frame.color = 'white', rescale = TRUE)
+  pdf(paste0(prefix, "Analyzed_Network_communities_noname.pdf"), h = h, w = w, useDingbats = FALSE)
+  plot(tmp_net, layout = l, rescale = TRUE,
+       mark.groups = cfg,
+       vertex.color = V(tmp_net)$color_clusters,
+       edge.color = E(tmp_net)$color_celltype,
+       vertex.label = V(tmp_net)$name_blank)
+  dev.off()
+
+  if(!is.null(E(tmp_net)$color_compare)){
+    pdf(paste0(prefix, "Analyzed_Network_compared.pdf"), h = h, w = w, useDingbats = FALSE)
+    plot(tmp_net, layout = l, rescale = TRUE,
+         vertex.color = V(tmp_net)$color_celltype,
+         edge.color = E(tmp_net)$color_compare)
     dev.off()
   }
 
+  if(!is.null(E(tmp_net)$color_compare)){
+    pdf(paste0(prefix, "Analyzed_Network_compared_noname.pdf"), h = h, w = w, useDingbats = FALSE)
+    plot(tmp_net, layout = l, rescale = TRUE,
+         vertex.color = V(tmp_net)$color_celltype,
+         edge.color = E(tmp_net)$color_compare,
+         vertex.label = V(tmp_net)$name_blank)
+    dev.off()
+  }
 
-  pdf(paste0(prefix, "Analyzed_Network_communities.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(tmp_net_cp, mark.groups = cfg,  layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
-  dev.off()
-
-
-  pdf(paste0(prefix, "Analyzed_Network_communities_nonames.pdf"), h = h, w = w, useDingbats = FALSE)
-  plot(tmp_net_cp, mark.groups = cfg, vertex.label = "",  layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
-  dev.off()
-
-  pdf(paste0(prefix, "Analyzed_Network_communities_crossing.pdf"), h = h, w = w, useDingbats = FALSE)
-  tmp_net_cp2 <- tmp_net_cp
-  E(tmp_net_cp2)$color <- "gray"
-  E(tmp_net_cp2)$color[crossing(cfg,tmp_net_cp2)] <- "red"
-  plot(tmp_net_cp2, mark.groups = cfg, vertex.label = "",  layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
-  dev.off()
-
-  if(!is.null(E(input$igraph_Network)$color2)){
-  pdf(paste0(prefix, "Analyzed_Network_communities_crossing_default_colors.pdf"), h = h, w = w, useDingbats = FALSE)
-  E(tmp_net_cp2)$color <- E(input$igraph_Network)$color2
-  V(tmp_net_cp2)$color <- V(tmp_net)$color
-  plot(tmp_net_cp2, mark.groups = cfg, vertex.label = "",  layout = l, cex.col= "black", rescale = TRUE)
+  if(!is.null(E(tmp_net)$color_compare)){
+  pdf(paste0(prefix, "Analyzed_Network_communities_compare.pdf"), h = h, w = w, useDingbats = FALSE)
+  plot(tmp_net, layout = l, rescale = TRUE,
+       mark.groups = cfg,
+       vertex.color = V(tmp_net)$color_clusters,
+       edge.color = E(tmp_net)$color_compare)
   dev.off()
   }
 
-  pdf(paste0(prefix, "Analyzed_Network_communities_crossing_named.pdf"), h = h, w = w, useDingbats = FALSE)
-  keep_name <- unique(ends(tmp_net_cp2, names(cs2)[which(cs2 == TRUE)], names =  T))
-  V(tmp_net_cp2)$name[-match(keep_name, V(tmp_net_cp2)$name)] <- ""
-  plot(tmp_net_cp2, layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
+  if(!is.null(E(tmp_net)$color_compare)){
+  pdf(paste0(prefix, "Analyzed_Network_communities_compare_noname.pdf"), h = h, w = w, useDingbats = FALSE)
+  plot(tmp_net, layout = l, rescale = TRUE,
+       mark.groups = cfg,
+       vertex.color = V(tmp_net)$color_clusters,
+       edge.color = E(tmp_net)$color_compare,
+       vertex.label = V(tmp_net)$name_blank)
+  dev.off()
+  }
+
+  pdf(paste0(prefix, "Analyzed_Network_communities_crossing_noname.pdf"), h = h, w = w, useDingbats = FALSE)
+  E(tmp_net)$color_crossing <- "gray"
+  E(tmp_net)$color_crossing[crossing(cfg,tmp_net)] <- "red"
+  plot(tmp_net, layout = l, rescale = TRUE,
+       mark.groups = cfg,
+       vertex.color = V(tmp_net)$color_clusters,
+       edge.color = E(tmp_net)$color_crossing,
+       vertex.label = V(tmp_net)$name_blank)
+  dev.off()
+
+
+  pdf(paste0(prefix, "Analyzed_Network_communities_crossing.pdf"), h = h, w = w, useDingbats = FALSE)
+  keep_name <- unique(ends(tmp_net, names(cs2)[which(cs2 == TRUE)], names =  T))
+  V(tmp_net)$name_crossing <- V(tmp_net)$name
+  V(tmp_net)$name_crossing[-match(keep_name, V(tmp_net)$name_crossing)] <- ""
+  plot(tmp_net, layout = l, rescale = TRUE,
+       mark.groups = cfg,
+       vertex.color = V(tmp_net)$color_clusters,
+       edge.color = E(tmp_net)$color_crossing,
+       vertex.label = V(tmp_net)$name_crossing)
   dev.off()
 
   pdf(paste0(prefix, "Analyzed_Network_communities_centers_named.pdf"), h = h, w = w, useDingbats = FALSE)
-  tmp_net3 <-  tmp_net_cp
-  keep_center <- match(names(cluster_centers), names(V(tmp_net3)))
-  V(tmp_net3)$name[-keep_center] <- ""
-  plot(tmp_net3,  layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
+  keep_center <- match(names(cluster_centers), names(V(tmp_net)))
+  V(tmp_net)$name_center <-V(tmp_net)$name
+  V(tmp_net)$name_center[-keep_center] <- ""
+  plot(tmp_net, layout = l, rescale = TRUE,
+       mark.groups = cfg,
+       vertex.color = V(tmp_net)$color_clusters,
+       edge.color = E(tmp_net)$color_crossing,
+       vertex.label = V(tmp_net)$name_center)
   dev.off()
 
 
   pdf(paste0(prefix, "Analyzed_Network_communities_numbered.pdf"), h = h, w = w, useDingbats = FALSE)
-  V(tmp_net_cp)$name <- cfg$membership
-  plot(tmp_net_cp, layout = l,  vertex.frame.color = 'white', cex.col= "black", rescale = TRUE)
+  V(tmp_net)$name_clusters <- cfg$membership
+  plot(tmp_net, layout = l, rescale = TRUE,
+       mark.groups = cfg,
+       vertex.color = V(tmp_net)$color_clusters,
+       edge.color = E(tmp_net)$color_crossing,
+       vertex.label = V(tmp_net)$name_clusters)
   dev.off()
 
-  # pdf(paste0(prefix, "Dendrogram.pdf"), height = 10, width = 50)
-  # dendPlot(cfg, mode="hclust")
-  # dev.off()
 
-  #####
+  ###############################################################################################
+  ##### Interactive #####
+  ###############################################################################################
 
   nodes <- igraph::as_data_frame(tmp_net, what = "vertices")
   links <- igraph::as_data_frame(tmp_net, what = "edges")
   links$arrows <- "to"
 
   colnames(nodes)[1] <- "id"
-  nodes <- nodes[,c("id", "color")]
+  nodes <- nodes[,c("id", "color_celltype")]
+
+  nodes$color <-  V(tmp_net)$color_celltype
+  links$color <- E(tmp_net)$color_celltype
 
   nodes$label <- V(tmp_net)$name
   links$value <- E(tmp_net)$width
@@ -212,7 +264,9 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layou
 
   visNetwork::visSave(vit_net, file=paste0(prefix, "Interactive_Network_analyzed.html"))
 
-  #####
+  ###############################################################################################
+  ##### Outputs #####
+  ###############################################################################################
 
   results <- vector(mode = "list", length = 10)
   results[[1]] <- deg
