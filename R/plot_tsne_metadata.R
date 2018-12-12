@@ -28,7 +28,8 @@ plot_tsne_metadata <- function(input,
                                theme = "classic",
                                legend_dot_size = 1.5,
                                xcol="x",
-                               ycol="y"){
+                               ycol="y",
+                               text_sizes = c(20,10,5,10,5,5)){
 
   tmp <- pData(input)
   tmp <- tmp[sample(nrow(tmp)),]
@@ -45,7 +46,7 @@ plot_tsne_metadata <- function(input,
   } else {
     g <- g +  labs(title= title, x = "tSNE[1]", y = "tSNE[2]")
   }
-  g <- g + theme(plot.title = element_text(size = 20), axis.title = element_text(size = 10), legend.title = element_text(size = 15), legend.text=element_text(size=10))
+  g <- g + theme(plot.title = element_text(size = text_sizes[1]), axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]), legend.title = element_text(size = text_sizes[4]), legend.text=element_text(size=text_sizes[5]))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   if(all(is.na(facet_by)) == FALSE){
     tmp <- pData(input)[c(xcol, ycol)]

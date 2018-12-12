@@ -22,7 +22,7 @@ extract_communities <- function(input, select, expand = TRUE){
   }
 
   if(expand == TRUE){
-    keep2 <- unlist(adjacent_vertices(input$input, keep, mode = "all"))
+    keep2 <- unlist(adjacent_vertices(input$igraph_Network, keep, mode = "all"))
     select2 <- unique(members[keep2])
     keep <- c()
     for (i in 1:length(select2)) {
@@ -32,9 +32,14 @@ extract_communities <- function(input, select, expand = TRUE){
     }
   }
 
-  subgraph <- induced_subgraph(input$input, keep)
-
-  return(subgraph)
+  subgraph <- induced_subgraph(input$igraph_Network, keep)
+  ind2 <- match(names(V(subgraph)), names(V(input$igraph_Network)))
+  l  <- input$layout[ind2,]
+  results <- vector(mode = "list", length = 2)
+  results[[1]] <- subgraph
+  results[[2]] <- l
+  names(results) <- c("igraph_Network", "layout")
+  return(results)
 
 }
 

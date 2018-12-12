@@ -6,10 +6,9 @@
 \usage{
 plot_rl_network(input, input_full, group_by = FALSE,
   comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,
-  layout = "nicely", write_interactive = TRUE,
-  interactive_groups = "nodes", nodesize = 3,
-  size_by_connections = TRUE, textsize = 0.5, h = 8, w = 8,
-  prefix = "")
+  write_interactive = TRUE, interactive_groups = "nodes",
+  nodesize = 3, size_by_connections = TRUE, textsize = 0.5, h = 8,
+  w = 8, prefix = "")
 }
 \arguments{
 \item{input}{the input networked (usually filtered)}
@@ -25,8 +24,6 @@ plot_rl_network(input, input_full, group_by = FALSE,
 \item{to}{the condition to compare to reference}
 
 \item{value}{the column of the full network to calculate foldChange on}
-
-\item{layout}{nicely, kk, circle}
 
 \item{write_interactive}{whether or not to write an interactive visNetwork html object}
 

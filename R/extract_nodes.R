@@ -12,27 +12,27 @@
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
 extract_nodes <- function(input, nodes, expand = 0){
+  input_extract <- input$igraph_Network
   path <- c()
   for (i in 1:length(nodes)) {
     if(i < length(nodes)){
       int1 <- nodes[i]
       int2 <- nodes[i+1]
-      walk <- shortest_paths(graph = input, from = int1, to = int2, mode = "all")
+      walk <- shortest_paths(graph = input_extract, from = int1, to = int2, mode = "all")
       walk <- unlist(walk$vpath)
       path <- c(path, walk)
     } else {
       int1 <- nodes[i]
       int2 <- nodes[1]
-      walk <- shortest_paths(graph = input, from = int1, to = int2, mode = "all")
+      walk <- shortest_paths(graph = input_extract, from = int1, to = int2, mode = "all")
       walk <- unlist(walk$vpath)
       path <- c(path, walk)
       path <- unique(path)
-      path <- names(V(input))[path]
+      path <- names(V(input_extract))[path]
     }
   }
-
   if(expand > 0){
-    output_graph <- make_ego_graph(input, order = expand, nodes = nodes, mode = "all")
+    output_graph <- make_ego_graph(input_extract, order = expand, nodes = nodes, mode = "all")
     keep_v <- c()
     for (j in 1:length(output_graph)) {
       gtmp <- output_graph[[j]]
@@ -42,11 +42,14 @@ extract_nodes <- function(input, nodes, expand = 0){
     }
     path <- unique(c(path, keep_v))
   }
-
-  keep <- match(path, names(V(input)))
-  output <- delete.vertices(input, V(input)[-keep])
-
-  return(output)
-
+  keep <- match(path, names(V(input_extract)))
+  output <- delete.vertices(input_extract, V(input_extract)[-keep])
+  ind2 <- match(names(V(output)), names(V(input_extract)))
+  l  <- input$layout[ind2,]
+  results <- vector(mode = "list", length = 2)
+  results[[1]] <- output
+  results[[2]] <- l
+  names(results) <- c("igraph_Network", "layout")
+  return(results)
 }
 

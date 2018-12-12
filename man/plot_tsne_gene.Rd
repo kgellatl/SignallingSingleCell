@@ -7,7 +7,8 @@
 plot_tsne_gene(input, gene, log_scale = F, title = "",
   density = FALSE, facet_by = "NA", colors_points = c("gray", "blue",
   "red", "yellow"), size = 1.5, ncol = 2, resolution = 500,
-  cutoff = 0.2, xcol = "x", ycol = "y")
+  theme = "classic", cutoff = 0.2, xcol = "x", ycol = "y",
+  text_sizes = c(20, 10, 5, 10, 5, 5))
 }
 \arguments{
 \item{input}{The input data}
