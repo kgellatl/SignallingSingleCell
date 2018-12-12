@@ -16,7 +16,7 @@
 #' @examples
 #' filtered_data <- filter_UMIs(input = ex_sc_example, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10, print_progress = TRUE)
 
-pre_filter <- function(input, minUMI, maxUMI=NA, threshold=NA, minCells=NA, print_progress = TRUE){
+pre_filter <- function(input, minUMI = 0, maxUMI = NA, threshold=NA, minCells=NA, print_progress = TRUE){
   if(is.na(threshold) != TRUE){
     if(is.na(minCells) != TRUE){
     }
@@ -30,21 +30,14 @@ pre_filter <- function(input, minUMI, maxUMI=NA, threshold=NA, minCells=NA, prin
     print("Filtering Low Cells")
   }
   cSum <- apply(exprs(input),2,sum)
-  if(minUMI < min(cSum)){
-    stop("minUMI is less than minimum number of UMIs in data")
+  if(is.na(maxUMI)){
+    maxUMI <- max(cSum)
   }
-  low_c <- which(cSum < minUMI)
-  if(is.na(maxUMI) != TRUE){
-    if(maxUMI > max(cSum)){
-      stop("maxUMI is greater than maximum number of UMIs in data")
-    }
-    if(print_progress == TRUE){
-      print("Filtering High Cells")
-    }
-    high_c <- which(cSum > maxUMI)
-    input <- input[,-c(low_c, high_c)]
-  } else (
-    input <- input[,-low_c]
-  )
+  low <- which(cSum < minUMI)
+  high <- which(cSum > maxUMI)
+  remove <- c(low, high)
+  if(length(remove) > 0){
+    input <- input[,-remove]
+  }
   return(input)
 }
