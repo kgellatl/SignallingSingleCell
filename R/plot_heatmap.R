@@ -26,10 +26,11 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row", cluster_type = "hierarchical", k = NULL, ceiling = FALSE,
+plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row",
+                         cluster_type = "hierarchical", k = NULL, show_k = F, ceiling = FALSE,
                          color_pal = viridis::magma(256), facet_by = FALSE,color_facets = FALSE,
                          group_names = TRUE, gene_names = TRUE, text_angle = 90,
-                         pdf_format = "raster", interactive = FALSE, text_sizes = c(20,10,5,10,5,5)){
+                         pdf_format = "tile", interactive = FALSE, text_sizes = c(20,10,5,10,5,5)){
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
@@ -184,6 +185,15 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   g <- g + labs(title= title)
   g <- g + theme(axis.text.x = element_text(angle = text_angle, hjust = 1))
   g <- g + theme(panel.spacing = unit(0.02, "lines"))
+  if(cluster_type == "kmeans"){
+    if(show_k == T){
+      ylabs <- res$cluster
+      ulabs <- unique(ylabs)
+      ind <- match(ulabs, ylabs)
+      ylabs[-ind] <- ""
+      g <- g + scale_y_discrete(labels=ylabs)
+    }
+  }
   g <- g +
     theme(axis.title.x=element_blank(),
           axis.title.y=element_blank(),
