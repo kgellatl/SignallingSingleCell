@@ -4,8 +4,8 @@
 \alias{plot_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-plot_rl_network(input, input_full, group_by = FALSE,
-  comparitive = FALSE, from = FALSE, to = FALSE, value = FALSE,
+plot_rl_network(input, value, group_by = FALSE, comparitive = FALSE,
+  from = FALSE, to = FALSE, input_full = NA,
   write_interactive = TRUE, interactive_groups = "nodes",
   nodesize = 3, size_by_connections = TRUE, textsize = 0.5, h = 8,
   w = 8, prefix = "")
@@ -13,7 +13,7 @@ plot_rl_network(input, input_full, group_by = FALSE,
 \arguments{
 \item{input}{the input networked (usually filtered)}
 
-\item{input_full}{the input full network}
+\item{value}{the column of the full network to calculate foldChange on}
 
 \item{group_by}{the pData columns calc_rl_network was calculated on to split the networks}
 
@@ -23,7 +23,7 @@ plot_rl_network(input, input_full, group_by = FALSE,
 
 \item{to}{the condition to compare to reference}
 
-\item{value}{the column of the full network to calculate foldChange on}
+\item{input_full}{the input full network}
 
 \item{write_interactive}{whether or not to write an interactive visNetwork html object}
 
