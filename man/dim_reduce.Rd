@@ -6,7 +6,7 @@
 \usage{
 dim_reduce(input, genelist = gene_subset, pre_reduce = "iPCA",
   nComp = 15, tSNE_perp = 30, iterations = 1000,
-  print_progress = TRUE, nVar = NA)
+  print_progress = TRUE, nVar = NA, log_scale = T, scale = T)
 }
 \arguments{
 \item{input}{the input ex_sc}

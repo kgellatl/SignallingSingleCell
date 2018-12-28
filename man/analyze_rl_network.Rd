@@ -5,7 +5,7 @@
 \title{Identifies all R / L interactions}
 \usage{
 analyze_rl_network(input, h = 8, w = 8, prefix = "", mult = 1,
-  layout = NULL)
+  layout = FALSE, subset = FALSE, subset_on = "connected")
 }
 \arguments{
 \item{input}{the input network from plot_rl_network}

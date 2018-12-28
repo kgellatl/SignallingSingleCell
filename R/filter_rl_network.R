@@ -73,6 +73,9 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
     if(is.null(DEfolder)){
       stop("Requires a DE folder from findDEgenes output")
     }
+    #####
+    # First list all the files in the DE folder and find ones that correspond to the nodes in network
+    #####
     filelist <- list.files(DEfolder)
     filelist <- paste0(DEfolder, "/", filelist)
     types <- unique(input$full_network[,1])
@@ -88,6 +91,9 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
           }
         }
       }
+      #####
+      # Find ones that pass the filter criteria
+      #####
       tmp <- read.table(int, sep = "\t", row.names = 1, header = T)
       vec <- tmp[,filter_by]
       if(absol == TRUE){
@@ -95,10 +101,16 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
       }
       bool <- f(vec, cutoff)
       int_gene <- rownames(tmp)[bool]
+      #####
+      # Find now the network rows corresponding to the input celltype
+      #####
       indices <-  grep(interested, input$full_network[,1])
-      kint2 <- input$full_network[grep(interested, input$full_network[,1]),]
-      rec <- kint2$Receptor
-      ligs <- kint2$Ligand
+      indices2 <-  grep(interested, input$full_network[,3]) ### Is this correct???
+      indices <- unique(c(indices, indices2)) ### Is this correct???
+      kint2 <- input$full_network[indices,]
+      rownames(kint2) <- indices
+      rec <- kint2$Receptor[indices2]
+      ligs <- kint2$Ligand[indices]
       mfin <- c()
       for (k in 1:length(int_gene)) {
         gene2 <- int_gene[k]
@@ -108,6 +120,9 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
         mfin <- c(mfin, fin)
         mfin <- unique(mfin)
       }
+      #####
+      # Keep the network rows based on this match
+      #####
       genes_keep <- kint2[mfin,]
       rows_keep <- c(rows_keep, rownames(genes_keep))
       rows_keep <- unique(rows_keep)

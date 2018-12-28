@@ -19,9 +19,14 @@
 #' @examples
 #' ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
 #'
-dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 1000, print_progress=TRUE, nVar=NA){
+dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 1000, print_progress=TRUE, nVar=NA, log_scale = T, scale = T){
   input_exp <- exprs(input)[genelist,]
-  input_scale <- scale(log2(input_exp[,]+2)-1)
+  if(log_scale){
+    input_exp <- log2(input_exp[,]+2)-1
+  }
+  if(scale){
+    input_exp <- scale(input_scale)
+  }
   check <- grep("Comp", colnames(pData(input)))
   if(length(check) > 0){
     pData(input) <- pData(input)[,-check]
@@ -30,7 +35,7 @@ dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp
     if(print_progress == TRUE){
       print("Starting ICA")
     }
-    ica <- fastICA::fastICA(t(input_scale), n.comp=(nComp), alg.typ = 'parallel', fun='logcosh', alpha = 1.0, method = 'C', verbose = print_progress)
+    ica <- fastICA::fastICA(t(input_exp), n.comp=(nComp), alg.typ = 'parallel', fun='logcosh', alpha = 1.0, method = 'C', verbose = print_progress)
     colnames(ica$A) <- gene_subset
     rownames(ica$S) <- colnames(input)
     set.seed(100)
@@ -44,7 +49,7 @@ dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp
     if(print_progress == TRUE){
       print("Starting PCA")
     }
-    PCA <- irlba::prcomp_irlba(t(input_scale), nComp, center = F)
+    PCA <- irlba::prcomp_irlba(t(input_exp), nComp, center = F)
     rownames(PCA$x) <- colnames(input)
     colnames(PCA$x) <- paste0("PC_Comp", seq(1:ncol(PCA$x)))
     set.seed(100)
@@ -57,7 +62,7 @@ dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp
     if(print_progress == TRUE){
       print("Starting iPCA")
     }
-    iPCA <- irlba::prcomp_irlba(input_scale, nComp, center = F)
+    iPCA <- irlba::prcomp_irlba(input_exp, nComp, center = F)
     rownames(iPCA$rotation) <- colnames(input)
     colnames(iPCA$rotation) <- paste0("iPC_Comp", seq(1:ncol(iPCA$rotation)))
     set.seed(100)
@@ -70,7 +75,7 @@ dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp
     if(print_progress == TRUE){
       print("Starting vPCA")
     }
-    vPCA <- irlba::prcomp_irlba(log10(input_exp+1), n = nComp, scale. = T)
+    vPCA <- irlba::prcomp_irlba(input_exp, n = nComp)
     # sum components until variance is >= x%
     var = vPCA$sdev^2/sum(vPCA$sdev^2)
     totalvar = var[1]

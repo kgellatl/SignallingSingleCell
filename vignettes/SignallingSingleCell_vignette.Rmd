@@ -29,6 +29,7 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 ```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
 library("SignallingSingleCell")
 load(url("http://garberlab.umassmed.edu/data/scRNASeqTools/mDC_0hr_1hr_4hr_CLEAN.Rdata"))
+# load("~/Documents/UMASS/Garber/Data/inDrop/mDC_UMIClean/1-RawFiles/mDC_0hr_1hr_4hr_CLEAN.Rdata")
 ```
 
 # Preprocessing  
@@ -52,12 +53,12 @@ rm(mDC_0hr_1hr_4hr_CLEAN)
 The first step is to filter your data to remove low quality cells. Often creating a histogram of the values and assigning cutoffs is simple and effective. Typically we remove all cells lower than 500-1000 UMIs / cell.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc <- calc_libsize(ex_sc) # sums counts for each cell
-plot_density(ex_sc, title = "UMI Density", val = "UMI_sum", statistic = "mean") # Density function. Note how many low UMI count cells are in the data!
+ex_sc <- calc_libsize(ex_sc, suffix = "raw") # sums counts for each cell
+plot_density(ex_sc, title = "UMI Density", val = "UMI_sum_raw", statistic = "mean") # Density function. Note how many low UMI count cells are in the data!
 
 ex_sc <- pre_filter(ex_sc, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10,  print_progress = TRUE) # filters cells and genes
-ex_sc <- calc_libsize(ex_sc)
-plot_density(ex_sc, title = "UMI Density",  val = "UMI_sum", statistic = "mean")  
+ex_sc <- calc_libsize(ex_sc, suffix = "raw")
+plot_density(ex_sc, title = "UMI Density",  val = "UMI_sum_raw", statistic = "mean")  
 
 # save_ggplot(filename = "Density", format = "pdf") # Plots can be quickly and easily saved!
 ```
@@ -73,7 +74,7 @@ ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "iPCA", nComp = 
 
 colnames(pData(ex_sc))
 
-plot_tsne_metadata(ex_sc, color_by = "UMI_sum", title = "Total UMIs per cell") 
+plot_tsne_metadata(ex_sc, color_by = "UMI_sum_raw", title = "Total UMIs per cell") 
 
 ```
 
@@ -82,17 +83,18 @@ plot_tsne_metadata(ex_sc, color_by = "UMI_sum", title = "Total UMIs per cell")
 Now that we have dimension reduced data we can try clustering it!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 7) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
+ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 6) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
 # ex_sc <- cluster_sc(ex_sc, dimension = "2d", method = "density", num_clust = 7) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
 
 plot_tsne_metadata(ex_sc, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
 
+plot_density(ex_sc, title = "UMIs per cluster", val = "UMI_sum_raw", color_by = "Cluster", statistic = "mean")
+
+# plot_density_ridge(ex_sc, title = "UMIs per cluster", val = "UMI_sum_raw", color_by = "Cluster")
+
 ex_sc <- id_markers(ex_sc, print_progress = TRUE) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
+
 markers <- return_markers(ex_sc, num_markers = 10) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
-
-plot_density(ex_sc, title = "UMIs per cluster", val = "UMI_sum", color_by = "Cluster", statistic = "mean")
-
-plot_density_ridge(ex_sc, title = "UMIs per cluster", val = "UMI_sum", color_by = "Cluster")
 ```
 
 ## Normalization
@@ -122,7 +124,7 @@ plot_tsne_metadata(ex_sc_norm, color_by = "Cluster", title = "Spectral Cluster o
 
 plot_density_ridge(ex_sc_norm, color_by = "Cluster", title = "UMIs per cluster", val = "UMI_sum")
 
-plot_tsne_metadata(ex_sc_norm, color_by = "UMI_sum", title = "Total UMIs per cell") 
+plot_tsne_metadata(ex_sc_norm, color_by = "UMI_sum_raw", title = "Total UMIs per cell") 
 
 plot_tsne_metadata(ex_sc_norm, color_by = "size_factor", title = "Size Factor per cell") 
 
@@ -166,7 +168,6 @@ plot_scatter(input = ex_sc_norm, title = "Correlation Plot", gene1 = "Ccr7", gen
 marker_facet <- c("Emr1", "Lcn2", "Ccr7")
 
 plot_tsne_gene(input = ex_sc_norm, genes = marker_facet, title = "Marker Genes",  ncol = 3, density = FALSE)
-plot_tsne_gene(input = ex_sc_norm, genes = marker_facet, title = "Marker Genes",  ncol = 3, density = TRUE)
 
 plot_violin(ex_sc_norm, title = "Ccr7 across clusters", gene = "Ccr7", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
 ```
@@ -197,21 +198,21 @@ panel3 <- c("Csf1r", "Mertk") # Mac
 
 panels <- list(panel1, panel2, panel3)
 
-plot_tsne_gene(mDC_0hr, genes = unlist(panels), title = "")
+plot_tsne_gene(mDC_0hr, gene = unlist(panels), title = "")
 
 names(panels) <- c("Neutrophil", "Dendritic", "Macrophage")
 
 mDC_0hr <- flow_filter(mDC_0hr, panels = panels, title = "Flow Pass Cells")
-
-```
-
-## SVM training on cells pass gate for flow
-
-```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
 
 mDC_0hr <- flow_svm(mDC_0hr)
 
 plot_tsne_metadata(mDC_0hr, color_by = "Cluster", title = "Spectral Cluster on PCA components")
 plot_tsne_metadata(mDC_0hr, color_by = "SVM_Classify", title = "Spectral Cluster on PCA components")
 
+```
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+# DE analysis
+# Network Analysis
+# Heatmap
 ```
