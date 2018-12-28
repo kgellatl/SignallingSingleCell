@@ -24,7 +24,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-plot_rl_network <- function(input, value, group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, input_full = NA,
+plot_rl_network <- function(input, value = "log10_Connection_product", group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, input_full = NA,
                             write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE,
                             textsize = 0.5, h = 8, w = 8, prefix = ""){
   ###############################################################################################
