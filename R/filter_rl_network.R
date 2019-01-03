@@ -101,16 +101,24 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
       }
       bool <- f(vec, cutoff)
       int_gene <- rownames(tmp)[bool]
+      # test_ind <- grep("TGFB2", int_gene)
+      # if(length(test_ind) > 0){
+      #   print(i)
+      # }
       #####
       # Find now the network rows corresponding to the input celltype
       #####
-      indices <-  grep(interested, input$full_network[,1])
-      indices2 <-  grep(interested, input$full_network[,3]) ### Is this correct???
+      indices <-  grep(interested, input$full_network[,1]) # Find from position
+      indices2 <-  grep(interested, input$full_network[,3]) # Find to position
+
       indices <- unique(c(indices, indices2)) ### Is this correct???
       kint2 <- input$full_network[indices,]
-      rownames(kint2) <- indices
-      rec <- kint2$Receptor[indices2]
-      ligs <- kint2$Ligand[indices]
+
+      rownames(kint2) <- rownames(input$full_network)[indices]
+      rec <- kint2$Receptor
+      ligs <- kint2$Ligand
+
+
       mfin <- c()
       for (k in 1:length(int_gene)) {
         gene2 <- int_gene[k]
@@ -126,19 +134,20 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
       genes_keep <- kint2[mfin,]
       rows_keep <- c(rows_keep, rownames(genes_keep))
       rows_keep <- unique(rows_keep)
+      rows_keep <- as.numeric(rows_keep)
     }
     if (keep == TRUE) {
       if(is.null(input$full_network$keep)){
         input$full_network$keep <- FALSE
-        input$full_network$keep[as.numeric(rows_keep)] <- TRUE
+        input$full_network$keep[(rows_keep)] <- TRUE
       } else {
         keep2 <- which(input$full_network$keep == TRUE)
-        ind <- intersect(as.numeric(rows_keep), keep2)
+        ind <- intersect((rows_keep), keep2)
         input$full_network$keep <- FALSE
-        input$full_network$keep[as.numeric(rows_keep)] <- TRUE
+        input$full_network$keep[(rows_keep)] <- TRUE
       }
     } else {
-      input$full_network <- input$full_network[sort(as.numeric(rows_keep)),]
+      input$full_network <- input$full_network[sort(rows_keep),]
     }
   }
   return(input)
