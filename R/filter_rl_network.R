@@ -125,26 +125,32 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
         #####
         # Find now the network rows corresponding to the input celltype
         #####
-        indices <-  grep(interested, input$full_network[,1]) # Find from position
-        indices2 <-  grep(interested, input$full_network[,3]) # Find to position
-        indices <- unique(c(indices, indices2)) ### Is this correct???
-        kint2 <- input$full_network[indices,]
-        rownames(kint2) <- rownames(input$full_network)[indices]
-        rec <- kint2$Receptor
-        ligs <- kint2$Ligand
-        mfin <- c()
+
+
+        from_pos <-  grep(interested, input$full_network[,1]) # Find from position
+        to_pos <-  grep(interested, input$full_network[,3]) # Find to position
+
         for (k in 1:length(int_gene)) {
           gene2 <- int_gene[k]
-          rec_match <- grep(paste0("^", gene2, "$"), rec)
-          lig_match <- grep(paste0("^", gene2, "$"), ligs)
-          fin <- c(rec_match, lig_match)
+
+          lig_match <- grep(paste0("^", gene2, "$"), input$full_network$Ligand)
+          rec_match <- grep(paste0("^", gene2, "$"), input$full_network$Receptor)
+
+          if(length(lig_match) > 0){
+            fin <- intersect(lig_match, from_pos)
+          } else {
+            fin <- intersect(rec_match, to_pos)
+          }
           mfin <- c(mfin, fin)
           mfin <- unique(mfin)
+
         } # ENDS GENE LOOP
+
+
         #####
         # Keep the network rows based on this match
         #####
-        genes_keep <- kint2[mfin,]
+        genes_keep <- input$full_network[mfin,]
         rows_keep <- c(rows_keep, rownames(genes_keep))
         rows_keep <- unique(rows_keep)
         rows_keep <- as.numeric(rows_keep)
@@ -168,26 +174,28 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
         #####
         # Find now the network rows corresponding to the input celltype
         #####
-        indices <-  grep(interested, input$full_network[,1]) # Find from position
-        indices2 <-  grep(interested, input$full_network[,3]) # Find to position
-        indices <- unique(c(indices, indices2)) ### Is this correct???
-        kint2 <- input$full_network[indices,]
-        rownames(kint2) <- rownames(input$full_network)[indices]
-        rec <- kint2$Receptor
-        ligs <- kint2$Ligand
-        mfin <- c()
+        from_pos <-  grep(interested, input$full_network[,1]) # Find from position
+        to_pos <-  grep(interested, input$full_network[,3]) # Find to position
+
         for (k in 1:length(int_gene)) {
           gene2 <- int_gene[k]
-          rec_match <- grep(paste0("^", gene2, "$"), rec)
-          lig_match <- grep(paste0("^", gene2, "$"), ligs)
-          fin <- c(rec_match, lig_match)
+
+          lig_match <- grep(paste0("^", gene2, "$"), input$full_network$Ligand)
+          rec_match <- grep(paste0("^", gene2, "$"), input$full_network$Receptor)
+
+          if(length(lig_match) > 0){
+            fin <- intersect(lig_match, from_pos)
+          } else {
+            fin <- intersect(rec_match, to_pos)
+          }
           mfin <- c(mfin, fin)
           mfin <- unique(mfin)
+
         } # ENDS GENE LOOP
         #####
         # Keep the network rows based on this match
         #####
-        genes_keep <- kint2[mfin,]
+        genes_keep <- input$full_network[mfin,]
         rows_keep <- c(rows_keep, rownames(genes_keep))
         rows_keep <- unique(rows_keep)
         rows_keep <- as.numeric(rows_keep)
