@@ -129,7 +129,7 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
 
         from_pos <-  grep(interested, input$full_network[,1]) # Find from position
         to_pos <-  grep(interested, input$full_network[,3]) # Find to position
-
+        mfin <- c()
         for (k in 1:length(int_gene)) {
           gene2 <- int_gene[k]
 
@@ -176,7 +176,7 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
         #####
         from_pos <-  grep(interested, input$full_network[,1]) # Find from position
         to_pos <-  grep(interested, input$full_network[,3]) # Find to position
-
+        mfin <- c()
         for (k in 1:length(int_gene)) {
           gene2 <- int_gene[k]
 
