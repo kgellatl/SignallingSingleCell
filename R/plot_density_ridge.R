@@ -15,7 +15,8 @@
 
 plot_density_ridge <- function(input, val, title = "", color_by){
   dat <- pData(input)
-  if(val != "UMI_sum"){
+  ind1 <- grep(val, colnames(dat))
+  if(length(ind1) == 0){
     dat <- cbind(dat, log2(exprs(input)[val,]+2)-1)
     colnames(dat) <- c(colnames(dat[2:ncol(dat)-1]), val)
   }
@@ -31,7 +32,7 @@ plot_density_ridge <- function(input, val, title = "", color_by){
     g <- g + ggtitle(title)
   }
   g <- g + xlab(val)
-  if(val == "UMI_sum"){
+  if(length(ind1) == 1){
     g <- g + scale_x_log10()
   }
   return(g)
