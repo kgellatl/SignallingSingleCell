@@ -19,13 +19,13 @@
 #' @examples
 #' ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
 #'
-dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 1000, print_progress=TRUE, nVar=NA, log_scale = T, scale = T){
+dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 1000, print_progress=TRUE, nVar=NA, log = T, scale = T){
   input_exp <- exprs(input)[genelist,]
-  if(log_scale){
+  if(log){
     input_exp <- log2(input_exp[,]+2)-1
   }
   if(scale){
-    input_exp <- scale(input_scale)
+    input_exp <- scale(input_exp)
   }
   check <- grep("Comp", colnames(pData(input)))
   if(length(check) > 0){
