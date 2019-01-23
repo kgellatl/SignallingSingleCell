@@ -17,7 +17,7 @@
 #' @examples
 #' ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
 #'
-norm_sc <- function(input, gene_frac = 0.25, gene_var = 0.75, sf_keep = 0.975, genelist = NULL, norm_by = "Cluster", pool_sizes = c(20,30,40,50), positive = TRUE){
+norm_sc <- function(input, gene_frac = 0.25, gene_var = 0.75, genelist = NULL, norm_by = "Cluster", pool_sizes = c(20,30,40,50), positive = TRUE){
 
   clusters <- pData(input)[,norm_by]
 
@@ -40,6 +40,7 @@ norm_sc <- function(input, gene_frac = 0.25, gene_var = 0.75, sf_keep = 0.975, g
     input2 <- input[genelist,]
     gene_subset_var <- subset_genes(input2, method = "PCA", threshold = 0, minCells = 0, nComp = 10, cutoff = gene_var) # filter genes on variability
     stable_genes <- genelist[!genelist %in% gene_subset_var] # remove variable genes
+    stable_genes
     genelist <- stable_genes
   }
 
@@ -58,12 +59,11 @@ norm_sc <- function(input, gene_frac = 0.25, gene_var = 0.75, sf_keep = 0.975, g
   size_factor <- sizeFactors(SCE)
   size_factor <- size_factor[ind]
   pData(input_norm)$size_factor <- size_factor
+  ind <- match(stable_genes, rownames(input_norm))
+  input_norm$norm_gene <- 0
 
-  cut <- qnorm(sf_keep)
-  sf_10 <- log10(size_factor)
-  sf_10 <- scale(sf_10)
-  sf_10 <- abs(sf_10)
-  remove <- which(sf_10 > cut)
-  input_norm <- input_norm[,-remove]
+  input_norm$norm_gene[ind] <- "Yes"
+  input_norm$norm_gene[-ind] <- "No"
+
   return(input_norm)
 }
