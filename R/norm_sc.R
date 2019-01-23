@@ -60,10 +60,11 @@ norm_sc <- function(input, gene_frac = 0.25, gene_var = 0.75, genelist = NULL, n
   size_factor <- size_factor[ind]
   pData(input_norm)$size_factor <- size_factor
   ind <- match(stable_genes, rownames(input_norm))
-  input_norm$norm_gene <- 0
 
-  input_norm$norm_gene[ind] <- "Yes"
-  input_norm$norm_gene[-ind] <- "No"
+  fData(input_norm)$norm_gene <- 0
+
+  fData(input_norm)$norm_gene[ind] <- "Yes"
+  fData(input_norm)$norm_gene[-ind] <- "No"
 
   return(input_norm)
 }
