@@ -123,21 +123,22 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
     }
     int <- full_network[i,]
     int_exp <- all_expr[c(int$Ligand, int$Receptor),]
+    int_exp_split <- matrix(unlist(strsplit(colnames(int_exp), split = "_num_genes_")), ncol=2, byrow = T)
     ctr <- int[,3]
     ctl <- int[,1]
     lig <- int$Ligand
     rec <- int$Receptor
     if(group_by != FALSE){
-      ctr <- paste0(int[,group_by], "_", ctr)
-      ctl <- paste0(int[,group_by], "_", ctl)
+      ctr <- paste0("^", int[,group_by], "_", ctr, "$")
+      ctl <- paste0("^", int[,group_by], "_", ctl, "$")
     } else {
-      ctr <- paste0(ctr)
-      ctl <- paste0(ctl)
+      ctr <- paste0("^", ctr, "$")
+      ctl <- paste0("^", ctl, "$")
     }
-    rec_ex <- int_exp[rec,grep(ctr, colnames(int_exp))]
-    lig_ex <- int_exp[lig,grep(ctl, colnames(int_exp))]
+    rec_ex <- int_exp[rec,grep(ctr, int_exp_split[,1])]
+    lig_ex <- int_exp[lig,grep(ctl, int_exp_split[,1])]
     if(weight_by_proportion == TRUE){
-      to_parse <- colnames(int_exp)[grep(ctl, colnames(int_exp))]
+      to_parse <- int_exp_split[,2][grep(ctl, int_exp_split[,1])]
       to_parse <- unlist(strsplit(to_parse, "_"))
       to_parse <- to_parse[match("percent", to_parse)+1]
       to_parse <- as.numeric(to_parse)/100
@@ -149,7 +150,6 @@ calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion
       remove <- c(remove, i)
     }
   }
-
   full_network$Connection_product <- full_network$Ligand_expression*full_network$Receptor_expression
   pos_con_prod <- which(full_network$Connection_product > 0)
   full_network$log10_Connection_product <- 0

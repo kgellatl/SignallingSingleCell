@@ -15,13 +15,9 @@
 #' This will use the calc_agg_bulk results to ID networks
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
+#'
 filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolder = NULL, cutoff, direction, absol = FALSE,
                               group_by = FALSE, keep = FALSE){
-  f <- function(a, b, op=direction) {
-    call <- call(op, a, b)
-    result <- eval(call)
-    result
-  }
   rownames(input$full_network) <- seq(1:nrow(input$full_network))
   if(filter_type != "DE" && filter_type != "network"){
     stop("Filter types can be 'DE' or 'network'")
@@ -73,6 +69,14 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
     if(is.null(DEfolder)){
       stop("Requires a DE folder from findDEgenes output")
     }
+    l1 <- length(filter_by)
+    l2 <-length(absol)
+    l3 <- length(cutoff)
+    l4 <- length(direction)
+    if(length(unique(c(l1,l2,l3,l4))) > 1){
+      stop("filter_by, absol, cutoff, and direction must be vectors of equal length")
+    }
+
     #####
     # First list all the files in the DE folder and find ones that correspond to the nodes in network
     #####
@@ -91,54 +95,127 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
           }
         }
       }
+
       #####
       # Find ones that pass the filter criteria
       #####
-      tmp <- read.table(int, sep = "\t", row.names = 1, header = T)
-      vec <- tmp[,filter_by]
-      if(absol == TRUE){
-        vec <- abs(vec)
-      }
-      bool <- f(vec, cutoff)
-      int_gene <- rownames(tmp)[bool]
-      #####
-      # Find now the network rows corresponding to the input celltype
-      #####
-      indices <-  grep(interested, input$full_network[,1])
-      indices2 <-  grep(interested, input$full_network[,3]) ### Is this correct???
-      indices <- unique(c(indices, indices2)) ### Is this correct???
-      kint2 <- input$full_network[indices,]
-      rownames(kint2) <- indices
-      rec <- kint2$Receptor[indices2]
-      ligs <- kint2$Ligand[indices]
-      mfin <- c()
-      for (k in 1:length(int_gene)) {
-        gene2 <- int_gene[k]
-        rec_match <- grep(paste0("^", gene2, "$"), rec)
-        lig_match <- grep(paste0("^", gene2, "$"), ligs)
-        fin <- c(rec_match, lig_match)
-        mfin <- c(mfin, fin)
-        mfin <- unique(mfin)
-      }
-      #####
-      # Keep the network rows based on this match
-      #####
-      genes_keep <- kint2[mfin,]
-      rows_keep <- c(rows_keep, rownames(genes_keep))
-      rows_keep <- unique(rows_keep)
-    }
+
+      if(length(filter_by) > 1){
+        full_gene_set <- c()
+        for (l in 1:length(filter_by)) {
+          int_filt <- filter_by[l]
+          f <- function(a, b, op=direction[l]) {
+            call <- call(op, a, b)
+            result <- eval(call)
+            result
+          } # ENDS F DEFINITION
+          tmp <- read.table(int, sep = "\t", row.names = 1, header = T)
+          vec <- tmp[,int_filt]
+
+          if(absol[l] == TRUE){
+            vec <- abs(vec)
+          }
+          bool <- f(vec, cutoff[l])
+          int_gene <- rownames(tmp)[bool]
+          full_gene_set <- c(full_gene_set, int_gene)
+        } # FINISHES FILTER BASED ON PARAMTER
+
+        int_gene <- which(table(full_gene_set) == length(filter_by))
+        int_gene <- names(int_gene)
+        #####
+        # Find now the network rows corresponding to the input celltype
+        #####
+
+
+        from_pos <-  grep(interested, input$full_network[,1]) # Find from position
+        to_pos <-  grep(interested, input$full_network[,3]) # Find to position
+        mfin <- c()
+        for (k in 1:length(int_gene)) {
+          gene2 <- int_gene[k]
+
+          lig_match <- grep(paste0("^", gene2, "$"), input$full_network$Ligand)
+          rec_match <- grep(paste0("^", gene2, "$"), input$full_network$Receptor)
+
+          if(length(lig_match) > 0){
+            fin <- intersect(lig_match, from_pos)
+          } else {
+            fin <- intersect(rec_match, to_pos)
+          }
+          mfin <- c(mfin, fin)
+          mfin <- unique(mfin)
+
+        } # ENDS GENE LOOP
+
+
+        #####
+        # Keep the network rows based on this match
+        #####
+        genes_keep <- input$full_network[mfin,]
+        rows_keep <- c(rows_keep, rownames(genes_keep))
+        rows_keep <- unique(rows_keep)
+        rows_keep <- as.numeric(rows_keep)
+
+      } else { # STARTS SINGLE PARAMETER
+        ########################################
+        ##### SINGLE FILTER BY PARAMETER #####
+        ########################################
+        f <- function(a, b, op=direction) {
+          call <- call(op, a, b)
+          result <- eval(call)
+          result
+        }
+        tmp <- read.table(int, sep = "\t", row.names = 1, header = T)
+        vec <- tmp[,filter_by]
+        if(absol == TRUE){
+          vec <- abs(vec)
+        }
+        bool <- f(vec, cutoff)
+        int_gene <- rownames(tmp)[bool]
+        #####
+        # Find now the network rows corresponding to the input celltype
+        #####
+        from_pos <-  grep(interested, input$full_network[,1]) # Find from position
+        to_pos <-  grep(interested, input$full_network[,3]) # Find to position
+        mfin <- c()
+        for (k in 1:length(int_gene)) {
+          gene2 <- int_gene[k]
+
+          lig_match <- grep(paste0("^", gene2, "$"), input$full_network$Ligand)
+          rec_match <- grep(paste0("^", gene2, "$"), input$full_network$Receptor)
+
+          if(length(lig_match) > 0){
+            fin <- intersect(lig_match, from_pos)
+          } else {
+            fin <- intersect(rec_match, to_pos)
+          }
+          mfin <- c(mfin, fin)
+          mfin <- unique(mfin)
+
+        } # ENDS GENE LOOP
+        #####
+        # Keep the network rows based on this match
+        #####
+        genes_keep <- input$full_network[mfin,]
+        rows_keep <- c(rows_keep, rownames(genes_keep))
+        rows_keep <- unique(rows_keep)
+        rows_keep <- as.numeric(rows_keep)
+
+      } # ENDS SINGLE PARAMETER LOOP
+
+    } # ENDS FILE LIST LOOP
+
     if (keep == TRUE) {
       if(is.null(input$full_network$keep)){
         input$full_network$keep <- FALSE
-        input$full_network$keep[as.numeric(rows_keep)] <- TRUE
+        input$full_network$keep[(rows_keep)] <- TRUE
       } else {
         keep2 <- which(input$full_network$keep == TRUE)
-        ind <- intersect(as.numeric(rows_keep), keep2)
+        ind <- intersect((rows_keep), keep2)
         input$full_network$keep <- FALSE
-        input$full_network$keep[as.numeric(rows_keep)] <- TRUE
+        input$full_network$keep[(rows_keep)] <- TRUE
       }
     } else {
-      input$full_network <- input$full_network[sort(as.numeric(rows_keep)),]
+      input$full_network <- input$full_network[sort(rows_keep),]
     }
   }
   return(input)

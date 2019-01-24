@@ -17,7 +17,7 @@ subset_ex_sc <- function(input, variable, select){
  val <- dat[,ind]
  selected <- c()
  for(s in select){
-   ind2 <- grep(s, val)
+   ind2 <- grep(paste0("^", s, "$"), val)
    selected <- c(selected, ind2)
  }
  cells <- rownames(dat)[selected]
