@@ -79,9 +79,9 @@ plot_violin <- function(input, title = "", gene, color_by, log_scale = F, colors
   g <- g + theme(plot.title = element_text(size = text_sizes[1]), axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]), legend.title = element_text(size = text_sizes[4]), legend.text=element_text(size=text_sizes[5]))
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   if(jitter_pts == T){
-    g <- g + geom_jitter(aes_string(x=color_by, y=gene, col = color_by), width = 0.2, size = size, alpha = alpha)
+    g <- g + geom_jitter(aes_string(x=color_by, y=gene, col = color_by), width = 0.2, size = size)
   }
-  g <- g + geom_violin(aes_string(x=color_by, y=gene, col = color_by), trim = T, fill = NA)
+  g <- g + geom_violin(aes_string(x=color_by, y=gene, fill = color_by), col= "black", trim = T, scale = "width", alpha = alpha)
   if(number_labels == T){
     g <- g + stat_summary(aes_string(x = color_by, y = gene), fun.data = label.n, fun.y = "mean", colour = "black", geom = "text", size=3)
     g <- g + stat_summary(aes_string(x = color_by, y = frac_cells), fun.data = fracSC, fun.y = "mean", colour = "black", geom = "text", size=3)
@@ -150,4 +150,3 @@ plot_violin <- function(input, title = "", gene, color_by, log_scale = F, colors
                  axis.ticks.x=element_blank())
   return(g)
 }
-
