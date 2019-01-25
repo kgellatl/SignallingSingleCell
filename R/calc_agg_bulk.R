@@ -37,7 +37,7 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff_frac = F
   names(to_expand) <- aggregate_by
   bulks <- expand.grid(to_expand, stringsAsFactors = FALSE)
   colnames(bulks) <- c(aggregate_by)
-  groups <- unique(pData(input)[,group_by])
+  groups <- sort(unique(pData(input)[,group_by]))
   upm_vals <- c()
   num_cells_vals <- c()
   num_genes_vals <- c()
@@ -90,7 +90,7 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff_frac = F
     for (i in 1:length(groups)) {
       ind <- grep(groups[i], bulks[,group_by])
       total <- sum(bulks$numcells[ind])
-      bulks$proportion <- round((bulks$numcells/total)*100,2)
+      bulks$proportion[ind] <- round((bulks$numcells[ind]/total)*100,2)
     }
   } else {
     total <- sum(bulks$numcells)
@@ -114,14 +114,15 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff_frac = F
     colnames(bulk)[l] <- cname
   }
   if(group_by != FALSE){
-    for (i in 1:length(vars)) {
-      int_cell <- vars[i]
-      ind <- grep(int_cell, names(rem_genes))
-      vals <- table(unlist(rem_genes[ind]))
-      zero_out <- names(which(vals == max(vals)))
-      bulk[zero_out,ind] <- 0
+    if(!is.null(unlist(rem_genes))){
+      for (i in 1:length(vars)) {
+        int_cell <- vars[i]
+        ind <- grep(int_cell, names(rem_genes))
+        vals <- table(unlist(rem_genes[ind]))
+        zero_out <- names(which(vals == max(vals)))
+        bulk[zero_out,ind] <- 0
+      }
     }
-
   }
   fData(input) <- cbind(fData(input), bulk)
   return(input)

@@ -77,7 +77,7 @@ plotViolin = function(gene,
 
     facet_wrap(reformulate(facetID), scales = facet_scale) +
     geom_jitter(width = 0.2, alpha=0.5) +
-    geom_violin(fill = NA) +
+    geom_violin(fill = NA, scale = "width") +
     stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.data = label.n, fun.y = "mean", colour = "black", geom = "text", size=3) +
     stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.y = mean, colour = "black", geom = "point", size=3, shape = 18) +
     theme_bw() +

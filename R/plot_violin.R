@@ -26,7 +26,7 @@
 
 plot_violin <- function(input, title = "", gene, color_by, log_scale = F, colors = NA, facet_by = "NA", ncol = "NA",
                         jitter_pts = T, plot_mean = TRUE, size = 1, sig = 3, number_labels = T,
-                        text_sizes = c(20,10,5,10,5,5), alpha = 0.25, theme = "classic"){
+                        text_sizes = c(20,10,5,10,5,5), alpha = 0.5, theme = "classic"){
   if(facet_by == "NA"){
     geneColored1 <- pData(input)[,c("x", "y", color_by)]
     if(log_scale == TRUE){
