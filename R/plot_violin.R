@@ -63,6 +63,7 @@ plot_violin <- function(input, title = "", gene, color_by, log_scale = F, colors
   g <- ggplot(geneColored1)
   if(all(!is.na(colors))){
     g <- g + scale_color_manual(values = c(colors))
+    g <- g + scale_fill_manual(values = c(colors))
   }
   if(theme == "bw") {
     g <- g + theme_bw();
