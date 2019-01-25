@@ -114,14 +114,15 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff_frac = F
     colnames(bulk)[l] <- cname
   }
   if(group_by != FALSE){
-    for (i in 1:length(vars)) {
-      int_cell <- vars[i]
-      ind <- grep(int_cell, names(rem_genes))
-      vals <- table(unlist(rem_genes[ind]))
-      zero_out <- names(which(vals == max(vals)))
-      bulk[zero_out,ind] <- 0
+    if(!is.null(unlist(rem_genes))){
+      for (i in 1:length(vars)) {
+        int_cell <- vars[i]
+        ind <- grep(int_cell, names(rem_genes))
+        vals <- table(unlist(rem_genes[ind]))
+        zero_out <- names(which(vals == max(vals)))
+        bulk[zero_out,ind] <- 0
+      }
     }
-
   }
   fData(input) <- cbind(fData(input), bulk)
   return(input)
