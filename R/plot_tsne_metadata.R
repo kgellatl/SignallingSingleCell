@@ -50,7 +50,7 @@ plot_tsne_metadata <- function(input,
   g <- g + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
   if(all(is.na(facet_by)) == FALSE){
     tmp <- pData(input)[c(xcol, ycol)]
-    g <- g + geom_point(data = tmp, aes(x=x, y=y), shape = 20, col = "gray", size = size)
+    g <- g + geom_point(data = tmp, aes_string(x = xcol, y = ycol), shape = 20, col = "gray", size = size)
   }
   if(class(pData(input)[,color_by]) == "double" || class(pData(input)[,color_by]) == "integer" || class(pData(input)[,color_by]) == "numeric" ){
     g <- g +  geom_point(aes_string(x = xcol, y = ycol, col = color_by), shape = 20, size = size)
