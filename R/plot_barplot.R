@@ -102,7 +102,12 @@ plot_barplot <- function(input, title = "", gene, color_by, facet_by = "NA", col
     }
   }
 
-
+  if(facet_by != "NA"){
+    if(round(sum(as.numeric(geneColored1$frac[grep(facet_bys[1], rownames(geneColored1))]))) != 100){
+      warning("facet_by variable is not the group_by argument that was provided for calc_agg_bulk,
+              proportions reported are internal to the group_by argument of calc_agg_bulk")
+    }
+  }
 
 
   ###
