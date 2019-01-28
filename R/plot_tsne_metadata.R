@@ -29,10 +29,15 @@ plot_tsne_metadata <- function(input,
                                legend_dot_size = 1.5,
                                xcol="x",
                                ycol="y",
-                               text_sizes = c(20,10,5,10,5,5)){
+                               text_sizes = c(20,10,5,10,5,5),
+                               shuffle = F){
 
   tmp <- pData(input)
-  tmp <- tmp[sample(nrow(tmp)),]
+  if(shuffle){
+    tmp <- tmp[sample(nrow(tmp)),]
+  } else {
+    tmp <- tmp[order(tmp[,color_by]),]
+  }
   g <- ggplot(tmp)
   if(theme == "bw") {
     g <- g + theme_bw();

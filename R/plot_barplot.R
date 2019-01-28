@@ -123,6 +123,7 @@ plot_barplot <- function(input, title = "", gene, color_by, facet_by = "NA", col
   }
   if(all(!is.na(colors))){
     g <- g + scale_color_manual(values = c(colors))
+    g <- g + scale_fill_manual(values = c(colors))
   }
   if(theme == "bw") {
     g <- g + theme_bw();
