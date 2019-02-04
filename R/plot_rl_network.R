@@ -93,6 +93,7 @@ plot_rl_network <- function(input, value = "log10_Connection_product", group_by 
       if(length(remove) > 0 ){
         tmpdat <- tmpdat[-remove,]
       }
+      net_graph <- graph_from_data_frame(tmpdat[,c("V5", "V6")], directed = TRUE)
     } else {
       net_graph <- graph_from_data_frame(tmpdat[,c("V5", "V6")], directed = TRUE)
     }
