@@ -24,7 +24,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-plot_rl_network <- function(input, value = "log10_Connection_product", group_by = FALSE, comparitive = FALSE, from = FALSE, to = FALSE, input_full = NA,
+plot_rl_network <- function(input, value = "log10_Connection_product", group_by = FALSE, merge_all = F, comparitive = FALSE, from = FALSE, to = FALSE, input_full = NA,
                             write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE,
                             textsize = 0.5, h = 8, w = 8, prefix = ""){
   ###############################################################################################
@@ -76,7 +76,27 @@ plot_rl_network <- function(input, value = "log10_Connection_product", group_by 
       }
       tmpdat$expression <- input$full_network[,value]
     }
-    net_graph <- graph_from_data_frame(tmpdat[,c("V5", "V6")], directed = TRUE)
+    ###### Union  #####
+    if(merge_all){
+      search_full <- apply(tmpdat[ , 1:4 ] , 1 , paste , collapse = "_" )
+      search <- unique(search_full)
+      remove <- c()
+      for (i in 1:length(search)) {
+        int <- search[i]
+        ind <- grep(paste0("^", int, "$"), search_full)
+        if(length(ind) > 1){
+          new_val <- mean(tmpdat$expression[ind])
+          tmpdat$expression[ind][1] <- new_val
+          remove <- c(remove, ind[2:length(ind)])
+        }
+      }
+      if(length(remove) > 0 ){
+        tmpdat <- tmpdat[-remove,]
+      }
+      net_graph <- graph_from_data_frame(tmpdat[,c("V5", "V6")], directed = TRUE)
+    } else {
+      net_graph <- graph_from_data_frame(tmpdat[,c("V5", "V6")], directed = TRUE)
+    }
   }
 
   ###############################################################################################

@@ -20,8 +20,7 @@ id_markers <- function(input, id_by = "Cluster", print_progress = TRUE, overwrit
   cols <- (unique(pData(input)[,id_by]))
   cols <- as.character(cols)
   cols <- sort(cols)
-  vals <- paste0(cols, "_marker_score_", id_by)
-  ind <- match(vals, colnames(fData(marker_input)))
+  ind <- grep("marker_score_", colnames(fData(marker_input)))
   if(unique(is.na(ind)) == FALSE){
     if(overwrite == FALSE){
       stop("Markers already calculated. Set overwrite to TRUE to recalculate")

@@ -47,27 +47,20 @@ plot_barplot <- function(input, title = "", gene, color_by, facet_by = "NA", col
 
   if(facet_by == "NA"){
     geneColored1 <- as.data.frame(t(geneColored1[gene,]))
-    geneColored1[,color_by] <- 0
-    for (i in 1:length(color_bys)) {
-      int <- color_bys[i]
-      ind <- grep(int, rownames(geneColored1))
-      geneColored1[ind,color_by] <- color_bys[i]
-    }
+    geneColored1[,color_by] <- sub("_num_.*", "", rownames(geneColored1))
   } else {
     geneColored1 <- as.data.frame(t(geneColored1[gene,]))
-    geneColored1[,color_by] <- 0
-    geneColored1[,facet_by] <- 0
+    geneColored1[,"tmp_val"] <- sub("_num_.*", "", rownames(geneColored1))
     facet_bys <- sort(unique(pData(input)[,facet_by]))
-    for (i in 1:length(color_bys)) {
-      int <- color_bys[i]
-      ind <- grep(int, rownames(geneColored1))
-      geneColored1[ind,color_by] <- int
-
-    }
-    for (i in 1:length(facet_bys)) {
-      int <- facet_bys[i]
-      ind <- grep(int, rownames(geneColored1))
-      geneColored1[ind,facet_by] <- int
+    tmpmat <- matrix(unlist(strsplit(geneColored1[,"tmp_val"], split = "_")), byrow = T, ncol = 2)
+    colnames(tmpmat) <- c("var1", "var2")
+    geneColored1 <- cbind(geneColored1, tmpmat)
+    if(all(color_bys %in% geneColored1$var1) == T){
+      colnames(geneColored1)[3] <- color_by
+      colnames(geneColored1)[4] <- facet_by
+    } else {
+      colnames(geneColored1)[4] <- color_by
+      colnames(geneColored1)[3] <- facet_by
     }
   }
 
@@ -104,8 +97,7 @@ plot_barplot <- function(input, title = "", gene, color_by, facet_by = "NA", col
 
   if(facet_by != "NA"){
     if(round(sum(as.numeric(geneColored1$frac[grep(facet_bys[1], rownames(geneColored1))]))) != 100){
-      warning("facet_by variable is not the group_by argument that was provided for calc_agg_bulk,
-              proportions reported are internal to the group_by argument of calc_agg_bulk")
+      warning("The proportions reported are internal to the group_by argument used to calc_agg_bulk")
     }
   }
 
@@ -154,3 +146,4 @@ plot_barplot <- function(input, title = "", gene, color_by, facet_by = "NA", col
                  axis.ticks.x=element_blank())
   return(g)
 }
+
