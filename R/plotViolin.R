@@ -13,6 +13,7 @@
 #' @param facet_scale ggplot2 parameter for plot scales defaults to fixed
 #' @param mean_text ggplot2 parameter for adding the mean expression per group defaults to False
 #' @param fraction_text ggplot2 parameter for adding the fraction of cells with expression greater than 0 for that gene defaults to False
+#' @param type plot type, default is violin, can also plot density and cdf distribution
 #' @export
 #' @details
 #' Utilize information stored in pData to control the plot display.
@@ -29,7 +30,8 @@ plotViolin = function(gene,
                       subsetName = NA,
                       facet_scale = "fixed",
                       mean_text = F,
-                      fraction_text = F)
+                      fraction_text = F,
+                      type = "violin")
 {
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
@@ -72,23 +74,38 @@ plotViolin = function(gene,
   if (!is.null(subsetName) & !is.na(subsetName) ) {
     title = paste(subsetName, geneName, sep=" - ");
   }
-  p = ggplot(merged, aes_string(sampleID, geneName, colour = colourID)) +
-
-
-    facet_wrap(reformulate(facetID), scales = facet_scale) +
-    geom_jitter(width = 0.2, alpha=0.5) +
-    geom_violin(fill = NA, scale = "width") +
-    stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.data = label.n, fun.y = "mean", colour = "black", geom = "text", size=3) +
-    stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.y = mean, colour = "black", geom = "point", size=3, shape = 18) +
-    theme_bw() +
-    scale_colour_manual(values=cols) +
-        ggtitle(title)
-
-  if (mean_text == T) {
-    p = p + stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.data = meanSC, fun.y = "mean", colour = "black", geom = "text", size=3)
+  if (type == "violin") {
+    p = ggplot(merged, aes_string(sampleID, geneName, colour = colourID)) +
+      facet_wrap(reformulate(facetID), scales = facet_scale) +
+      geom_jitter(width = 0.2, alpha=0.5) +
+      geom_violin(fill = NA) +
+      stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.data = label.n, fun.y = "mean", colour = "black", geom = "text", size=3) +
+      stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.y = mean, colour = "black", geom = "point", size=3, shape = 18) +
+      theme_bw() +
+      scale_colour_manual(values=cols) +
+      ggtitle(title)
+    if (mean_text == T) {
+      p = p + stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.data = meanSC, fun.y = "mean", colour = "black", geom = "text", size=3)
+    }
+    if (fraction_text == T) {
+      p = p + stat_summary(data = merged, aes_string(x = sampleID, y = fracCells), fun.data = fracSC, fun.y = "mean", colour = "black", geom = "text", size=3)
+    }
   }
-  if (fraction_text == T) {
-    p = p + stat_summary(data = merged, aes_string(x = sampleID, y = fracCells), fun.data = fracSC, fun.y = "mean", colour = "black", geom = "text", size=3)
+  if (type == "density") {
+    p = ggplot(merged, aes_string(geneName, colour = colourID)) +
+      facet_wrap(reformulate(facetID), scales = facet_scale) +
+      geom_density(fill = NA) +
+      theme_bw() +
+      scale_colour_manual(values=cols) +
+      ggtitle(title)
+  }
+  if (type == "cdf") {
+    p = ggplot(merged, aes_string(geneName, colour = colourID)) +
+      facet_wrap(reformulate(facetID), scales = facet_scale) +
+      stat_ecdf() +
+      theme_bw() +
+      scale_colour_manual(values=cols) +
+      ggtitle(title)
   }
   return(p)
 }
