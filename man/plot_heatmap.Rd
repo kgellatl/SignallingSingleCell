@@ -9,7 +9,8 @@ plot_heatmap(input, genes, type, title = "Heatmap", scale_by = "row",
   show_k = F, ceiling = FALSE, color_pal = viridis::magma(256),
   facet_by = FALSE, color_facets = FALSE, group_names = TRUE,
   gene_names = TRUE, text_angle = 90, pdf_format = "tile",
-  interactive = FALSE, text_sizes = c(20, 10, 5, 10, 5, 5))
+  interactive = FALSE, text_sizes = c(20, 10, 5, 10, 5, 5),
+  gene_labels = NULL)
 }
 \arguments{
 \item{input}{the input ex_sc}

@@ -30,7 +30,7 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
                          cluster_type = "hierarchical", k = NULL, show_k = F, ceiling = FALSE,
                          color_pal = viridis::magma(256), facet_by = FALSE,color_facets = FALSE,
                          group_names = TRUE, gene_names = TRUE, text_angle = 90,
-                         pdf_format = "tile", interactive = FALSE, text_sizes = c(20,10,5,10,5,5)){
+                         pdf_format = "tile", interactive = FALSE, text_sizes = c(20,10,5,10,5,5), gene_labels = NULL){
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
@@ -203,6 +203,12 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   if(group_names == FALSE){
     g <- g + theme(axis.text.x=element_blank())
   }
+  if(!is.null(gene_labels)){
+    ligs_reorder_label <- genes
+    ind <- match(gene_labels, genes)
+    ligs_reorder_label[-ind] <- ""
+    g <- g + scale_y_discrete(labels= ligs_reorder_label)
+  }
   if(gene_names == FALSE){
     g <- g + theme(axis.text.y=element_blank())
   }
@@ -254,7 +260,12 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   }
   if(cluster_type == "kmeans"){
     kmean_res <- res
-    return(kmean_res)
+    return_result <- vector(mode = "list", length = 2)
+    return_result[[1]] <-  g
+    return_result[[2]] <-  kmean_res
+    return(return_result)
+  } else {
+    return(g)
   }
   if(interactive == TRUE){
     ggplotly(g, source = "master")
