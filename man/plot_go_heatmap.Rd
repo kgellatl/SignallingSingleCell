@@ -5,7 +5,7 @@
 \title{Construct Expression Set Class}
 \usage{
 plot_go_heatmap(input, sig_val = "p.adjust", cutoff = 0.1,
-  max_categories = 30, subset_group = F)
+  max_categories = 30, subset_group = F, color_by = "sig")
 }
 \arguments{
 \item{input}{the input Go result from clusterProfiler}
@@ -17,6 +17,8 @@ plot_go_heatmap(input, sig_val = "p.adjust", cutoff = 0.1,
 \item{max_categories}{mox categories included}
 
 \item{subset_group}{table(input@compareClusterResult$group)}
+
+\item{color_by}{what the cells should be shaded by. "count" or "sig"}
 }
 \description{
 This function will take an input expression matrix and make an Expression Set Class

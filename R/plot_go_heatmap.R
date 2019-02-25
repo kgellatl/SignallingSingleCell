@@ -15,7 +15,7 @@
 #' @examples
 #' construct_ex_sc(input = sc_dat)
 
-plot_go_heatmap <- function(input, sig_val = "p.adjust", cutoff = 0.1, max_categories = 30, subset_group = F, color_by = "count"){
+plot_go_heatmap <- function(input, sig_val = "p.adjust", cutoff = 0.1, max_categories = 30, subset_group = F, color_by = "sig"){
   if(class(input)[1] == "enrichResult"){
     genes <- input@result$geneID
     descriptions <- input@result$Description
