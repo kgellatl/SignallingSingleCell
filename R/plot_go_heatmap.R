@@ -103,7 +103,7 @@ plot_go_heatmap <- function(input, sig_val = "p.adjust", cutoff = 0.1, max_categ
         counts_words <- table(all_words)
         common <- names(which(counts_words >= word_similarity*length(all_full_terms)))
         if(length(common) == 0){
-          stop("word_similarity is too stringent, no words meet this criteria, try decreasing this value")
+          common <- names(which(counts_words == max(counts_words)))
         }
         new_term <- unique(all_words[all_words %in% common])
         new_term <- paste0(new_term, collapse = "_")
