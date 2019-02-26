@@ -6,7 +6,7 @@
 \usage{
 plotViolin(gene, input, sampleID, facetID, colourID, cols = NULL,
   subsetID = NA, subsetName = NA, facet_scale = "fixed",
-  mean_text = F, fraction_text = F)
+  mean_text = F, fraction_text = F, type = "violin")
 }
 \arguments{
 \item{gene}{Will only plot data for this gene, if the gene paramter is a list the violin plot will display the sum of the expression for all genes in the list}
@@ -30,6 +30,8 @@ plotViolin(gene, input, sampleID, facetID, colourID, cols = NULL,
 \item{mean_text}{ggplot2 parameter for adding the mean expression per group defaults to False}
 
 \item{fraction_text}{ggplot2 parameter for adding the fraction of cells with expression greater than 0 for that gene defaults to False}
+
+\item{type}{plot type, default is violin, can also plot density and cdf distribution}
 }
 \description{
 This will plot a given gene via violin plot
