@@ -28,8 +28,8 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 
 ```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
 library("SignallingSingleCell")
-load(url("http://garberlab.umassmed.edu/data/scRNASeqTools/mDC_0hr_1hr_4hr_CLEAN.Rdata"))
-# load("~/Documents/UMASS/Garber/Data/inDrop/mDC_UMIClean/1-RawFiles/mDC_0hr_1hr_4hr_CLEAN.Rdata")
+# load(url("http://garberlab.umassmed.edu/data/scRNASeqTools/mDC_0hr_1hr_4hr_CLEAN.Rdata"))
+load("~/Documents/UMASS/Garber/Data/inDrop/mDC_UMIClean/1-RawFiles/mDC_0hr_1hr_4hr_CLEAN.Rdata")
 ```
 
 # Preprocessing  

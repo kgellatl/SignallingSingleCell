@@ -13,7 +13,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-calc_rl_network <- function(input, nodes, group_by = FALSE, weight_by_proportion = FALSE, print_progress = TRUE){
+calc_rl_connections <- function(input, nodes, group_by = FALSE, weight_by_proportion = FALSE, print_progress = TRUE){
   ##### Get all Receptor Ligand Pairs expressed in the data into long format
   if(print_progress == TRUE){
     print("Getting all RL Pairs")

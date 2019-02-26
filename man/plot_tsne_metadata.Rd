@@ -7,7 +7,7 @@
 plot_tsne_metadata(input, title = "", color_by, facet_by = NA,
   ncol = "NA", size = 1.5, colors = NA, theme = "classic",
   legend_dot_size = 1.5, xcol = "x", ycol = "y", text_sizes = c(20,
-  10, 5, 10, 5, 5))
+  10, 5, 10, 5, 5), shuffle = F)
 }
 \arguments{
 \item{input}{the input ex_sc.}

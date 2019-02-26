@@ -12,7 +12,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layout = FALSE, subset = FALSE, subset_on = "connected"){
+analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layout = FALSE, subset = FALSE, subset_on = "connected", merge_singles = T){
 
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
@@ -43,14 +43,39 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layou
     l <- layout_with_kk(tmp_net)
   }
 
-  if(length(E(tmp_net)) > 1){
-
     ###############################################################################################
     ##### Subsetting and determining layout #####
     ###############################################################################################
 
     cfg <- cluster_edge_betweenness(as.undirected(tmp_net), weights = NULL)
     cs2 <- crossing(cfg, tmp_net)
+    coGrph <- delete_edges(tmp_net, E(tmp_net)[crossing(cfg, tmp_net)])
+    comm_ind <- igraph::decompose.graph(coGrph)
+
+    if(merge_singles){
+      members <-  as.vector(cfg$membership)
+      cluster_sizes <- table(cfg$membership)
+      check_singles <- which(cluster_sizes == 1)
+      if(length(check_singles) > 0){
+        ind_singles <- as.vector(which(cluster_sizes == 1))
+        ind_multiples <- as.vector(which(cluster_sizes > 1))
+        multiples_length <- seq(1:length(ind_multiples))
+        for (i in 1:length(ind_multiples)) {
+          int_clust <- ind_multiples[i]
+          ind_clust <- which(members == int_clust)
+          members[ind_clust] <- multiples_length[i]
+        }
+        members[which(members > max(multiples_length))] <- max(multiples_length)+1
+        all_new_cs <- sort(unique(members))
+        comm_ind <- vector(mode = "list", length = max(multiples_length)+1)
+        for (i in 1:length(all_new_cs)) {
+          new_cluster <- V(tmp_net)[which(members == all_new_cs[i])]
+          new_cluster <- induced_subgraph(tmp_net, new_cluster)
+          comm_ind[[i]] <- new_cluster
+        }
+        cfg$membership <- members
+      }
+    }
 
     cols_clust <- gg_color_hue(length(unique(cfg$membership)))
     cols_clust2 <- adjustcolor(cols_clust, alpha.f = 1)
@@ -118,9 +143,6 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layou
     }
 
     V(tmp_net)$size <- sizes
-
-    coGrph <- delete_edges(tmp_net, E(tmp_net)[crossing(cfg, tmp_net)])
-    comm_ind <- igraph::decompose.graph(coGrph)
 
     ###############################################################################################
     ##### Format outputs #####
@@ -243,6 +265,7 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layou
 
     nodes <- igraph::as_data_frame(tmp_net, what = "vertices")
     links <- igraph::as_data_frame(tmp_net, what = "edges")
+    if(dim(links)[1] > 0){
     links$arrows <- "to"
 
     colnames(nodes)[1] <- "id"
@@ -268,6 +291,9 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layou
     vit_net <- visNetwork::visOptions(vit_net, highlightNearest = TRUE, selectedBy = "community", nodesIdSelection = TRUE)
 
     visNetwork::visSave(vit_net, file=paste0(prefix, "Interactive_Network_analyzed.html"))
+    } else {
+      vit_net <- NULL
+    }
 
     ###############################################################################################
     ##### Outputs #####
@@ -295,7 +321,6 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layou
                         "Edge_degree", "Edge_betweeness", "Edge_hub", "Crossing", "Clusters_Results", "Clusters_individual",
                         "Clusters_betweeness", "Clusters_edge_hub","Clusters_node_authority", "Interactive", "igraph_Network", "layout")
     return(results)
-  }
 }
 
 

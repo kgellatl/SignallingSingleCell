@@ -24,7 +24,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-plot_rl_network <- function(input, value = "log10_Connection_product", group_by = FALSE, merge_all = F, comparitive = FALSE, from = FALSE, to = FALSE, input_full = NA,
+build_rl_network <- function(input, value = "log10_Connection_product", group_by = FALSE, merge_all = F, comparitive = FALSE, from = FALSE, to = FALSE, input_full = NA,
                             write_interactive = TRUE, interactive_groups = "nodes", nodesize = 3, size_by_connections = TRUE,
                             textsize = 0.5, h = 8, w = 8, prefix = ""){
   ###############################################################################################
@@ -319,7 +319,34 @@ plot_rl_network <- function(input, value = "log10_Connection_product", group_by 
     dev.off()
   }
 
+ ##### Changed to ensure that the resulting connected subgraphs are ordered by their size!!!
+
   subgraphs <- igraph::clusters(net_graph)
+
+  old_members <- subgraphs$membership
+  new_members <- old_members
+  old_sizes <- subgraphs$csize
+
+  c_order <- order(old_sizes, decreasing = T)
+  new_order <- seq(1:length(c_order))
+
+  for (i in 1:length(c_order)) {
+    int_c <- c_order[i]
+    int_c_nodes <- names(which(old_members == int_c))
+    new_members[int_c_nodes] <- new_order[i]
+  }
+  subgraphs$csize <- as.vector(table(new_members))
+  subgraphs$membership <- new_members
+
+  decomposed_subgraph_old <- decompose.graph(net_graph)
+  decomposed_subgraph <- vector(mode = "list", length = length(decomposed_subgraph_old))
+  for (i in 1:length(c_order)) {
+    int_decomp <- c_order[i]
+    decomposed_subgraph[[i]] <- decomposed_subgraph_old[[int_decomp]]
+  }
+
+  #####
+
   cols_clust <- gg_color_hue(length(unique(subgraphs$membership)))
   clusts <- as.vector(subgraphs$membership)
   for (i in 1:length(cols_clust)) {
@@ -339,7 +366,7 @@ plot_rl_network <- function(input, value = "log10_Connection_product", group_by 
   plot_rl_results[[1]] <- net_graph
   plot_rl_results[[2]] <- l
   plot_rl_results[[3]] <- subgraphs
-  plot_rl_results[[4]] <- decompose.graph(net_graph)
+  plot_rl_results[[4]] <- decomposed_subgraph
   names(plot_rl_results) <- c("igraph_Network", "layout", "clusters", "clusters_subgraphs")
 
   if(comparitive!= FALSE){

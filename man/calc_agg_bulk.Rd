@@ -5,7 +5,7 @@
 \title{Calculate UPM expression values across pData values}
 \usage{
 calc_agg_bulk(input, aggregate_by, group_by = FALSE,
-  cutoff_frac = FALSE, cutoff_num = FALSE)
+  cutoff_frac = FALSE, cutoff_num = FALSE, cutoff_cpm = FALSE)
 }
 \arguments{
 \item{input}{the input ex_sc.}
@@ -17,7 +17,9 @@ This is used to calculate portions internally to this group}
 
 \item{cutoff_frac}{a  fraction expressing value below which gene expression values will be set to 0 for the mean.}
 
-\item{cutoff_num}{a total number cells expressing value below which gene expression values will be set to 0 for the mean.
+\item{cutoff_num}{a total number cells expressing value below which gene expression values will be set to 0 for the mean.}
+
+\item{cutoff_cpm, }{the minimum CPM values below which set to 0
 This is useful for removing nodes from networks that contain only a couple of cells.}
 }
 \description{
