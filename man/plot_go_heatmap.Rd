@@ -5,7 +5,8 @@
 \title{Construct Expression Set Class}
 \usage{
 plot_go_heatmap(input, sig_val = "p.adjust", cutoff = 0.1,
-  max_categories = 30, subset_group = F, color_by = "sig")
+  max_categories = 30, color_by = "sig", subset_group = F,
+  prune = F, cutoff_jaccard = 1, word_similarity = 0.5)
 }
 \arguments{
 \item{input}{the input Go result from clusterProfiler}
@@ -16,9 +17,15 @@ plot_go_heatmap(input, sig_val = "p.adjust", cutoff = 0.1,
 
 \item{max_categories}{mox categories included}
 
+\item{color_by}{what the cells should be shaded by. "count" or "sig"}
+
 \item{subset_group}{table(input@compareClusterResult$group)}
 
-\item{color_by}{what the cells should be shaded by. "count" or "sig"}
+\item{prune}{If true will prune the resulting heatmap based on jaccard similarity}
+
+\item{cutoff_jaccard}{The jaccard similarity index of terms to create a new group}
+
+\item{word_similarity}{for groups of go terms, the fraction of the original terms that a given word must occur in}
 }
 \description{
 This function will take an input expression matrix and make an Expression Set Class
