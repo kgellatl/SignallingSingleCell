@@ -4,9 +4,10 @@
 \alias{plotViolin}
 \title{This will create a violin plot}
 \usage{
-plotViolin(gene, input, sampleID, facetID, colourID, cols = NULL,
-  subsetID = NA, subsetName = NA, facet_scale = "fixed",
-  mean_text = F, fraction_text = F, type = "violin")
+plotViolin(gene, input, sampleID, facetID = NULL, colourID,
+  cols = NULL, subsetID = NA, subsetName = NA,
+  facet_scale = "fixed", mean_text = F, fraction_text = F,
+  type = "violin")
 }
 \arguments{
 \item{gene}{Will only plot data for this gene, if the gene paramter is a list the violin plot will display the sum of the expression for all genes in the list}
@@ -15,15 +16,15 @@ plotViolin(gene, input, sampleID, facetID, colourID, cols = NULL,
 
 \item{sampleID}{pData variable to group by on the x axis}
 
-\item{facetID}{a pData variable}
+\item{facetID}{an optional pData variable to plot by}
 
-\item{colourID}{a pData variable}
+\item{colourID}{a pData variable to color by}
 
 \item{cols}{Personalized colour vector, length should equal number of groups in colourID}
 
-\item{subsetID}{a pData variable to subset the data by}
+\item{subsetID}{a pData variable to subset the original data by}
 
-\item{subsetName}{a value from the subsetID variable specified}
+\item{subsetName}{a value from the subsetID variable specified, this will select only these cells to plot}
 
 \item{facet_scale}{ggplot2 parameter for plot scales defaults to fixed}
 
