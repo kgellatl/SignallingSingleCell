@@ -26,7 +26,7 @@ id_markers <- function(input, id_by = "Cluster", print_progress = TRUE, overwrit
       stop("Markers already calculated. Set overwrite to TRUE to recalculate")
     }
     if(overwrite == TRUE){
-      fData(marker_input) <- fData(marker_input)[,-ind]
+      fData(marker_input) <- as.data.frame(fData(marker_input)[,-ind])
     }
   }
   fData(marker_input)$tmp <- "tmp"
