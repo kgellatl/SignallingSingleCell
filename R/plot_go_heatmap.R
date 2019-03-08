@@ -129,8 +129,11 @@ plot_go_heatmap <- function(input, sig_val = "p.adjust", cutoff = 0.1, max_categ
     numcol <- dim(table(unlist(new_go_matrix)))
     colpal <- viridis::viridis(numcol)
     colpal[1] <- "gray"
-    plot_heatmap(go_sc, genes = rownames(go_sc), type = "single_cell", cluster_by = "both", scale_by = F, text_angle = 60, color_pal = colpal)
-
+    res <- vector(mode = "list", length = 2)
+    g <- plot_heatmap(go_sc, genes = rownames(go_sc), type = "single_cell", cluster_by = "both", scale_by = F, text_angle = 60, color_pal = colpal)
+    res[[1]] <- g
+    res[[2]] <- colnames(new_go_matrix)
+    return(res)
     ###### This is the untrimmed GO Matrix!!
   } else {
     if(color_by == "count"){
@@ -164,7 +167,8 @@ plot_go_heatmap <- function(input, sig_val = "p.adjust", cutoff = 0.1, max_categ
       colpal <- rev(colpal)
       colpal[length(colpal)] <- "gray"
     }
-    plot_heatmap(go_sc, genes = rownames(go_sc), type = "single_cell", cluster_by = "both", scale_by = F, text_angle = 60, color_pal = colpal)
+    g <- plot_heatmap(go_sc, genes = rownames(go_sc), type = "single_cell", cluster_by = "both", scale_by = F, color_pal = colpal)
+    return(g)
   }
 }
 
