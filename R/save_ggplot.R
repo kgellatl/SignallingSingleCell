@@ -16,7 +16,12 @@
 #' save_plot(filename = "Cluster plot", format = "pdf")
 
 save_ggplot <- function(filename = "Rplot", format = "pdf", dingbats = FALSE, dpi = 300, h = 6, w = 6, units = "in"){
-  ggplot2::ggsave(filename = paste0(filename, ".", format), height = h, width = w, useDingbats = dingbats)
+  if(format == "pdf"){
+    ggplot2::ggsave(filename = paste0(filename, ".", format), height = h, width = w, useDingbats = dingbats)
+  }
+  if(format == "png"){
+    ggplot2::ggsave(filename = paste0(filename, ".", format), height = h, width = w, dpi = dpi)
+  }
 }
 
 
