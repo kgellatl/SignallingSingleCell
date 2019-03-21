@@ -26,11 +26,12 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row",
+plot_heatmap2 <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row",
                          cluster_type = "hierarchical", k = NULL, show_k = F, ceiling = FALSE,
                          color_pal = viridis::magma(256), facet_by = FALSE,color_facets = FALSE,
                          group_names = TRUE, gene_names = TRUE, text_angle = 90,
-                         pdf_format = "tile", interactive = FALSE, text_sizes = c(20,10,5,10,5,5), gene_labels = NULL, gene_labels_size = 2, gene_labels_nudge  = -0.5){
+                         pdf_format = "tile", interactive = FALSE, text_sizes = c(20,10,5,10,5,5),
+                         gene_labels = NULL, gene_labels_size = 2, gene_labels_nudge  = -0.5, gene_labels_col = 1, gene_labels_force = 1){
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
@@ -209,7 +210,9 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     # ligs_reorder_label[-ind] <- ""
     g <- g + theme(axis.text.y=element_blank())
     heat_dat_lng$label[heat_dat_lng$genes %in% gene_labels] <- as.character(heat_dat_lng$genes[heat_dat_lng$genes %in% gene_labels])
-    g <- g + ggrepel::geom_text_repel(data = heat_dat_lng[1:nrow(heat_dat),], mapping = ggplot2::aes(label = label), na.rm = T, nudge_x = gene_labels_nudge, direction = "y", min.segment.length = 0, size = gene_labels_size)
+    rows_lab <- seq(from = (gene_labels_col-1)*nrow(heat_dat)+1, to = (gene_labels_col-1)*nrow(heat_dat)+1+nrow(heat_dat)-1)
+    g <- g + ggrepel::geom_text_repel(data = heat_dat_lng[rows_lab,], mapping = ggplot2::aes(label = label), na.rm = T, nudge_x = gene_labels_nudge, direction = "y", min.segment.length = 0, size = gene_labels_size, force = gene_labels_force, max.iter = 10000)
+
     }
   if(gene_names == FALSE){
     g <- g + theme(axis.text.y=element_blank())
