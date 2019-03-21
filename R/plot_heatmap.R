@@ -30,7 +30,7 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
                          cluster_type = "hierarchical", k = NULL, show_k = F, ceiling = FALSE,
                          color_pal = viridis::magma(256), facet_by = FALSE,color_facets = FALSE,
                          group_names = TRUE, gene_names = TRUE, text_angle = 90,
-                         pdf_format = "tile", interactive = FALSE, text_sizes = c(20,10,5,10,5,5), gene_labels = NULL, gene_labels_size = 1, gene_labels_nudge  = -0.5){
+                         pdf_format = "tile", interactive = FALSE, text_sizes = c(20,10,5,10,5,5), gene_labels = NULL, gene_labels_size = 2, gene_labels_nudge  = -0.5){
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
