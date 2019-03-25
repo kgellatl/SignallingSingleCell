@@ -28,10 +28,7 @@ subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10
     gene_subset <- gene_subset
   }
   if(method == "CV"){
-    if(log){
-      input <- log2(input[gene_subset,]+2)-1
-    }
-    g_exp <- input[gene_subset,]
+    g_exp <- log2(input[gene_subset,]+2)-1
     gsd <- apply(g_exp,1,sd)
     CV = sqrt((exp(gsd))^2-1)
     CV <- CV[order(CV)]
