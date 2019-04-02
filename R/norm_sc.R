@@ -43,12 +43,13 @@ norm_sc <- function(input, gene_frac = 0.25, gene_var = 0.75, genelist = NULL, n
     genelist <- stable_genes
     csums <- apply(exprs(input)[stable_genes,], 2,sum)
     zero_csums <- which(csums == 0)
-    if(length(zero_csums) > 0)
+    if(length(zero_csums) > 0){
       err_result <- vector(mode = "list", length = 2)
     err_result[[1]] <- csums
     err_result[[2]] <- stable_genes
     warning("With provided parameters, some cells have zero expression. Try reducing gene_frac argument. See returned result")
     return(err_result)
+    }
   }
 
   SCE <- SingleCellExperiment::SingleCellExperiment(list(counts = exprs(input)))
