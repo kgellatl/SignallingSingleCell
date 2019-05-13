@@ -1,6 +1,6 @@
 ### Setup
 
-Ex_Sc <- setClass(Class = "Ex_Sc",
+ExSc <- setClass(Class = "ExSc",
 
                   slots = c(
                     counts = "dgCMatrix",
@@ -30,8 +30,6 @@ Ex_Sc <- setClass(Class = "Ex_Sc",
                   }
 )
 
-### Setup
-
 DimReduc <- setClass(Class = "DimReduc",
 
                   slots = c(
@@ -39,11 +37,12 @@ DimReduc <- setClass(Class = "DimReduc",
                     x_y = "matrix")
 )
 
-Signal_Set  <- setClass(Class = "Signal_Set",
+SignalSet  <- setClass(Class = "SignalSet",
 
                         slots = c(
-                          assays = "Ex_Sc",
+                          assays = "ExSc",
                           DimReduc = "DimReduc",
+                          AggBulk = "matrix",
                           DE = "list",
                           network_dataframe = "data.frame",
                           network_igraph = "list")
@@ -52,6 +51,3 @@ Signal_Set  <- setClass(Class = "Signal_Set",
 
 
 
-exsc <- new("Ex_Sc")
-dimreduc <- new("DimReduc")
-signal_set <- new(Class = "Signal_Set", assays = exsc, DimReduc = dimreduc)
