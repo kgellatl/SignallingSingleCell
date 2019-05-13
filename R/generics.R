@@ -1,18 +1,6 @@
 ### Setup
 
 setMethod("show",
-          signature = "ExSc",
-          definition = function(object){
-
-            cat("An object of class ", class(object), "\n", sep = "")
-
-            cat("", nrow(object@counts), "features by ",
-                ncol(object@counts), " cells")
-
-            invisible(NULL)
-          })
-
-setMethod("show",
           signature = "SignalSet",
           definition = function(object){
             dims <- dim(object@assays@counts)
@@ -50,18 +38,16 @@ setMethod("show",
 
 setGeneric("pData", function(object, ...) standardGeneric("pData"))
 setGeneric("fData", function(object, ...) standardGeneric("fData"))
-setGeneric("pData<-", function(object, value) standardGeneric("pData<-"))
-setGeneric("fData<-", function(object, value) standardGeneric("fData<-"))
-
 setMethod("pData", "SignalSet", function(object) object@assays@pD)
 setMethod("fData", "SignalSet", function(object) object@assays@fD)
 
+setGeneric("pData<-", function(object, value) standardGeneric("pData<-"))
+setGeneric("fData<-", function(object, value) standardGeneric("fData<-"))
 setMethod("pData<-", "SignalSet", function(object, value){
   object@assays@pD <- value
   if(validObject(object))
     return(object)
 })
-
 setMethod("fData<-", "SignalSet", function(object, value){
   object@assays@fD <- value
   if(validObject(object))
@@ -84,5 +70,9 @@ setMethod("[", "SignalSet",
               AggBulk = x@AggBulk,
               DE = x@DE,
               network_dataframe = x@network_dataframe,
-              network_igraph = x@network_igraph)
+              network_igraph = x@network_igraph,
+              commands = x@commands)
           })
+
+
+

@@ -14,6 +14,15 @@ ExSc <- setClass(Class = "ExSc",
                                    fD = as.data.frame(matrix(NA, nrow = 100, ncol =2)))
 )
 
+SignalSetCommand <- setClass(
+  Class = 'SignalSetCommand',
+  slots = c(
+    name = 'character',
+    time.stamp = 'POSIXct',
+    call.string = 'character',
+    params = 'ANY'
+  )
+)
 
 SignalSet  <- setClass(Class = "SignalSet",
 
@@ -22,7 +31,8 @@ SignalSet  <- setClass(Class = "SignalSet",
                           AggBulk = "matrix",
                           DE = "list",
                           network_dataframe = "data.frame",
-                          network_igraph = "list"),
+                          network_igraph = "list",
+                          commands = "list"),
 
                        validity = function(object){
                          errors <- character()
