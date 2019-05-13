@@ -21,12 +21,6 @@ setMethod("show",
 
             cat("", dims[1], "features by ", dims[2], "cells \n")
 
-            if(is.null(dim(object@DimReduc))){
-              cat("", "dim_reduce has not been performed \n")
-            } else {
-              cat("", "Dimension Reduction Results present \n")
-            }
-
             if(is.null(dim(object@DE))){
               cat("", "DE has not been performed \n")
             } else {
@@ -55,8 +49,40 @@ setMethod("show",
           })
 
 setGeneric("pData", function(object, ...) standardGeneric("pData"))
-setMethod("pData", "SignalSet", function(object) object@assays@pD)
-
 setGeneric("fData", function(object, ...) standardGeneric("fData"))
+setGeneric("pData<-", function(object, value) standardGeneric("pData<-"))
+setGeneric("fData<-", function(object, value) standardGeneric("fData<-"))
+
+setMethod("pData", "SignalSet", function(object) object@assays@pD)
 setMethod("fData", "SignalSet", function(object) object@assays@fD)
 
+setMethod("pData<-", "SignalSet", function(object, value){
+  object@assays@pD <- value
+  if(validObject(object))
+    return(object)
+})
+
+setMethod("fData<-", "SignalSet", function(object, value){
+  object@assays@fD <- value
+  if(validObject(object))
+    return(object)
+})
+
+
+setMethod("[", "SignalSet",
+          function(x,i,j,drop="missing") {
+            .marray <- x@assays@counts[i, j]
+            .mnormarray <- x@assays@norm_counts[i, j]
+            .pmeta <- x@assays@pD[j, ]
+            .fmeta <- x@assays@fD[i, ]
+            SignalSet(
+              assays = ExSc(
+                counts = .marray,
+                norm_counts = .mnormarray,
+                fD = .fmeta,
+                pD = .pmeta),
+              AggBulk = x@AggBulk,
+              DE = x@DE,
+              network_dataframe = x@network_dataframe,
+              network_igraph = x@network_igraph)
+          })
