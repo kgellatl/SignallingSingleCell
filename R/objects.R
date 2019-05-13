@@ -1,6 +1,6 @@
 ### Setup
 
-ex_sc <- setClass(Class = "ex_sc",
+Ex_Sc <- setClass(Class = "Ex_Sc",
 
                   slots = c(
                     counts = "dgCMatrix",
@@ -30,7 +30,28 @@ ex_sc <- setClass(Class = "ex_sc",
                   }
 )
 
+### Setup
 
-object <- new("ex_sc")
-validObject(object)
+DimReduc <- setClass(Class = "DimReduc",
 
+                  slots = c(
+                    cells = "matrix",
+                    x_y = "matrix")
+)
+
+Signal_Set  <- setClass(Class = "Signal_Set",
+
+                        slots = c(
+                          assays = "Ex_Sc",
+                          DimReduc = "DimReduc",
+                          DE = "list",
+                          network_dataframe = "data.frame",
+                          network_igraph = "list")
+)
+
+
+
+
+exsc <- new("Ex_Sc")
+dimreduc <- new("DimReduc")
+signal_set <- new(Class = "Signal_Set", assays = exsc, DimReduc = dimreduc)
