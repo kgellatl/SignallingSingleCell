@@ -7,6 +7,8 @@
 #' @param method can either be "spectral" or "density" which is on 2d
 #' @param num_clust the number of clusters
 #' @param s the number of standard deviations from the curve to select cluster centers
+#' @param xcol first column to use with dimentions for the 2d method
+#' @param ycol second column to use with dimentions for the 2d method
 #' @export
 #' @details
 #' This will perform clustering on either the high dimensional PCA / ICA components if dimension = Comp,
@@ -15,12 +17,18 @@
 #' @examples
 #' ex_sc_example <- cluster_sc(input = ex_sc_example, dimension = "Comp", method = "spectral", num_clust = 6)
 
-cluster_sc <- function(input, dimension, method, num_clust = NA, s=2) {
+cluster_sc <- function(input,
+                       dimension,
+                       method,
+                       num_clust = NA,
+                       s=2,
+                       xcol="x",
+                       ycol="y") {
   if(dimension == "Comp"){
     tocluster = pData(input)[,grep("Comp", colnames(pData(input)))]
   }
   if(dimension == "2d"){
-    tocluster = pData(input)[,c("x", "y")]
+    tocluster = pData(input)[,c(xcol, ycol)]
   }
   if(method == "spectral"){
     spec <- kknn::specClust(tocluster, centers = num_clust, method = 'random-walk')

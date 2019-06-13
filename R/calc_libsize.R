@@ -5,7 +5,7 @@
 #' @param input the input ex_sc
 #' @export
 #' @details
-#' This will calculate total UMIs on a per cell basis.
+#' This will calculate the total number of UMIs on a per cell basis.
 #' @examples
 #' ex_sc_example <- calc_libsize(input = ex_sc_example)
 
