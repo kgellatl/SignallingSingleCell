@@ -15,6 +15,7 @@
 #' @param dotsize the size of dots.
 #' @param bar the weighted mean.
 #' @param binwidth average the values when dots are within the range of (max-min)*binwidth.
+#' @param link link the dots from same patients in each panel.
 #' @export
 #' @details
 #' Utilize information stored in pData to control the plot display. Each point_by as a dot with a bar showing the weighted mean of all point_by dots.
@@ -22,7 +23,7 @@
 #' plot_dotplot(ex_sc, gene = "ADCY7", color_by = "Skin", facet_by = "subCellType", point_by = "Patient")
 
 
-plot_dotplot <- function(input, gene, color_by, facet_by = "NA", point_by, title = "", colors = NA, ncol = "NA", number_labels = T, text_sizes = c(20, 10, 5, 10, 5, 5), theme = "classic", alpha = 0.5, stackratio = 0.4, dotsize = 3, bar = T, binwidth = 0.005)
+plot_dotplot <- function(input, gene, color_by, facet_by = "NA", point_by, title = "", colors = NA, ncol = "NA", number_labels = T, text_sizes = c(20, 10, 5, 10, 5, 5), theme = "classic", alpha = 0.5, stackratio = 0.4, dotsize = 3, bar = T, binwidth = 0.005, link = FALSE)
 {
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
@@ -44,17 +45,21 @@ plot_dotplot <- function(input, gene, color_by, facet_by = "NA", point_by, title
   }
   point_bys <- sort(unique(pData(input)[, point_by]))
 
+
+
   geneColored1 <- as.data.frame(t(geneColored1[gene, ]))
   geneColored1[, "tmp_val"] <- sub("_num_.*", "", rownames(geneColored1))
+
+
 
   ncol_tmp <- length(strsplit(geneColored1[1, "tmp_val"], split = "_")[[1]])
   tmpmat <- matrix(unlist(strsplit(geneColored1[, "tmp_val"], split = "_")), byrow = T, ncol = ncol_tmp)
   if (facet_by != "NA") {facet_bys <- sort(unique(pData(input)[, facet_by]))}else{facet_bys <- "NA"}
 
   ind <- apply(tmpmat, 2, function(x) all(x %in% color_bys) | all(x %in% facet_bys) | all(x %in% point_bys))
-  if (!all(ind)) {
-    stop("Bulk values are calculated with more variables. You may want to provide a facet_by.")
-  }
+  # if (!all(ind)) {
+  #   stop("Bulk values are calculated with more variables. You may want to provide a facet_by.")
+  # }
   tmpmat <- tmpmat[, ind]
   names_tmp <- c()
   for (i in 1:ncol(tmpmat)) {
@@ -62,7 +67,7 @@ plot_dotplot <- function(input, gene, color_by, facet_by = "NA", point_by, title
     names_tmp <- c(names_tmp, c(color_by, facet_by, point_by)[ind])
   }
   colnames(tmpmat) <- names_tmp
-
+  ###### ######
   geneColored1 <- cbind(geneColored1, tmpmat)
 
   for (i in 1:nrow(geneColored1)) {
@@ -103,7 +108,10 @@ plot_dotplot <- function(input, gene, color_by, facet_by = "NA", point_by, title
     }
   }
 
+
+  ###### ###### What is changed from the original package.
   genename <- gene
+  ###### ######
 
   colnames(geneColored1) <- gsub("-", "", colnames(geneColored1))
   gene <- gsub("-", "", gene)
@@ -118,6 +126,8 @@ plot_dotplot <- function(input, gene, color_by, facet_by = "NA", point_by, title
       warning("The proportions reported are internal to the group_by argument used to calc_agg_bulk")
     }
   }
+
+
 
   g <- ggplot(geneColored1)
   if (number_labels == T) {
@@ -138,12 +148,14 @@ plot_dotplot <- function(input, gene, color_by, facet_by = "NA", point_by, title
     g <- g + theme_classic()
   }
 
+  ###### ###### What is changed from the original package.
   if (title == "") {
     title <- genename
     g <- g + labs(title = title, y = genename)
   }else {
     g <- g + labs(title = title, y = genename)
   }
+  ###### ######
 
   g <- g + theme(plot.title = element_text(size = text_sizes[1]),
                  axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]),
@@ -152,6 +164,7 @@ plot_dotplot <- function(input, gene, color_by, facet_by = "NA", point_by, title
 
   g <- g + geom_col(aes_string(x = color_by, y = "weighted_mean", fill = color_by), col = "black", alpha = alpha)
   g <- g + geom_dotplot(aes_string(x = color_by, y = gene, fill = color_by), binaxis='y', stackdir = 'center', stackratio = stackratio, dotsize = dotsize, alpha = 0.8, binwidth = (max(geneColored1[,gene])-min(geneColored1[,gene]))*binwidth)
+  if (link == T) {g <- g + geom_line(aes(x = get(color_by), y = get(gene), group = get(point_by)), alpha = 0.8)}
 
   if (facet_by != "NA") {
     if (ncol != "NA") {
@@ -168,3 +181,4 @@ plot_dotplot <- function(input, gene, color_by, facet_by = "NA", point_by, title
   g <- g + theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
   return(g)
 }
+

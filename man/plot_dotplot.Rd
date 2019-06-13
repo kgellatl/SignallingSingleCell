@@ -8,7 +8,7 @@ plot_dotplot(input, gene, color_by, facet_by = "NA", point_by,
   title = "", colors = NA, ncol = "NA", number_labels = T,
   text_sizes = c(20, 10, 5, 10, 5, 5), theme = "classic",
   alpha = 0.5, stackratio = 0.4, dotsize = 3, bar = T,
-  binwidth = 0.005)
+  binwidth = 0.005, link = FALSE)
 }
 \arguments{
 \item{input}{Bioconductor’s ExpressionSet Class with bulk value stored in fData.}
@@ -40,6 +40,8 @@ plot_dotplot(input, gene, color_by, facet_by = "NA", point_by,
 \item{bar}{the weighted mean.}
 
 \item{binwidth}{average the values when dots are within the range of (max-min)*binwidth.}
+
+\item{link}{link the dots from same patients in each panel.}
 }
 \description{
 This will create a bar plot with dots
