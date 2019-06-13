@@ -270,7 +270,11 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     return_result[[2]] <-  kmean_res
     return(return_result)
   } else {
-    return(g)
+    hc_res <- hc1
+    return_result <- vector(mode = "list", length = 2)
+    return_result[[1]] <-  g
+    return_result[[2]] <-  hc_res
+    return(return_result)
   }
   if(interactive == TRUE){
     ggplotly(g, source = "master")
