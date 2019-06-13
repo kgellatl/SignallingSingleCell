@@ -4,10 +4,10 @@
 \alias{plotViolin}
 \title{This will create a violin plot}
 \usage{
-plotViolin(gene, input, sampleID, facetID = NULL, colourID,
+plotViolin(gene, input, sampleID, colourID, facetID = NULL,
   cols = NULL, subsetID = NA, subsetName = NA,
   facet_scale = "fixed", mean_text = F, fraction_text = F,
-  type = "violin")
+  type = "violin", fudge = 0)
 }
 \arguments{
 \item{gene}{Will only plot data for this gene, if the gene paramter is a list the violin plot will display the sum of the expression for all genes in the list}
@@ -16,9 +16,9 @@ plotViolin(gene, input, sampleID, facetID = NULL, colourID,
 
 \item{sampleID}{pData variable to group by on the x axis}
 
-\item{facetID}{an optional pData variable to plot by}
-
 \item{colourID}{a pData variable to color by}
+
+\item{facetID}{an optional pData variable to plot by}
 
 \item{cols}{Personalized colour vector, length should equal number of groups in colourID}
 
@@ -33,6 +33,8 @@ plotViolin(gene, input, sampleID, facetID = NULL, colourID,
 \item{fraction_text}{ggplot2 parameter for adding the fraction of cells with expression greater than 0 for that gene defaults to False}
 
 \item{type}{plot type, default is violin, can also plot density and cdf distribution}
+
+\item{fudge}{a pseudocount value to avoid dropping cells with zero counts}
 }
 \description{
 This will plot a given gene via violin plot
