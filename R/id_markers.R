@@ -27,7 +27,7 @@ id_markers <- function(input, id_by = "Cluster", print_progress = TRUE, overwrit
       stop("Markers already calculated. Set overwrite to TRUE to recalculate")
     }
     if(overwrite == TRUE){
-      fData(marker_input) <- fData(marker_input)[,-ind]
+      fData(marker_input) <- as.data.frame(fData(marker_input)[,-ind])
     }
   }
   if(print_progress == TRUE){
@@ -135,6 +135,6 @@ id_markers <- function(input, id_by = "Cluster", print_progress = TRUE, overwrit
     fData(marker_input)$name <- val
     colnames(fData(marker_input))[grep("name", colnames(fData(marker_input)))] <- paste0(cluster,"_marker_score_", id_by) #HERE BE THE BUG!!!
   }
-  fData(marker_input) <- fData(marker_input)[,-grep("tmp", colnames(fData(marker_input)))]
+  fData(marker_input) <- fData(marker_input)[,-match("tmp", colnames(fData(marker_input)))]
   return(marker_input)
 }
