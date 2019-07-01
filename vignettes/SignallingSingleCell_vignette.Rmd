@@ -122,7 +122,7 @@ ex_sc_norm <- cluster_sc(ex_sc_norm, dimension = "Comp", method = "spectral", nu
 
 plot_tsne_metadata(ex_sc_norm, color_by = "Cluster", title = "Spectral Cluster on iPCA components")
 
-plot_density_ridge(ex_sc_norm, color_by = "Cluster", title = "UMIs per cluster", val = "UMI_sum")
+plot_density_ridge(ex_sc_norm, color_by = "Cluster", title = "UMIs per cluster", val = "UMI_sum_raw")
 
 plot_tsne_metadata(ex_sc_norm, color_by = "UMI_sum_raw", title = "Total UMIs per cell") 
 
@@ -167,7 +167,7 @@ plot_scatter(input = ex_sc_norm, title = "Correlation Plot", gene1 = "Ccr7", gen
 
 marker_facet <- c("Emr1", "Lcn2", "Ccr7")
 
-plot_tsne_gene(input = ex_sc_norm, genes = marker_facet, title = "Marker Genes",  ncol = 3, density = FALSE)
+plot_tsne_gene(input = ex_sc_norm, gene = marker_facet, title = "Marker Genes",  ncol = 3, density = FALSE)
 
 plot_violin(ex_sc_norm, title = "Ccr7 across clusters", gene = "Ccr7", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
 ```

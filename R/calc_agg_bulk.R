@@ -128,8 +128,12 @@ calc_agg_bulk <- function(input, aggregate_by, group_by = FALSE, cutoff_frac = F
     for (i in 1:length(vars)) {
       int_cell <- vars[i]
       ind <- grep(int_cell, colnames(bulk))
-      gCount <- apply(bulk[,ind],1,function(x) length(which(x>=cutoff_cpm)))
-      zero_out <- which(gCount == 0)
+      if(length(ind) > 1){
+        gCount <- apply(bulk[,ind],1,function(x) length(which(x>=cutoff_cpm)))
+        zero_out <- which(gCount == 0)
+      } else {
+        zero_out <- which(bulk[,ind] < cutoff_cpm)
+      }
       bulk[zero_out,ind] <- 0
     }
   }

@@ -5,7 +5,7 @@
 \title{Plot Density}
 \usage{
 plot_density(input, val, title = "", color_by = "NA",
-  statistic = "mean")
+  statistic = "mean", log = T, type = "density")
 }
 \arguments{
 \item{input}{the input ex_sc}
