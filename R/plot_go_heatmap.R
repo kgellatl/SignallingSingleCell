@@ -134,6 +134,7 @@ plot_go_heatmap <- function(input,
         new_terms <- c(new_terms, all_full_terms)
       }
     }
+    return(matrix(c(new_terms, unique_terms), ncol = 2))
     new_go_matrix <- matrix(ncol = length(new_terms), nrow = nrow(go_matrix))
     colnames(new_go_matrix) <- new_terms
     rownames(new_go_matrix) <- rownames(go_matrix)
@@ -201,6 +202,7 @@ plot_go_heatmap <- function(input,
     }
     g <- plot_heatmap(go_sc, genes = rownames(go_sc), type = "single_cell",
                       cluster_by = "both", scale_by = F, color_pal = colpal)
-    return(g)
+    #return(g)
   }
+
 }
