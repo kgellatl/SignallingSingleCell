@@ -27,7 +27,7 @@ construct_ex_sc_10x <- function(bc_path, long_genes = T, feature_assay = F){
                                header = FALSE,
                                stringsAsFactors = FALSE)
     colnames(mat) = gsub("-1", "", barcode.names$V1)
-    colnames(mat) <- paste0(colnames(mat), "_", int_sample)
+    colnames(mat) <- paste0(colnames(mat), "-", int_sample)
     rownames(mat) = feature.names$V2
     if( i == 1){
       master_data <- mat
@@ -57,5 +57,8 @@ construct_ex_sc_10x <- function(bc_path, long_genes = T, feature_assay = F){
     fData(ex_sc)$"feature_type" <- feature.names$V3[ind]
 
   }
+
+  ex_sc$Sample <- matrix(unlist(strsplit(colnames(ex_sc), split = "-")),byrow = T, ncol = 2)[,2]
+
   return(ex_sc)
 }
