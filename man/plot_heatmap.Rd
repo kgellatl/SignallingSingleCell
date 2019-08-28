@@ -46,6 +46,8 @@ plot_heatmap(input, genes, type, title = "Heatmap", scale_by = "row",
 
 \item{pdf_format}{can be "tile" or "raster." tile is generally higher quality while raster is more efficient}
 
+\item{text_sizes}{a vector of title_size, axis_title, axis_text, legend_title, legend_text, facet_text, faults too c(20,10,5,10,5,5)}
+
 \item{plotly}{if true will be interactive
 # note that this option cannot be saved with save_ggplot(), and also is time consuming for single cell heatmaps}
 }
