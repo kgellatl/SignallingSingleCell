@@ -202,7 +202,7 @@ plot_go_heatmap <- function(input,
     }
     g <- plot_heatmap(go_sc, genes = rownames(go_sc), type = "single_cell",
                       cluster_by = "both", scale_by = F, color_pal = colpal)
-    #return(g)
+    plot(g)
   }
 
 }

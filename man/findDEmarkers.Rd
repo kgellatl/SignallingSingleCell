@@ -4,8 +4,8 @@
 \alias{findDEmarkers}
 \title{This will perform differential expression using edgeR to find markers for each cluster or group compared to all others}
 \usage{
-findDEmarkers(input, pd = pData(input), DEgroup, batchID, sizefactor,
-  lib_size, outdir = "DEmarkers/", outsuffix = "DEmarkers.tsv",
+findDEmarkers(input, pd = pData(input), DEgroup, sizefactor, lib_size,
+  batchID = NULL, outdir = "DEmarkers/", outsuffix = "DEmarkers.tsv",
   minCells = 0.1, pVal = 1, contrast = list(c(-1, 1)))
 }
 \arguments{
@@ -15,11 +15,11 @@ findDEmarkers(input, pd = pData(input), DEgroup, batchID, sizefactor,
 
 \item{DEgroup}{a pData variable}
 
-\item{batchID}{a pData variable to use for model accounting for batch effects}
-
 \item{sizefactor}{a pData column containing the scran reported size factor for each cell}
 
 \item{lib_size}{a pData column containing the library size for each cell}
+
+\item{batchID}{a pData variable to use for model accounting for batch effects}
 
 \item{outdir}{an output directory}
 
