@@ -22,7 +22,7 @@ edgeRDE <- function(input,
                     batch,
                     sizefactor,
                     lib_size,
-                    minCells = 0.1,
+                    minCells,
                     pVal = 1,
                     contrast = list(c(-1,1))) {
   ## remove any zero-variance genes

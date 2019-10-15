@@ -22,9 +22,9 @@
 findDEmarkers = function(input,
                          pd = pData(input),
                          DEgroup,
-                         batchID,
                          sizefactor,
                          lib_size,
+                         batchID = NULL,
                          outdir = "DEmarkers/",
                          outsuffix = "DEmarkers.tsv",
                          minCells = 0.1,
@@ -34,7 +34,12 @@ findDEmarkers = function(input,
     name = unique(as.character(pd[,DEgroup]))[i]
     idx = rownames(pd)[which(pd[,DEgroup]==name)]
     z = as.matrix(exprs(input[,rownames(pd)]))
-    batch = as.factor(pd[,batchID])
+    if (is.null(batchID)) {
+      # if batchID is null all cells are in the same batch
+      batch = as.factor(rep(1,ncol(input)))
+    } else {
+      batch = as.factor(pd[,batchID])
+    }
     groupList = rep(0, times=ncol(z))   # all cells are reference
     groupList[which(colnames(z) %in% idx)] = 1 # cells that match id are used as contrast
     group = factor(groupList)

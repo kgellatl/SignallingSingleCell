@@ -51,7 +51,7 @@ plotViolin = function(gene,
   }
   ###
   if (!is.null(subsetID) & !is.na(subsetID)) {
-    input = input[,which(pData(input)[,subsetID]==subsetName)]
+    input = input[,which(pData(input)[,subsetID]%in%subsetName)]
   }
   inputM = as.data.frame(exprs(input[rownames(input)%in%gene,]))
   inputM = inputM + fudge
@@ -86,13 +86,13 @@ plotViolin = function(gene,
   }
   if (type == "violin") {
     p = ggplot(merged, aes_string(sampleID, geneName, colour = colourID)) +
-      geom_jitter(width = 0.2, alpha=0.5) +
+      geom_jitter(width = 0.2) +
       geom_violin(fill = NA) +
       stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.data = label.n, fun.y = "mean", colour = "black", geom = "text", size=3) +
       stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.y = mean, colour = "black", geom = "point", size=3, shape = 18) +
       theme_bw() +
       scale_colour_manual(values=cols) +
-      scale_y_log10() +
+      scale_y_continuous(trans = scales::pseudo_log_trans()) +
       ggtitle(title)
     if (mean_text == T) {
       p = p + stat_summary(data = merged, aes_string(x = sampleID, y = geneName), fun.data = meanSC, fun.y = "mean", colour = "black", geom = "text", size=3)
