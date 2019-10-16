@@ -20,7 +20,7 @@
 #' ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
 #'
 
-analyze_cell_net <- function(input_ex_sc, input_cell_net, verbose = T, layout = "fr", clusters = "eigen"){
+analyze_cell_net <- function(input_ex_sc, input_cell_net, verbose = T, layout = "fr", cluster_method = "eigen"){
 
   if(layout == "fr"){
     if(verbose){
@@ -41,7 +41,7 @@ analyze_cell_net <- function(input_ex_sc, input_cell_net, verbose = T, layout = 
   input_ex_sc$kk_y <- l[,2]
   }
 
-  if(clusters == "eigen"){
+  if(cluster_method == "eigen"){
     if(verbose){
       print("Calculating leading eigen clusters")
     }
@@ -53,7 +53,7 @@ analyze_cell_net <- function(input_ex_sc, input_cell_net, verbose = T, layout = 
     input_ex_sc$leading_eigen_clusters <- paste0("leading_eigen_", clusters$membership)
   }
 
-  if(clusters == "greedy"){
+  if(cluster_method == "greedy"){
     if(verbose){
       print("Calculating fast greedy clusters")
     }
@@ -66,7 +66,7 @@ analyze_cell_net <- function(input_ex_sc, input_cell_net, verbose = T, layout = 
   }
 
 
-  if(clusters == "louvain"){
+  if(cluster_method == "louvain"){
     if(verbose){
       print("Calculating louvain clusters")
     }
