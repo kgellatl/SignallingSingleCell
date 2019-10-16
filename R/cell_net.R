@@ -80,8 +80,8 @@ cell_net <- function(input, genelist, n_blocks = 5, number_edges = 5, method = "
 
     mat <- exprs(input)[gene_subset,]
 
-    cor_mat <- HiClimR::fastCor(x = mat, nSplit =  n_blocks)
-    # cor_mat <- bigcor(x = mat, nblocks =  n_blocks)
+    # cor_mat <- HiClimR::fastCor(x = mat, nSplit =  n_blocks)
+    cor_mat <- bigcor(x = mat, nblocks =  n_blocks)
 
     num_cutoff <- number_edges
     num_edges <- matrix(ncol = 3, nrow = ncol(mat)*num_cutoff)
