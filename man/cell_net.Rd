@@ -4,7 +4,8 @@
 \alias{cell_net}
 \title{Dimension Reduction}
 \usage{
-cell_net(input, genelist, n_blocks = 10, number_edges = 5)
+cell_net(input, genelist, n_blocks = 5, number_edges = 5,
+  method = "bigcor")
 }
 \arguments{
 \item{input}{the input ex_sc}
