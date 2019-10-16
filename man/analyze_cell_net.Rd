@@ -4,7 +4,8 @@
 \alias{analyze_cell_net}
 \title{Dimension Reduction}
 \usage{
-analyze_cell_net(input_ex_sc, input_cell_net, verbose = T)
+analyze_cell_net(input_ex_sc, input_cell_net, verbose = T,
+  layout = "fr", clusters = "eigen")
 }
 \arguments{
 \item{input}{the input ex_sc}

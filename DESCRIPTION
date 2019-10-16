@@ -34,7 +34,8 @@ Imports:
     gtable,
     SingleCellExperiment, 
     scran, 
-    scater
+    scater,
+    HiClimR
 biocViews: Single Cell, Networking
 VignetteBuilder: knitr
 Roxygen: list(wrap = FALSE)
