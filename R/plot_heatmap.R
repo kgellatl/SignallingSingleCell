@@ -12,6 +12,7 @@
 #' @param cluster_type "kmeans" or "hierarchical"
 #' @param k if cluster type is kmeans must provide k
 #' @param text_angle The desired angle for text on the group labels
+#' @param text_sizes a vector of title_size, axis_title, axis_text, legend_title, legend_text, facet_text, faults too c(20,10,5,10,5,5)
 #' @param group_names whether groups should be labelled
 #' @param gene_names whether genes should be labelled
 #' @param facet_by will create breaks in the heatmap by some pData Variable
@@ -154,15 +155,16 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     if(type == "bulk"){
       for (i in 1:length(facs)) {
         int <- facs[i]
-        vals <- strsplit(as.character(heat_dat_lng$group), split = "_")
-        vals <- matrix(unlist(vals), ncol = length(vals[[1]]), byrow = T)
-        for (j in 1:nrow(vals)) {
-          int2 <- vals[j,]
-          ind <- match(int, int2)
-          if(!is.na(ind)){
-            heat_dat_lng$facet[j] <- int
-          }
-        }
+        heat_dat_lng$facet[grep(int, as.character(heat_dat_lng$group))] <- int
+        # vals <- strsplit(as.character(heat_dat_lng$group), split = "_")
+        # vals <- matrix(unlist(vals), ncol = length(vals[[1]]), byrow = T)
+        # for (j in 1:nrow(vals)) {
+        #   int2 <- vals[j,]
+        #   ind <- match(int, int2)
+        #   if(!is.na(ind)){
+        #     heat_dat_lng$facet[j] <- int
+        #   }
+        # }
       }
       heat_dat_lng$facet <- factor(heat_dat_lng$facet)
       colnames(heat_dat_lng)[ncol(heat_dat_lng)] <- facet_by

@@ -42,6 +42,24 @@ detect_doublets <- function(input, id_by, num_markers, remove){
       questionable <- c(questionable, ratio)
     }
   }
+  # vals <- matrix(ncol = length(marks)-1, nrow = ncol(input))
+  # rownames(vals) <- colnames(input)
+  #
+  # alerts <- floor(ncol(input) / 20)
+  # alerts <-  as.numeric(alerts)
+  # when_alert <- seq(from = 1, to = ncol(input), by = alerts)
+  # when_alert <- when_alert[-1]
+  #
+  # for (i in 1:nrow(vals)) {
+  #   if(i %in% when_alert){
+  #     ind <- match(i, when_alert)
+  #     print(paste0(5*ind, " Percent Done"))
+  #   }
+  #   int <- rownames(vals)[i]
+  #   ind <- grep(int, names(questionable))
+  #   thevals <- questionable[ind]
+  #   vals[i,] <- thevals
+  # }
   pData(input)$Doublets <- "Good"
   bad <- questionable
   very_bad1 <- which(is.na(bad))
