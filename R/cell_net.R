@@ -78,7 +78,7 @@ cell_net <- function(input, genelist, n_blocks = 5, number_edges = 5, method = "
       return(corMAT)
     }
 
-    mat <- exprs(input)[gene_subset,]
+    mat <- exprs(input)[genelist,]
 
     # cor_mat <- HiClimR::fastCor(x = mat, nSplit =  n_blocks)
     cor_mat <- bigcor(x = mat, nblocks =  n_blocks)
