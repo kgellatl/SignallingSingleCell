@@ -20,12 +20,12 @@
 #' ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
 #'
 
-cell_net <- function(input, genelist, n_blocks = 5, number_edges = 5, method = "bigcor") {
+cell_net <- function(input, genelist, n_blocks = 5, number_edges = 5, cor_method = "bigcor", cor = "spearman") {
 
   #############  #############  #############  #############
   #############  BIGCOR section
   #############  #############  #############  #############
-  if (method == "bigcor"){
+  if (cor_method == "bigcor"){
 
     bigcor <- function(x, nblocks, verbose = TRUE, ...)
     {
@@ -66,7 +66,12 @@ cell_net <- function(input, genelist, n_blocks = 5, number_edges = 5, method = "
         G2 <- SPLIT[[COMB[2]]]
         if (verbose) cat("Block", COMB[1], "with Block", COMB[2], "\n")
         flush.console()
-        COR <- cor(x[, G1], x[, G2], method = "spearman")
+        if(cor == "spearman"){
+          COR <- cor(x[, G1], x[, G2], method = "spearman")
+        }
+        if(cor == "pearsons"){
+          COR <- cor(x[, G1], x[, G2])
+        }
         corMAT[G1, G2] <- COR
         corMAT[G2, G1] <- t(COR)
         COR <- NULL
@@ -117,7 +122,7 @@ cell_net <- function(input, genelist, n_blocks = 5, number_edges = 5, method = "
   #############  truncated section
   #############  #############  #############  #############
 
-  if (method == "truncated") {
+  if (cor_method == "truncated") {
 
 
 

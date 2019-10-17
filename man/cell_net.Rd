@@ -5,7 +5,7 @@
 \title{Dimension Reduction}
 \usage{
 cell_net(input, genelist, n_blocks = 5, number_edges = 5,
-  method = "bigcor")
+  cor_method = "bigcor", cor = "spearman")
 }
 \arguments{
 \item{input}{the input ex_sc}
