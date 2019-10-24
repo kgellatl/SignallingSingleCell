@@ -21,6 +21,7 @@
 #' gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "PCA", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.75)
 
 subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85, log = F){
+  results <- vector(mode = "list", length = 2)
   input <- exprs(input)
   gCount <- apply(input,1,function(x) length(which(x>=threshold))) # a bit wasteful if threshold = 0, but alas.
   gene_subset <- rownames(input[(which(gCount >= minCells)),])
@@ -31,8 +32,10 @@ subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10
     g_exp <- log2(input[gene_subset,]+2)-1
     gsd <- apply(g_exp,1,sd)
     CV = sqrt((exp(gsd))^2-1)
+    results[[1]] <- CV
     CV <- CV[order(CV)]
     gene_subset <- names(CV[round(length(CV)*cutoff):length(CV)])
+    results[[2]] <- gene_subset
   }
   if(method == "PCA"){
     if(log){
@@ -42,10 +45,12 @@ subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10
     pc <- irlba::prcomp_irlba(t(input_scale), nComp, center = F)
     rownames(pc$rotation) <- gene_subset
     d <- mahalanobis(pc$rotation[,1:nComp], center=rep(0, nComp), cov = cov(pc$rotation[,1:nComp]))
+    results[[1]] <- d
     dThresh <- quantile(d,cutoff)
     gene_subset <- names(which(d>dThresh))
+    results[[2]] <- gene_subset
   }
-  return(gene_subset)
+  return(results)
 }
 
 
