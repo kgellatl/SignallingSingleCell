@@ -31,7 +31,8 @@ return_subset_genes <- function(input, method, cutoff = NULL, num_genes = NULL){
         gene_set <- rownames(mat)[1:num_genes]
       }
       if(!is.null(cutoff)){
-        val <- quantile(mat$CV, cutoff)
+        cv_vec <- mat$CV[which(mat$CV > 0)]
+        val <- quantile(cv_vec, cutoff)
         ind <- which(mat$CV > val)
         gene_set <- rownames(mat)[ind]
 
@@ -49,7 +50,10 @@ return_subset_genes <- function(input, method, cutoff = NULL, num_genes = NULL){
         gene_set <- rownames(mat)[1:num_genes]
       }
       if(!is.null(cutoff)){
-        val <- quantile(mat$malhanobis_d, cutoff)
+
+        malhan_vec <- mat$malhanobis_d[which(mat$malhanobis_d > 0)]
+        val <- quantile(malhan_vec, cutoff)
+
         ind <- which(mat$malhanobis_d > val)
         gene_set <- rownames(mat)[ind]
 
