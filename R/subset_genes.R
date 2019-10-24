@@ -21,36 +21,68 @@
 #' gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "PCA", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.75)
 
 subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85, log = F){
-  results <- vector(mode = "list", length = 2)
-  input <- exprs(input)
-  gCount <- apply(input,1,function(x) length(which(x>=threshold))) # a bit wasteful if threshold = 0, but alas.
-  gene_subset <- rownames(input[(which(gCount >= minCells)),])
-  if(method =="Expression"){
-    gene_subset <- gene_subset
-  }
+
+  input_mat <- exprs(input)
+  gCount <- apply(input_mat,1,function(x) length(which(x>=threshold))) # a bit wasteful if threshold = 0, but alas.
+  gene_subset <- rownames(input_mat[(which(gCount >= minCells)),])
+
+   if(method =="Expression"){
+
+    ind <- match(names(gCount), rownames(fData(input)))
+    fData(input)$count <- as.vector(gCount)
+    fData(input)$count_selected <- F
+
+    ind <- match(gene_subset, rownames(fData(input)))
+    fData(input)$count_selected <- F
+    fData(input)$count_selected[ind] <- T
+
+   }
+
   if(method == "CV"){
-    g_exp <- log2(input[gene_subset,]+2)-1
+
+    g_exp <- log2(input_mat[gene_subset,]+2)-1
     gsd <- apply(g_exp,1,sd)
-    CV = sqrt((exp(gsd))^2-1)
-    results[[1]] <- CV
-    CV <- CV[order(CV)]
-    gene_subset <- names(CV[round(length(CV)*cutoff):length(CV)])
-    results[[2]] <- gene_subset
+    CV <- sqrt((exp(gsd))^2-1)
+
+    ind <- match(names(CV), rownames(fData(ex_sc_mDC)))
+
+    fData(input)$CV <- 0
+    fData(input)$CV[ind] <- as.vector(CV)
+
+    cv_thresh <- quantile(CV,cutoff)
+    gene_subset_cv <- names(which(CV>cv_thresh))
+
+    ind <- match(gene_subset_cv, rownames(fData(ex_sc_mDC)))
+
+    fData(input)$CV_selected <- F
+    fData(input)$CV_selected[ind] <- T
+
   }
+
   if(method == "PCA"){
     if(log){
-      input <- log2(input[gene_subset,]+2)-1
+      input <- log2(input_mat[gene_subset,]+2)-1
     }
     input_scale <- scale(input[gene_subset,])
     pc <- irlba::prcomp_irlba(t(input_scale), nComp, center = F)
     rownames(pc$rotation) <- gene_subset
     d <- mahalanobis(pc$rotation[,1:nComp], center=rep(0, nComp), cov = cov(pc$rotation[,1:nComp]))
-    results[[1]] <- d
+
+    ind <- match(names(d), rownames(fData(ex_sc_mDC)))
+
+    fData(input)$malhanobis_d <- 0
+    fData(input)$malhanobis_d[ind] <- as.vector(d)
+
     dThresh <- quantile(d,cutoff)
-    gene_subset <- names(which(d>dThresh))
-    results[[2]] <- gene_subset
+    gene_subset_malhanobis <- names(which(d>dThresh))
+
+    ind <- match(gene_subset_malhanobis, rownames(fData(ex_sc_mDC)))
+
+    fData(input)$malhanobis_selected <- F
+    fData(input)$malhanobis_selected[ind] <- T
+
   }
-  return(results)
+  return(input)
 }
 
 
