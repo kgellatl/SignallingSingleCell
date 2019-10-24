@@ -20,7 +20,7 @@
 #' @examples
 #' gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "PCA", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.75)
 
-subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85, log = F){
+subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85, log = F, output = "simple"){
 
   input_mat <- exprs(input)
   gCount <- apply(input_mat,1,function(x) length(which(x>=threshold))) # a bit wasteful if threshold = 0, but alas.
@@ -57,6 +57,9 @@ subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10
     fData(input)$CV_selected <- F
     fData(input)$CV_selected[ind] <- T
 
+    gene_subset <- gene_subset_cv
+
+
   }
 
   if(method == "PCA"){
@@ -81,8 +84,15 @@ subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10
     fData(input)$malhanobis_selected <- F
     fData(input)$malhanobis_selected[ind] <- T
 
+    gene_subset <- gene_subset_malhanobis
+
   }
-  return(input)
+  if(output == "simple"){
+    return(gene_subset)
+  }
+  if(output == "ex_sc"){
+    return(input)
+  }
 }
 
 
