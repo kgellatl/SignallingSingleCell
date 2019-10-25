@@ -44,7 +44,7 @@ subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10
     gsd <- apply(g_exp,1,sd)
     CV <- sqrt((exp(gsd))^2-1)
 
-    ind <- match(names(CV), rownames(fData(ex_sc_mDC)))
+    ind <- match(names(CV), rownames(fData(input)))
 
     fData(input)$CV <- 0
     fData(input)$CV[ind] <- as.vector(CV)
@@ -52,7 +52,7 @@ subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10
     cv_thresh <- quantile(CV,cutoff)
     gene_subset_cv <- names(which(CV>cv_thresh))
 
-    ind <- match(gene_subset_cv, rownames(fData(ex_sc_mDC)))
+    ind <- match(gene_subset_cv, rownames(fData(input)))
 
     fData(input)$CV_selected <- F
     fData(input)$CV_selected[ind] <- T
@@ -71,7 +71,7 @@ subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10
     rownames(pc$rotation) <- gene_subset
     d <- mahalanobis(pc$rotation[,1:nComp], center=rep(0, nComp), cov = cov(pc$rotation[,1:nComp]))
 
-    ind <- match(names(d), rownames(fData(ex_sc_mDC)))
+    ind <- match(names(d), rownames(fData(input)))
 
     fData(input)$malhanobis_d <- 0
     fData(input)$malhanobis_d[ind] <- as.vector(d)
@@ -79,7 +79,7 @@ subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10
     dThresh <- quantile(d,cutoff)
     gene_subset_malhanobis <- names(which(d>dThresh))
 
-    ind <- match(gene_subset_malhanobis, rownames(fData(ex_sc_mDC)))
+    ind <- match(gene_subset_malhanobis, rownames(fData(input)))
 
     fData(input)$malhanobis_selected <- F
     fData(input)$malhanobis_selected[ind] <- T
