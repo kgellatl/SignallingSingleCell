@@ -21,7 +21,7 @@ plot_density <- function(input, val, title = "", color_by = "NA", statistic = "m
   dat <- pData(input)
   ind1 <- grep(val, colnames(dat))
   if(length(ind1) == 0){
-    dat <- cbind(dat, log2(exprs(input)[val,]+2)-1)
+    dat <- cbind(dat, exprs(input)[val,])
     colnames(dat) <- c(colnames(dat[2:ncol(dat)-1]), val)
   }
   if(color_by == "NA"){

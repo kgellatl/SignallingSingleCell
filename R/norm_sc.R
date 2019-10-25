@@ -17,39 +17,69 @@
 #' @examples
 #' ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
 #'
-norm_sc <- function(input, gene_frac = 0.25, gene_var = 0.75, genelist = NULL, norm_by = "Cluster", pool_sizes = c(20,30,40,50), positive = TRUE){
+norm_sc <- function(input, genelist = NULL, gene_selection = "gini", num_gini = 200, gene_frac = 0.25, gene_var = 0.80, norm_by = "Cluster", pool_sizes = c(20,30,40,50), positive = TRUE){
 
   clusters <- pData(input)[,norm_by]
 
   if(is.null(genelist)){
-    frac_mat <-  input
-    exprs(frac_mat)[which(exprs(frac_mat) > 0)] <- 1
+    if(gene_selection == "PCA"){
+      frac_mat <-  input
+      exprs(frac_mat)[which(exprs(frac_mat) > 0)] <- 1
 
-    gene_set <- c()
+      gene_set <- c()
 
-    for (i in 1:length(unique(clusters))) {
-      int <- unique(clusters)[i]
-      ind <- grep(int, clusters)
-      frac <- apply(exprs(frac_mat)[,ind], 1, mean)
-      set <- names(which(frac > gene_frac))
-      gene_set <- c(gene_set, set)
+      for (i in 1:length(unique(clusters))) {
+        int <- unique(clusters)[i]
+        ind <- grep(int, clusters)
+        frac <- apply(exprs(frac_mat)[,ind], 1, mean)
+        set <- names(which(frac > gene_frac))
+        gene_set <- c(gene_set, set)
+      }
+
+      tab <- table(gene_set)
+      genelist <- names(tab)[which(tab == length(unique(clusters)))]
+      input2 <- input[genelist,]
+      gene_subset_var <- subset_genes(input2, method = "PCA", threshold = 0, minCells = 0, nComp = 10, cutoff = gene_var) # filter genes on variability
+      stable_genes <- genelist[!genelist %in% gene_subset_var] # remove variable genes
+      genelist <- stable_genes
+      csums <- apply(exprs(input)[genelist,], 2,sum)
+      zero_csums <- which(csums == 0)
+      if(length(zero_csums) > 0){
+        err_result <- vector(mode = "list", length = 2)
+        err_result[[1]] <- csums
+        err_result[[2]] <- stable_genes
+        warning("With provided parameters, some cells have zero expression. Try reducing gene_frac argument. See returned result")
+        return(err_result)
+      }
     }
 
-    tab <- table(gene_set)
-    genelist <- names(tab)[which(tab == length(unique(clusters)))]
-    input2 <- input[genelist,]
-    gene_subset_var <- subset_genes(input2, method = "PCA", threshold = 0, minCells = 0, nComp = 10, cutoff = gene_var) # filter genes on variability
-    stable_genes <- genelist[!genelist %in% gene_subset_var] # remove variable genes
-    genelist <- stable_genes
-    csums <- apply(exprs(input)[stable_genes,], 2,sum)
-    zero_csums <- which(csums == 0)
-    if(length(zero_csums) > 0){
-      err_result <- vector(mode = "list", length = 2)
-    err_result[[1]] <- csums
-    err_result[[2]] <- stable_genes
-    warning("With provided parameters, some cells have zero expression. Try reducing gene_frac argument. See returned result")
-    return(err_result)
+    if(gene_selection == "gini"){
+      gene_set <- c()
+
+      for (i in 1:length(unique(clusters))) {
+        int <- unique(clusters)[i]
+        ind <- grep(int, clusters)
+
+        gini_mat <- t(log2(exprs(ex_sc_mDC[,ind])+2)-1)
+        gini_genes <- edgeR::gini(gini_mat)
+        set <- names(sort(gini_genes)[1:num_gini])
+        gene_set <- c(gene_set, set)
+      }
+
+      tab <- table(gene_set)
+      genelist <- names(tab)[which(tab == length(unique(clusters)))]
+
+      csums <- apply(exprs(input)[genelist,], 2,sum)
+      zero_csums <- which(csums == 0)
+      if(length(zero_csums) > 0){
+        err_result <- vector(mode = "list", length = 2)
+        err_result[[1]] <- csums
+        err_result[[2]] <- stable_genes
+        warning("With provided parameters, some cells have zero expression. Try increasing num_gini argument. See returned result")
+        return(err_result)
+      }
     }
+
   }
 
   SCE <- SingleCellExperiment::SingleCellExperiment(list(counts = exprs(input)))
@@ -67,7 +97,7 @@ norm_sc <- function(input, gene_frac = 0.25, gene_var = 0.75, genelist = NULL, n
   size_factor <- sizeFactors(SCE)
   size_factor <- size_factor[ind]
   pData(input_norm)$size_factor <- size_factor
-  ind <- match(stable_genes, rownames(input_norm))
+  ind <- match(genelist, rownames(input_norm))
 
   fData(input_norm)$norm_gene <- 0
 

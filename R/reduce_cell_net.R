@@ -20,15 +20,18 @@
 #' ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
 #'
 
-analyze_cell_net <- function(input_ex_sc, input_cell_net, verbose = T){
+reduce_cell_net <- function(input_ex_sc, input_cell_net, verbose = T, layout = "fr"){
 
-  if(verbose){
-    print("Calculating fr layout")
+  if(layout == "fr"){
+    if(verbose){
+      print("Calculating fr layout")
+    }
+    l <- layout_with_fr(input_cell_net)
+    input_ex_sc$fr_x <- l[,1]
+    input_ex_sc$fr_y <- l[,2]
   }
-  l <- layout_with_fr(input_cell_net)
-  input_ex_sc$fr_x <- l[,1]
-  input_ex_sc$fr_y <- l[,2]
 
+  if(layout == "kk"){
   if(verbose){
     print("Calculating kk layout")
   }
@@ -36,44 +39,8 @@ analyze_cell_net <- function(input_ex_sc, input_cell_net, verbose = T){
   l <- layout_with_kk(input_cell_net)
   input_ex_sc$kk_x <- l[,1]
   input_ex_sc$kk_y <- l[,2]
-
-  if(verbose){
-    print("Calculating leading eigen clusters")
-  }
-  clusters <- cluster_leading_eigen(as.undirected(input_cell_net))
-
-  weights_clusters <- ifelse(crossing(clusters, input_cell_net), 1, 3)
-  cluster_weighted_layout <- layout_with_fr(input_cell_net, weights = weights_clusters)
-  pData(input_ex_sc)$eigen_x <- cluster_weighted_layout[,1]
-  pData(input_ex_sc)$eigen_y <- cluster_weighted_layout[,2]
-
-  input_ex_sc$leading_eigen_clusters <- paste0("leading_eigen_", clusters$membership)
-
-  if(verbose){
-    print("Calculating fast greedy clusters")
-  }
-  clusters <- cluster_fast_greedy(as.undirected(input_cell_net))
-
-  weights_clusters <- ifelse(crossing(clusters, input_cell_net), 1, 3)
-  cluster_weighted_layout <- layout_with_fr(input_cell_net, weights = weights_clusters)
-  pData(input_ex_sc)$greedy_x <- cluster_weighted_layout[,1]
-  pData(input_ex_sc)$greedy_y <- cluster_weighted_layout[,2]
-
-  input_ex_sc$fast_greedy_clusters <- paste0("fast_greedy_", clusters$membership)
-
-
-  if(verbose){
-    print("Calculating louvain clusters")
   }
 
-  clusters <- cluster_louvain(as.undirected(input_cell_net))
-
-  weights_clusters <- ifelse(crossing(clusters, input_cell_net), 1, 3)
-  cluster_weighted_layout <- layout_with_fr(input_cell_net, weights = weights_clusters)
-  pData(input_ex_sc)$louvaine_x <- cluster_weighted_layout[,1]
-  pData(input_ex_sc)$louvaine_y <- cluster_weighted_layout[,2]
-
-  input_ex_sc$leading_louvain_clusters <- paste0("leading_louvain_", clusters$membership)
   return(input_ex_sc)
 }
 

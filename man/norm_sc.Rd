@@ -4,18 +4,19 @@
 \alias{norm_sc}
 \title{Normalization}
 \usage{
-norm_sc(input, gene_frac = 0.25, gene_var = 0.75, genelist = NULL,
+norm_sc(input, genelist = NULL, gene_selection = "gini",
+  num_gini = 200, gene_frac = 0.25, gene_var = 0.8,
   norm_by = "Cluster", pool_sizes = c(20, 30, 40, 50),
   positive = TRUE)
 }
 \arguments{
 \item{input}{the input ex_sc}
 
+\item{genelist}{the subset of genes to use for calculating size factors. Defaults to null. Provide to overrule internal gene selection.}
+
 \item{gene_frac}{the fraction of cells expressing a given gene to be included in normalization}
 
 \item{gene_var}{the percentile of least variable genes to keep (ie 0.75 removes the 25 percent most variable genes)}
-
-\item{genelist}{the subset of genes to use for calculating size factors. Defaults to null. Provide to overrule internal gene selection.}
 
 \item{norm_by}{the pdata variable on which to perform internal normalization before normalizing across this variable.}
 
