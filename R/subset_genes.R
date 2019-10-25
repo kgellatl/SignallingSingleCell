@@ -64,9 +64,9 @@ subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10
 
   if(method == "PCA"){
     if(log){
-      input <- log2(input_mat[gene_subset,]+2)-1
+      input_mat <- log2(input_mat[gene_subset,]+2)-1
     }
-    input_scale <- scale(input[gene_subset,])
+    input_scale <- scale(input_mat[gene_subset,])
     pc <- irlba::prcomp_irlba(t(input_scale), nComp, center = F)
     rownames(pc$rotation) <- gene_subset
     d <- mahalanobis(pc$rotation[,1:nComp], center=rep(0, nComp), cov = cov(pc$rotation[,1:nComp]))
