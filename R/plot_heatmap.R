@@ -155,7 +155,7 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     if(type == "bulk"){
       for (i in 1:length(facs)) {
         int <- facs[i]
-        heat_dat_lng$facet[grep(int, as.character(heat_dat_lng$group))] <- int
+        heat_dat_lng$facet[grep(paste0(int, "$"), as.character(heat_dat_lng$group))] <- int
         # vals <- strsplit(as.character(heat_dat_lng$group), split = "_")
         # vals <- matrix(unlist(vals), ncol = length(vals[[1]]), byrow = T)
         # for (j in 1:nrow(vals)) {
