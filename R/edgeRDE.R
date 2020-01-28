@@ -35,7 +35,13 @@ edgeRDE <- function(input,
   input <- input[idx.keep,]
   ## make DGElist
   y <- edgeR::DGEList(counts=exprs(input), group=groups)
-  y$samples$norm.factors = pData(input)[,sizefactor]/pData(input)[,lib_size]
+  if (is.null(sizefactor)) {
+    # if sizefactor is null use regular edgeR normalization
+    message(sprintf('Calculating norm factors...'));flush.console()
+    y <- calcNormFactors(y)
+  } else {
+    y$samples$norm.factors = pData(input)[,sizefactor]/pData(input)[,lib_size]
+  }
   # set batch as coefficient if more than one batch is specified
   if (length(unique(batch))>1) {
     design <- model.matrix(~0+batch+group, data=y$samples)

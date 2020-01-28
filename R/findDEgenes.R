@@ -25,8 +25,8 @@ findDEgenes = function(input,
                        pd = pData(input),
                        DEgroup,
                        contrastID,
-                       sizefactor,
-                       lib_size,
+                       sizefactor = NULL,
+                       lib_size = NULL,
                        facet_by,
                        minCells = 0.1,
                        batchID = NULL,
@@ -43,6 +43,12 @@ findDEgenes = function(input,
     # select cells
     z = as.matrix(exprs(input))[,idx]
     if(ncol(z) > 2){
+      if (is.null(lib_size)) {
+        # if lib_size is null sum up UMI counts
+        lib_size = colSums(exprs(input))
+      } else {
+        lib_size = as.factor(pd[,lib_size])
+      }
       if (is.null(batchID)) {
         # if batchID is null all cells are in the same batch
         batch = as.factor(rep(1,ncol(input)))
