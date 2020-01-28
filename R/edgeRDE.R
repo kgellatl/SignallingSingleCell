@@ -38,7 +38,7 @@ edgeRDE <- function(input,
   if (is.null(sizefactor)) {
     # if sizefactor is null use regular edgeR normalization
     message(sprintf('Calculating norm factors...'));flush.console()
-    y <- calcNormFactors(y)
+    y <- edgeR::calcNormFactors(y)
   } else {
     y$samples$norm.factors = pData(input)[,sizefactor]/pData(input)[,lib_size]
   }
