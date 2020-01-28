@@ -44,14 +44,18 @@ findDEmarkers = function(input,
 		batch = as.factor(pd[,batchID])
 	}
 
+	z = as.matrix(exprs(input[,rownames(pd)]))
+	z = construct_ex_sc(z)
+	pData(z) = pd[colnames(z),,drop=F]
+
 	for (i in 1:length(unique(pd[,DEgroup]))) {
 		name = unique(as.character(pd[,DEgroup]))[i]
 		message(paste("Working on group: ", name, sep=""));flush.console()
 		idx = rownames(pd)[which(pd[,DEgroup]==name)]
-		groupList = rep(0, times=ncol(input))   # all cells are reference
-		groupList[which(colnames(input) %in% idx)] = 1 # cells that match id are used as contrast
+		groupList = rep(0, times=ncol(z))   # all cells are reference
+		groupList[which(colnames(z) %in% idx)] = 1 # cells that match id are used as contrast
 		group = factor(groupList)
-		tab = edgeRDE(input, group, batch, sizefactor, lib_size, minCells, pVal, contrast)
+		tab = edgeRDE(z, group, batch, sizefactor, lib_size, minCells, pVal, contrast)
 		#Handle results with multiple contrasts
 		message('Writing results to output file');flush.console()
 		if (length(tab) == 1){
