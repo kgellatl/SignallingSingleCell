@@ -47,7 +47,7 @@ findDEgenes = function(input,
         # if lib_size is null sum up UMI counts
         lib_size = colSums(exprs(input))
       } else {
-        lib_size = as.factor(pd[,lib_size])
+        lib_size = pd[,lib_size]
       }
       if (is.null(batchID)) {
         # if batchID is null all cells are in the same batch
@@ -63,7 +63,7 @@ findDEgenes = function(input,
       if(length(unique(groupList)) > 1){
         group = factor(groupList)
         z = construct_ex_sc(z)
-        pData(z) = pd[idx,]
+        pData(z) = pd[idx,,drop=F]
         # perform DE
         tab = edgeRDE(input = z, groups = group, batch = batch, sizefactor = sizefactor, lib_size = lib_size,
                       minCells = minCells, pVal = pVal, contrast = contrast)

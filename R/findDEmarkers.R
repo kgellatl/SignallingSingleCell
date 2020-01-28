@@ -44,13 +44,13 @@ findDEmarkers = function(input,
       # if batchID is null all cells are in the same batch
       batch = as.factor(rep(1,ncol(input)))
     } else {
-      batch = as.factor(pd[,batchID])
+      lib_size = pd[,lib_size]
     }
     groupList = rep(0, times=ncol(z))   # all cells are reference
     groupList[which(colnames(z) %in% idx)] = 1 # cells that match id are used as contrast
     group = factor(groupList)
     z = construct_ex_sc(z)
-    pData(z) = pd[colnames(z),]
+    pData(z) = pd[colnames(z),,drop=F]
     tab = edgeRDE(z, group, batch, sizefactor, lib_size, minCells)
     DEtableclsall = tab[['contrast_1']]
     outfile = paste(name, outsuffix, sep = "_")
