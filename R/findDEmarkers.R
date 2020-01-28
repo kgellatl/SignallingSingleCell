@@ -30,31 +30,40 @@ findDEmarkers = function(input,
                          minCells = 0.01,
                          pVal = 1,
                          contrast = list(c(-1,1))) {
-  for (i in 1:length(unique(pd[,DEgroup]))) {
-    name = unique(as.character(pd[,DEgroup]))[i]
-    idx = rownames(pd)[which(pd[,DEgroup]==name)]
-    z = as.matrix(exprs(input[,rownames(pd)]))
-    if (is.null(lib_size)) {
-      # if lib_size is null sum up UMI counts
-      lib_size = colSums(exprs(input))
-    } else {
-      lib_size = pd[,lib_size]
-    }
-    if (is.null(batchID)) {
-      # if batchID is null all cells are in the same batch
-      batch = as.factor(rep(1,ncol(input)))
-    } else {
-      # get batch factors from batchID column in pData
-      batch = as.factor(pd[,batchID])
-    }
-    groupList = rep(0, times=ncol(z))   # all cells are reference
-    groupList[which(colnames(z) %in% idx)] = 1 # cells that match id are used as contrast
-    group = factor(groupList)
-    z = construct_ex_sc(z)
-    pData(z) = pd[colnames(z),,drop=F]
-    tab = edgeRDE(z, group, batch, sizefactor, lib_size, minCells)
-    DEtableclsall = tab[['contrast_1']]
-    outfile = paste(name, outsuffix, sep = "_")
-    write.table(DEtableclsall, paste(outdir, outfile, sep = ""), sep = "\t")
-  }
+	if (is.null(lib_size)) {
+		# if lib_size is null sum up UMI counts
+		lib_size = colSums(exprs(input))
+	} else {
+		lib_size = pd[,lib_size]
+	}
+	if (is.null(batchID)) {
+		# if batchID is null all cells are in the same batch
+		batch = as.factor(rep(1,ncol(input)))
+	} else {
+		# get batch factors from batchID column in pData
+		batch = as.factor(pd[,batchID])
+	}
+
+	for (i in 1:length(unique(pd[,DEgroup]))) {
+		name = unique(as.character(pd[,DEgroup]))[i]
+		message(paste("Working on group: ", name, sep=""));flush.console()
+		idx = rownames(pd)[which(pd[,DEgroup]==name)]
+		groupList = rep(0, times=ncol(input))   # all cells are reference
+		groupList[which(colnames(input) %in% idx)] = 1 # cells that match id are used as contrast
+		group = factor(groupList)
+		tab = edgeRDE(input, group, batch, sizefactor, lib_size, minCells, pVal, contrast)
+		#Handle results with multiple contrasts
+		message('Writing results to output file');flush.console()
+		if (length(tab) == 1){
+			DEtableclsall = tab[['contrast_1']]
+			outfile = paste(name, outsuffix, sep = "_")
+			write.table(DEtableclsall, paste(outdir, outfile, sep = ""), sep = "\t")
+		} else {
+			for (t in length(tab)){
+				DEtableclsall = tab[[t]]
+				outfile = paste(name, t, outsuffix, sep = "_")
+				write.table(DEtableclsall, paste(outdir, outfile, sep = ""), sep = "\t")
+			}
+		}
+	}
 }
