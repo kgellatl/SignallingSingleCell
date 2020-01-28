@@ -27,7 +27,7 @@ findDEmarkers = function(input,
                          batchID = NULL,
                          outdir = "DEmarkers/",
                          outsuffix = "DEmarkers.tsv",
-                         minCells = 0.1,
+                         minCells = 0.01,
                          pVal = 1,
                          contrast = list(c(-1,1))) {
   for (i in 1:length(unique(pd[,DEgroup]))) {
@@ -38,13 +38,14 @@ findDEmarkers = function(input,
       # if lib_size is null sum up UMI counts
       lib_size = colSums(exprs(input))
     } else {
-      lib_size = as.factor(pd[,lib_size])
+      lib_size = pd[,lib_size]
     }
     if (is.null(batchID)) {
       # if batchID is null all cells are in the same batch
       batch = as.factor(rep(1,ncol(input)))
     } else {
-      lib_size = pd[,lib_size]
+      # get batch factors from batchID column in pData
+      batch = as.factor(pd[,batchID])
     }
     groupList = rep(0, times=ncol(z))   # all cells are reference
     groupList[which(colnames(z) %in% idx)] = 1 # cells that match id are used as contrast

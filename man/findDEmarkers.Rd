@@ -6,7 +6,7 @@
 \usage{
 findDEmarkers(input, pd = pData(input), DEgroup, sizefactor = NULL,
   lib_size = NULL, batchID = NULL, outdir = "DEmarkers/",
-  outsuffix = "DEmarkers.tsv", minCells = 0.1, pVal = 1,
+  outsuffix = "DEmarkers.tsv", minCells = 0.01, pVal = 1,
   contrast = list(c(-1, 1)))
 }
 \arguments{
