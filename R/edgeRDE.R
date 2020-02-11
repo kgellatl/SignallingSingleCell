@@ -40,7 +40,7 @@ edgeRDE <- function(input,
     message(sprintf('Calculating norm factors...'));flush.console()
     y <- edgeR::calcNormFactors(y)
   } else {
-    y$samples$norm.factors = pData(input)[,sizefactor]/pData(input)[,lib_size]
+    y$samples$norm.factors = pData(input)[,sizefactor]/lib_size
   }
   # set batch as coefficient if more than one batch is specified
   if (length(unique(batch))>1) {

@@ -4,7 +4,7 @@
 \alias{findDEmarkers}
 \title{This will perform differential expression using edgeR to find markers for each cluster or group compared to all others}
 \usage{
-findDEmarkers(input, pd = pData(input), DEgroup, sizefactor = NULL,
+findDEmarkers(input, pd = NULL, DEgroup, sizefactor = NULL,
   lib_size = NULL, batchID = NULL, outdir = "DEmarkers/",
   outsuffix = "DEmarkers.tsv", minCells = 0.01, pVal = 1,
   contrast = list(c(-1, 1)))
