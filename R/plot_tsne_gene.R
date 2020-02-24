@@ -30,12 +30,13 @@ plot_tsne_gene <- function(input,
                            colors_points = c("gray", 'blue', 'red', 'yellow'),
                            size = 1.5,
                            ncol = 2,
-                           resolution = 500,
+                           resolution = 250,
                            theme = "classic",
                            cutoff = 0.2,
                            xcol="x",
                            ycol="y",
-                           text_sizes = c(20,10,5,10,5,5)){
+                           text_sizes = c(20,10,5,10,5,5),
+                           density_scale = 1){
   kde2d_weighted <- function (x, y, w, h, n , lims = c(range(x), range(y))) {
     nx <- length(x)
     if (length(y) != nx)
@@ -56,6 +57,19 @@ plot_tsne_gene <- function(input,
   }
   if(facet_by == "NA"){ #This will allow plotting of 1 - n gene
     geneColored1 <- pData(input)[,c(xcol, ycol)]
+    LinMap <- function(x, from, to) {
+      # Shifting the vector so that min(x) == 0
+      x <- x - min(x)
+      # Scaling to the range of [0, 1]
+      x <- x / max(x)
+      # Scaling to the needed amplitude
+      x <- x * (to - from)
+      # Shifting to the needed level
+      x + from
+    }
+    geneColored1[,c(xcol)] <- LinMap(geneColored1[,c(xcol)],0,1)
+    geneColored1[,c(ycol)] <- LinMap(geneColored1[,c(ycol)],0,1)
+
     geneColored1 <- do.call(rbind, replicate(length(gene), geneColored1, simplify=FALSE))
     geneColored3 <- t(exprs(input)[gene,])
     for(i in 1:ncol(geneColored3)){
@@ -79,7 +93,7 @@ plot_tsne_gene <- function(input,
       for(i in 1:length(gene)){
         index <- grep(gene[i], geneColored1[,"gene"])
         subset <- geneColored1[index,]
-        dens <- kde2d_weighted(subset[,xcol], subset[,ycol], subset$vals, n = resolution)
+        dens <- kde2d_weighted(subset[,xcol], subset[,ycol], subset$vals*density_scale, n = resolution)
         dfdens <- data.frame(expand.grid(x=dens$x, y=dens$y), z=as.vector(dens$z))
         dfdens_norm <- dfdens
         dfdens_norm[,3] <- dfdens_norm[,3]/max(dfdens_norm[,3])
@@ -103,10 +117,13 @@ plot_tsne_gene <- function(input,
     g <- g + theme(plot.title = element_text(size = text_sizes[1]), axis.title = element_text(size = text_sizes[2]), axis.text = element_text(size = text_sizes[3]), legend.title = element_text(size = text_sizes[4]), legend.text=element_text(size=text_sizes[5]))
     g <- g +  theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))
     g <- g +  facet_wrap(~gene, ncol = ncol)
-    if(density == TRUE){
-      g <- g +  geom_point(data=final_dfdens_norm, aes_string(x=xcol, y=ycol, color="z"), shape=20, size=.1, stroke = 1)
-    }
     g <- g +  scale_color_gradientn(colours=colors_points)
+    if(density == TRUE){
+      if(xcol != "x"){
+        colnames(final_dfdens_norm)[1:2] <- c("x", "y")
+      }
+      g <- g +  geom_point(data=final_dfdens_norm, aes(x=x, y=y, color=z), shape=20, size=.15, stroke = 1)
+    }
     g <- g +  geom_point(data= geneColored1, aes_string(x=xcol, y=ycol, col="vals"), shape=20, size = size)
     if(title == ""){
       title <- gene
@@ -119,6 +136,20 @@ plot_tsne_gene <- function(input,
       stop("You cannot facet multiple gene")
     }
     geneColored1 <- pData(input)[,c(xcol, ycol, facet_by)]
+    geneColored1 <- pData(input)[,c(xcol, ycol)]
+    LinMap <- function(x, from, to) {
+      # Shifting the vector so that min(x) == 0
+      x <- x - min(x)
+      # Scaling to the range of [0, 1]
+      x <- x / max(x)
+      # Scaling to the needed amplitude
+      x <- x * (to - from)
+      # Shifting to the needed level
+      x + from
+    }
+    geneColored1[,c(xcol)] <- LinMap(geneColored1[,c(xcol)],0,1)
+    geneColored1[,c(ycol)] <- LinMap(geneColored1[,c(ycol)],0,1)
+
     geneColored1 <- as.data.frame(geneColored1)
     values <- log2(t(exprs(input)[gene,])+2)-1
     values <- as.vector(values)
@@ -148,7 +179,10 @@ plot_tsne_gene <- function(input,
     tmp <- pData(input)[c(xcol, ycol)]
     g <- ggplot(geneColored1)
     if(density == TRUE){
-      g <- g +  geom_point(data=final_dfdens_norm, aes(x=x, y=y, color=z), shape=20, size=.1, stroke = 1)
+      if(xcol != "x"){
+        colnames(final_dfdens_norm)[1:2] <- c("x", "y")
+      }
+      g <- g +  geom_point(data=final_dfdens_norm, aes(x=x, y=y, color=z), shape=20, size=.15, stroke = 1)
     }
     g <- g +  geom_point(data= tmp, aes_string(x=xcol, y=ycol), shape=20, size = size, col = "gray")
     g <- g +  theme_classic()

@@ -134,7 +134,7 @@ plot_go_heatmap <- function(input,
         new_terms <- c(new_terms, all_full_terms)
       }
     }
-    return(matrix(c(new_terms, unique_terms), ncol = 2))
+    mat_el <- matrix(c(new_terms, unique_terms), ncol = 2)
     new_go_matrix <- matrix(ncol = length(new_terms), nrow = nrow(go_matrix))
     colnames(new_go_matrix) <- new_terms
     rownames(new_go_matrix) <- rownames(go_matrix)
@@ -164,6 +164,8 @@ plot_go_heatmap <- function(input,
                       color_pal = colpal)
     res[[1]] <- g
     res[[2]] <- colnames(new_go_matrix)
+    res[[3]] <- mat_el
+
     return(res)
   }
   else {
