@@ -154,17 +154,24 @@ plot_go_heatmap <- function(input,
                                                                                   1)
                                      paste0(x[1], "(", seq_along(x), ")")
                                    else x[1])
-    go_sc <- construct_ex_sc(new_go_matrix)
+    mystring <-  colnames(new_go_matrix)
+    mystring <- gsub("_", ", ", mystring)
+    mystring <- gsub("((?:[^,]+, ){3}[^,]+),", "\\1\n", mystring)
+    mystring <- gsub(", ", " ", mystring)
+    colnames(new_go_matrix) <- mystring
+
+             go_sc <- construct_ex_sc(new_go_matrix)
     numcol <- dim(table(unlist(new_go_matrix)))
     colpal <- viridis::viridis(numcol)
     colpal[1] <- "gray"
-    res <- vector(mode = "list", length = 2)
+    res <- vector(mode = "list", length = 4)
     g <- plot_heatmap(go_sc, genes = rownames(go_sc), type = "single_cell",
                       cluster_by = "both", scale_by = F, text_angle = 60,
                       color_pal = colpal)
-    res[[1]] <- g
+    res[[1]] <- g[[1]]
     res[[2]] <- colnames(new_go_matrix)
-    res[[3]] <- mat_el
+    res[[3]] <- g[[2]]
+    res[[4]] <- mat_el
 
     return(res)
   }
@@ -192,6 +199,13 @@ plot_go_heatmap <- function(input,
     all_full_terms <- gsub(" ", "-", colnames(go_matrix))
     all_full_terms <- gsub("-", "_", all_full_terms)
     colnames(go_matrix) <- all_full_terms
+
+    mystring <-  colnames(go_matrix)
+    mystring <- gsub("_", ", ", mystring)
+    mystring <- gsub("((?:[^,]+, ){3}[^,]+),", "\\1\n", mystring)
+    mystring <- gsub(", ", " ", mystring)
+    colnames(go_matrix) <- mystring
+
     go_sc <- construct_ex_sc(go_matrix)
     numcol <- dim(table(unlist(go_matrix)))
     colpal <- viridis::viridis(numcol)
@@ -204,7 +218,13 @@ plot_go_heatmap <- function(input,
     }
     g <- plot_heatmap(go_sc, genes = rownames(go_sc), type = "single_cell",
                       cluster_by = "both", scale_by = F, color_pal = colpal)
-    plot(g)
+
+    res <- vector(mode = "list", length = 3)
+
+
+    res[[1]] <- g[[1]]
+    res[[2]] <- colnames(go_matrix)
+    res[[3]] <- g[[2]]
   }
 
 }
