@@ -4,8 +4,14 @@
 \alias{pre_filter}
 \title{Filter Data}
 \usage{
-pre_filter(input, minUMI = 0, maxUMI = NA, threshold = NA,
-  minCells = NA, print_progress = TRUE)
+pre_filter(
+  input,
+  minUMI = 0,
+  maxUMI = NA,
+  threshold = NA,
+  minCells = NA,
+  print_progress = TRUE
+)
 }
 \arguments{
 \item{input}{the input ex_sc}

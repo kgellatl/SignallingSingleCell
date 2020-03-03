@@ -4,8 +4,13 @@
 \alias{calc_rl_connections}
 \title{Identifies all R / L interactions}
 \usage{
-calc_rl_connections(input, nodes, group_by = FALSE,
-  weight_by_proportion = FALSE, print_progress = TRUE)
+calc_rl_connections(
+  input,
+  nodes,
+  group_by = FALSE,
+  weight_by_proportion = FALSE,
+  print_progress = TRUE
+)
 }
 \arguments{
 \item{input}{the input ex_sc}

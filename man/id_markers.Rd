@@ -4,8 +4,7 @@
 \alias{id_markers}
 \title{ID markers}
 \usage{
-id_markers(input, id_by = "Cluster", print_progress = TRUE,
-  overwrite = FALSE)
+id_markers(input, id_by = "Cluster", print_progress = TRUE, overwrite = FALSE)
 }
 \arguments{
 \item{input}{the input ex_sc}

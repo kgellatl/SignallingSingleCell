@@ -4,9 +4,18 @@
 \alias{plot_scatter}
 \title{Create a Scatter Plot}
 \usage{
-plot_scatter(input, gene1, title = "", gene2, color_by,
-  facet_by = "NA", ncol = "NA", size = 2, colors = "NA",
-  logscale = FALSE)
+plot_scatter(
+  input,
+  gene1,
+  title = "",
+  gene2,
+  color_by,
+  facet_by = "NA",
+  ncol = "NA",
+  size = 2,
+  colors = "NA",
+  logscale = FALSE
+)
 }
 \arguments{
 \item{input}{The input data}

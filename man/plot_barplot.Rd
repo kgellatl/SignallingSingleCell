@@ -4,9 +4,19 @@
 \alias{plot_barplot}
 \title{This will create a bar plot}
 \usage{
-plot_barplot(input, title = "", gene, color_by, facet_by = "NA",
-  colors = NA, ncol = "NA", number_labels = T, text_sizes = c(20,
-  10, 5, 10, 5, 5), theme = "classic", alpha = 0.5)
+plot_barplot(
+  input,
+  title = "",
+  gene,
+  color_by,
+  facet_by = "NA",
+  colors = NA,
+  ncol = "NA",
+  number_labels = T,
+  text_sizes = c(20, 10, 5, 10, 5, 5),
+  theme = "classic",
+  alpha = 0.5
+)
 }
 \arguments{
 \item{input}{The input data}
