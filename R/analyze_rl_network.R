@@ -12,7 +12,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layout = FALSE, subset = FALSE, subset_on = "connected", merge_singles = T){
+analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layout = FALSE, subset = FALSE, subset_on = "connected", merge_singles = T, cluster_type  = "louvain"){
 
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
@@ -47,7 +47,15 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layou
     ##### Subsetting and determining layout #####
     ###############################################################################################
 
+  if(cluster_type == "between"){
     cfg <- cluster_edge_betweenness(as.undirected(tmp_net), weights = NULL)
+
+  }
+
+  if(cluster_type == "louvain"){
+    cfg <- cluster_louvain(as.undirected(tmp_net), weights = NULL)
+
+  }
     cs2 <- crossing(cfg, tmp_net)
     coGrph <- delete_edges(tmp_net, E(tmp_net)[crossing(cfg, tmp_net)])
     comm_ind <- igraph::decompose.graph(coGrph)
