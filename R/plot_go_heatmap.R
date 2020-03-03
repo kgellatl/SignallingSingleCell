@@ -169,10 +169,9 @@ plot_go_heatmap <- function(input,
                       cluster_by = "both", scale_by = F, text_angle = 60,
                       color_pal = colpal)
     res[[1]] <- g[[1]]
-    res[[2]] <- colnames(new_go_matrix)
-    res[[3]] <- g[[2]]
+    res[[2]] <- g[[2]]
+    res[[3]] <- colnames(new_go_matrix)
     res[[4]] <- mat_el
-
     return(res)
   }
   else {
@@ -220,11 +219,10 @@ plot_go_heatmap <- function(input,
                       cluster_by = "both", scale_by = F, color_pal = colpal)
 
     res <- vector(mode = "list", length = 3)
-
-
     res[[1]] <- g[[1]]
-    res[[2]] <- colnames(go_matrix)
-    res[[3]] <- g[[2]]
+    res[[2]] <- g[[2]]
+    res[[3]] <- colnames(go_matrix)
+    return(res)
   }
 
 }
