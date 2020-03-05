@@ -4,10 +4,21 @@
 \alias{findDEgenes}
 \title{This will perform differential expression using edgeR for pairwise comparisons}
 \usage{
-findDEgenes(input, pd = pData(input), DEgroup, contrastID,
-  sizefactor = NULL, lib_size = NULL, facet_by, minCells = 0.1,
-  batchID = NULL, outdir = "DEresults/", outsuffix = "DEresults.tsv",
-  pVal = 1, contrast = list(c(-1, 1)))
+findDEgenes(
+  input,
+  pd = pData(input),
+  DEgroup,
+  contrastID,
+  sizefactor = NULL,
+  lib_size = NULL,
+  facet_by,
+  minCells = 0.1,
+  batchID = NULL,
+  outdir = "DEresults/",
+  outsuffix = "DEresults.tsv",
+  pVal = 1,
+  contrast = list(c(-1, 1))
+)
 }
 \arguments{
 \item{input}{Input expression set}
