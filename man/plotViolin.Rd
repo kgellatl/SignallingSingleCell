@@ -7,7 +7,7 @@
 plotViolin(gene, input, sampleID, colourID, facetID = NULL,
   cols = NULL, subsetID = NA, subsetName = NA,
   facet_scale = "fixed", mean_text = F, fraction_text = F,
-  type = "violin", fudge = 0)
+  type = "violin", legend = T, fudge = 0)
 }
 \arguments{
 \item{gene}{Will only plot data for this gene, if the gene paramter is a list the violin plot will display the sum of the expression for all genes in the list}
