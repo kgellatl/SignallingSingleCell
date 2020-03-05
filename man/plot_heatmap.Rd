@@ -8,6 +8,8 @@ plot_heatmap(
   input,
   genes,
   type,
+  facet_by = FALSE,
+  scale_group = F,
   title = "Heatmap",
   scale_by = "row",
   cluster_by = "row",
@@ -16,7 +18,6 @@ plot_heatmap(
   show_k = F,
   ceiling = FALSE,
   color_pal = viridis::magma(256),
-  facet_by = FALSE,
   color_facets = FALSE,
   group_names = TRUE,
   gene_names = TRUE,
@@ -38,6 +39,8 @@ plot_heatmap(
 
 \item{type}{can either be "bulk" or "single_cell. If type is "bulk" it will utilize the bulk info stored in fData}
 
+\item{facet_by}{will create breaks in the heatmap by some pData Variable}
+
 \item{title}{A heatmap title}
 
 \item{scale_by}{scale across "row" (genes), "col" (groups), or FALSE}
@@ -51,8 +54,6 @@ plot_heatmap(
 \item{ceiling}{A value above which to truncate}
 
 \item{color_pal}{The color pallete to be used}
-
-\item{facet_by}{will create breaks in the heatmap by some pData Variable}
 
 \item{color_facets}{if true will use colors instead of text labels for the facets}
 
