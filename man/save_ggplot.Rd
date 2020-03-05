@@ -4,8 +4,15 @@
 \alias{save_ggplot}
 \title{Save plot}
 \usage{
-save_ggplot(filename = "Rplot", format = "pdf", dingbats = FALSE,
-  dpi = 300, h = 6, w = 6, units = "in")
+save_ggplot(
+  filename = "Rplot",
+  format = "pdf",
+  dingbats = FALSE,
+  dpi = 300,
+  h = 6,
+  w = 6,
+  units = "in"
+)
 }
 \arguments{
 \item{filename}{The file name to be written}

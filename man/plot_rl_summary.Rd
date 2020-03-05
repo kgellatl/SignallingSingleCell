@@ -4,9 +4,14 @@
 \alias{plot_rl_summary}
 \title{Identifies all R / L interactions}
 \usage{
-plot_rl_summary(input, group_by = FALSE,
-  edge_weight = "fraction_connections", rank = TRUE, threshold = NA,
-  reference = NA)
+plot_rl_summary(
+  input,
+  group_by = FALSE,
+  edge_weight = "fraction_connections",
+  rank = TRUE,
+  threshold = NA,
+  reference = NA
+)
 }
 \arguments{
 \item{input}{the input full_network from calc_rc_network}

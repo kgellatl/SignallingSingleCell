@@ -4,11 +4,24 @@
 \alias{plot_violin}
 \title{This will create a violin plot}
 \usage{
-plot_violin(input, title = "", gene, color_by, log_scale = F,
-  colors = NA, facet_by = "NA", ncol = "NA", jitter_pts = T,
-  plot_mean = TRUE, size = 1, sig = 3, number_labels = T,
-  text_sizes = c(20, 10, 5, 10, 5, 5), alpha = 0.5,
-  theme = "classic")
+plot_violin(
+  input,
+  title = "",
+  gene,
+  color_by,
+  log_scale = F,
+  colors = NA,
+  facet_by = "NA",
+  ncol = "NA",
+  jitter_pts = T,
+  plot_mean = TRUE,
+  size = 1,
+  sig = 3,
+  number_labels = T,
+  text_sizes = c(20, 10, 5, 10, 5, 5),
+  alpha = 0.5,
+  theme = "classic"
+)
 }
 \arguments{
 \item{input}{The input data}

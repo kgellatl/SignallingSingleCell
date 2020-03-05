@@ -4,9 +4,17 @@
 \alias{filter_rl_network}
 \title{Identifies all R / L interactions}
 \usage{
-filter_rl_network(input, filter_by, filter_type = "network",
-  DEfolder = NULL, cutoff, direction, absol = FALSE,
-  group_by = FALSE, keep = FALSE)
+filter_rl_network(
+  input,
+  filter_by,
+  filter_type = "network",
+  DEfolder = NULL,
+  cutoff,
+  direction,
+  absol = FALSE,
+  group_by = FALSE,
+  keep = FALSE
+)
 }
 \arguments{
 \item{input}{the output of calc_rl_network}

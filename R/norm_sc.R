@@ -60,7 +60,7 @@ norm_sc <- function(input, genelist = NULL, gene_selection = "gini", num_gini = 
         int <- unique(clusters)[i]
         ind <- grep(int, clusters)
 
-        gini_mat <- t(log2(exprs(ex_sc_mDC[,ind])+2)-1)
+        gini_mat <- t(log2(exprs(input[,ind])+2)-1)
         gini_genes <- edgeR::gini(gini_mat)
         set <- names(sort(gini_genes)[1:num_gini])
         gene_set <- c(gene_set, set)

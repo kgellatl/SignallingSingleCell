@@ -12,7 +12,7 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layout = FALSE, subset = FALSE, subset_on = "connected", merge_singles = T){
+analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layout = FALSE, subset = FALSE, subset_on = "connected", merge_singles = T, cluster_type  = "louvain"){
 
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
@@ -47,10 +47,25 @@ analyze_rl_network <- function(input, h = 8, w = 8, prefix = "", mult = 1, layou
     ##### Subsetting and determining layout #####
     ###############################################################################################
 
+  if(cluster_type == "between"){
     cfg <- cluster_edge_betweenness(as.undirected(tmp_net), weights = NULL)
+
+  }
+
+  if(cluster_type == "louvain"){
+    cfg <- cluster_louvain(as.undirected(tmp_net), weights = NULL)
+
+  }
     cs2 <- crossing(cfg, tmp_net)
-    coGrph <- delete_edges(tmp_net, E(tmp_net)[crossing(cfg, tmp_net)])
-    comm_ind <- igraph::decompose.graph(coGrph)
+    # coGrph <- delete_edges(tmp_net, E(tmp_net)[crossing(cfg, tmp_net)])
+    # comm_ind <- igraph::decompose.graph(coGrph)
+
+    found_clust <- sort(unique(cfg$membership))
+    comm_ind <- vector(mode = "list", length = length(found_clust))
+    for (i in 1:length(found_clust)) {
+      nodes_int_clust <- names(V(tmp_net))[which(cfg$membership == found_clust[i])]
+      comm_ind[[i]] <- induced_subgraph(tmp_net, nodes_int_clust)
+    }
 
     if(merge_singles){
       members <-  as.vector(cfg$membership)

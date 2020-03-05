@@ -4,10 +4,17 @@
 \alias{norm_sc}
 \title{Normalization}
 \usage{
-norm_sc(input, genelist = NULL, gene_selection = "gini",
-  num_gini = 200, gene_frac = 0.25, gene_var = 0.8,
-  norm_by = "Cluster", pool_sizes = c(20, 30, 40, 50),
-  positive = TRUE)
+norm_sc(
+  input,
+  genelist = NULL,
+  gene_selection = "gini",
+  num_gini = 200,
+  gene_frac = 0.25,
+  gene_var = 0.8,
+  norm_by = "Cluster",
+  pool_sizes = c(20, 30, 40, 50),
+  positive = TRUE
+)
 }
 \arguments{
 \item{input}{the input ex_sc}

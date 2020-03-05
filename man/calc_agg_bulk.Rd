@@ -4,8 +4,14 @@
 \alias{calc_agg_bulk}
 \title{Calculate UPM expression values across pData values}
 \usage{
-calc_agg_bulk(input, aggregate_by, group_by = FALSE,
-  cutoff_frac = FALSE, cutoff_num = FALSE, cutoff_cpm = FALSE)
+calc_agg_bulk(
+  input,
+  aggregate_by,
+  group_by = FALSE,
+  cutoff_frac = FALSE,
+  cutoff_num = FALSE,
+  cutoff_cpm = FALSE
+)
 }
 \arguments{
 \item{input}{the input ex_sc.}

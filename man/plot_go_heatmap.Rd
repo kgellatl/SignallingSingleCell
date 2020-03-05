@@ -4,9 +4,17 @@
 \alias{plot_go_heatmap}
 \title{Construct Expression Set Class}
 \usage{
-plot_go_heatmap(input, sig_val = "p.adjust", cutoff = 0.1,
-  max_categories = 30, color_by = "sig", subset_group = F,
-  prune = F, cutoff_jaccard = 1, word_similarity = 0.5)
+plot_go_heatmap(
+  input,
+  sig_val = "p.adjust",
+  cutoff = 0.1,
+  max_categories = 30,
+  color_by = "sig",
+  subset_group = F,
+  prune = F,
+  cutoff_jaccard = 1,
+  word_similarity = 0.5
+)
 }
 \arguments{
 \item{input}{the input Go result from clusterProfiler}

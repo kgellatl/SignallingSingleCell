@@ -61,6 +61,46 @@ return_subset_genes <- function(input, method, cutoff = NULL, num_genes = NULL){
     }
   }
 
+  if(method == "Gini"){
+    if(is.null(cutoff) && is.null(num_genes)){
+      gene_set <- rownames(mat)[which(mat$gini_selected == T)]
+    } else {
+      if(!is.null(num_genes)){
+        mat <- mat[rev(order(mat$gini)),]
+        gene_set <- rownames(mat)[1:num_genes]
+      }
+      if(!is.null(cutoff)){
+
+        malhan_vec <- mat$gini[which(mat$gini > 0)]
+        val <- quantile(malhan_vec, cutoff)
+
+        ind <- which(mat$gini > val)
+        gene_set <- rownames(mat)[ind]
+
+      }
+    }
+  }
+
+  if(method == "Seurat"){
+    if(is.null(cutoff) && is.null(num_genes)){
+      gene_set <- rownames(mat)[which(mat$seurat_select == T)]
+    } else {
+      if(!is.null(num_genes)){
+        mat <- mat[rev(order(mat$seurat_var)),]
+        gene_set <- rownames(mat)[1:num_genes]
+      }
+      if(!is.null(cutoff)){
+
+        malhan_vec <- mat$seurat_var[which(mat$seurat_var > 0)]
+        val <- quantile(malhan_vec, cutoff)
+
+        ind <- which(mat$seurat_var > val)
+        gene_set <- rownames(mat)[ind]
+
+      }
+    }
+  }
+
   return(gene_set)
 }
 

@@ -27,12 +27,31 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row",
-                         cluster_type = "hierarchical", k = NULL, show_k = F, ceiling = FALSE,
-                         color_pal = viridis::magma(256), facet_by = FALSE,color_facets = FALSE,
-                         group_names = TRUE, gene_names = TRUE, text_angle = 90,
-                         pdf_format = "tile", interactive = FALSE, text_sizes = c(20,10,5,10,5,5),
-                         gene_labels = NULL, gene_labels_size = 2, gene_labels_nudge  = -0.5, gene_labels_col = 1, gene_labels_force = 1){
+plot_heatmap <- function(input,
+                         genes,
+                         type,
+                         facet_by = FALSE,
+                         scale_group = F,
+                         title = "Heatmap",
+                         scale_by = "row",
+                         cluster_by = "row",
+                         cluster_type = "hierarchical",
+                         k = NULL,
+                         show_k = F,
+                         ceiling = FALSE,
+                         color_pal = viridis::magma(256),
+                         color_facets = FALSE,
+                         group_names = TRUE,
+                         gene_names = TRUE,
+                         text_angle = 90,
+                         pdf_format = "tile",
+                         interactive = FALSE,
+                         text_sizes = c(20,10,5,10,5,5),
+                         gene_labels = NULL,
+                         gene_labels_size = 2,
+                         gene_labels_nudge  = -0.5,
+                         gene_labels_col = 1,
+                         gene_labels_force = 1){
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
@@ -56,10 +75,27 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   }
   #####
   if(scale_by == "row"){
-    heat_dat_2 <- t(apply(heat_dat,1,scale))
-    colnames(heat_dat_2) <- colnames(heat_dat)
-    heat_dat <- heat_dat_2
+    if(scale_group != F){
+      groups <- unique(pData(input)[,scale_group])
+
+      for (i in 1:length(groups)) {
+        int_group <- groups[i]
+        ind <- grep(int_group, colnames(heat_dat))
+        if(length(ind) == 0){
+          stop("scale_group was not used to calculate aggregate bulk")
+        }
+        heat_dat[,ind] <- t(apply(heat_dat[,ind],1,scale))
+
+      }
+
+
+    } else {
+      heat_dat_2 <- t(apply(heat_dat,1,scale))
+      colnames(heat_dat_2) <- colnames(heat_dat)
+      heat_dat <- heat_dat_2
+    }
   }
+
   #####
   if(scale_by == "col"){
     heat_dat_2 <- apply(heat_dat,2,scale)
@@ -155,7 +191,7 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     if(type == "bulk"){
       for (i in 1:length(facs)) {
         int <- facs[i]
-        heat_dat_lng$facet[grep(int, as.character(heat_dat_lng$group))] <- int
+        heat_dat_lng$facet[grep(paste0(int, "$"), as.character(heat_dat_lng$group))] <- int
         # vals <- strsplit(as.character(heat_dat_lng$group), split = "_")
         # vals <- matrix(unlist(vals), ncol = length(vals[[1]]), byrow = T)
         # for (j in 1:nrow(vals)) {
