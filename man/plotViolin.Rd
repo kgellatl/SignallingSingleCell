@@ -17,6 +17,7 @@ plotViolin(
   mean_text = F,
   fraction_text = F,
   type = "violin",
+  legend = T,
   fudge = 0
 )
 }
