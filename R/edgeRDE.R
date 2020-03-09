@@ -35,6 +35,7 @@ edgeRDE <- function(input,
   input <- input[idx.keep,]
   ## make DGElist
   y <- edgeR::DGEList(counts=exprs(input), group=groups)
+  y$samples$lib.size <- lib_size
   if (is.null(sizefactor)) {
     # if sizefactor is null use regular edgeR normalization
     message(sprintf('Calculating norm factors...'));flush.console()
