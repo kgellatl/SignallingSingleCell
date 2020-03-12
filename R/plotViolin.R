@@ -48,7 +48,7 @@ plotViolin = function(gene,
     return(c(y = -1, label = round(10^(mean(x)), 2)))
   }
   fracSC = function(f){
-  return(c(y = -1.5, label = round(10^(mean(f)), 2)))
+    return(c(y = -1.5, label = round(10^(mean(f)), 2)))
   }
   ###
   if (!is.null(subsetID) & !is.na(subsetID)) {

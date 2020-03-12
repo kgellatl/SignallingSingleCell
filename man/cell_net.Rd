@@ -4,9 +4,14 @@
 \alias{cell_net}
 \title{Dimension Reduction}
 \usage{
-cell_net(input_cor_matrix, number_edges = NULL,
-  correlation_cutoff = NULL, min_edges = 10, max_edges = 100,
-  weight = "standardized")
+cell_net(
+  input_cor_matrix,
+  number_edges = NULL,
+  correlation_cutoff = NULL,
+  min_edges = 10,
+  max_edges = 100,
+  weight = "standardized"
+)
 }
 \arguments{
 \item{input}{the input ex_sc}

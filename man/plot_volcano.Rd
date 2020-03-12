@@ -4,8 +4,7 @@
 \alias{plot_volcano}
 \title{Calculate Library Size}
 \usage{
-plot_volcano(de_path, de_file, title = NA, fdr_cut = 0.001,
-  logfc_cut = 0.75)
+plot_volcano(de_path, de_file, title = NA, fdr_cut = 0.001, logfc_cut = 0.75)
 }
 \arguments{
 \item{input}{the input DIRECTORY}

@@ -4,8 +4,15 @@
 \alias{plot_density}
 \title{Plot Density}
 \usage{
-plot_density(input, val, title = "", color_by = "NA",
-  statistic = "mean", log = T, type = "density")
+plot_density(
+  input,
+  val,
+  title = "",
+  color_by = "NA",
+  statistic = "mean",
+  log = T,
+  type = "density"
+)
 }
 \arguments{
 \item{input}{the input ex_sc}

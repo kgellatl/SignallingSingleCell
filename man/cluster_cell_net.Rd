@@ -4,9 +4,14 @@
 \alias{cluster_cell_net}
 \title{Dimension Reduction}
 \usage{
-cluster_cell_net(input_ex_sc, input_cell_net, verbose = T,
-  cluster_method = "eigen", crossing_edge_weight = 1,
-  internal_edge_weight = 10)
+cluster_cell_net(
+  input_ex_sc,
+  input_cell_net,
+  verbose = T,
+  cluster_method = "eigen",
+  crossing_edge_weight = 1,
+  internal_edge_weight = 10
+)
 }
 \arguments{
 \item{input}{the input ex_sc}

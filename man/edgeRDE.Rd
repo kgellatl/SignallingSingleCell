@@ -4,8 +4,16 @@
 \alias{edgeRDE}
 \title{This will run edgeR to find differentially expressed genes. Use the wrapping functions findDEgenes or findDEmarkers to use pData columns and get the proper input}
 \usage{
-edgeRDE(input, groups, batch, sizefactor, lib_size, minCells, pVal = 1,
-  contrast = list(c(-1, 1)))
+edgeRDE(
+  input,
+  groups,
+  batch,
+  sizefactor,
+  lib_size,
+  minCells,
+  pVal = 1,
+  contrast = list(c(-1, 1))
+)
 }
 \arguments{
 \item{input}{Input expression set}

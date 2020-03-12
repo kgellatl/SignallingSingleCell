@@ -4,8 +4,7 @@
 \alias{reduce_cell_net}
 \title{Dimension Reduction}
 \usage{
-reduce_cell_net(input_ex_sc, input_cell_net, verbose = T,
-  layout = "fr")
+reduce_cell_net(input_ex_sc, input_cell_net, verbose = T, layout = "fr")
 }
 \arguments{
 \item{input}{the input ex_sc}
