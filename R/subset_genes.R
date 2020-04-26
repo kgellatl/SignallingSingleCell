@@ -20,35 +20,120 @@
 #' @examples
 #' gene_subset <- subset_genes(input = exprs(ex_sc_example), method = "PCA", threshold = 3, minCells = 30, nComp = 15, cutoff = 0.75)
 
-subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85, log = F){
-  input <- exprs(input)
-  gCount <- apply(input,1,function(x) length(which(x>=threshold))) # a bit wasteful if threshold = 0, but alas.
-  gene_subset <- rownames(input[(which(gCount >= minCells)),])
-  if(method =="Expression"){
-    gene_subset <- gene_subset
-  }
+subset_genes <- function(input, method, threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85, log = F, output = "simple", fudge = T){
+
+  input_mat <- exprs(input)
+  gCount <- apply(input_mat,1,function(x) length(which(x>=threshold))) # a bit wasteful if threshold = 0, but alas.
+  gene_subset <- rownames(input_mat[(which(gCount >= minCells)),])
+
+   if(method =="Expression"){
+
+    ind <- match(names(gCount), rownames(fData(input)))
+    fData(input)$count <- as.vector(gCount)
+    fData(input)$count_selected <- F
+
+    ind <- match(gene_subset, rownames(fData(input)))
+    fData(input)$count_selected <- F
+    fData(input)$count_selected[ind] <- T
+
+   }
+
   if(method == "CV"){
-    if(log){
-      input <- log2(input[gene_subset,]+2)-1
+
+    if(fudge){
+      input_mat <- input_mat+mean(input_mat)
     }
-    g_exp <- input[gene_subset,]
+
+    g_exp <- log2(input_mat[gene_subset,]+2)-1
     gsd <- apply(g_exp,1,sd)
-    CV = sqrt((exp(gsd))^2-1)
-    CV <- CV[order(CV)]
-    gene_subset <- names(CV[round(length(CV)*cutoff):length(CV)])
+    CV <- sqrt((exp(gsd))^2-1)
+
+    ind <- match(names(CV), rownames(fData(input)))
+
+    fData(input)$CV <- 0
+    fData(input)$CV[ind] <- as.vector(CV)
+
+    cv_thresh <- quantile(CV,cutoff)
+    gene_subset_cv <- names(which(CV>cv_thresh))
+
+    ind <- match(gene_subset_cv, rownames(fData(input)))
+
+    fData(input)$CV_selected <- F
+    fData(input)$CV_selected[ind] <- T
+
+    gene_subset <- gene_subset_cv
+
+
   }
-  if(method == "PCA"){
-    if(log){
-      input <- log2(input[gene_subset,]+2)-1
+
+
+  if(method == "Gini"){
+
+    if(fudge){
+      input_mat <- input_mat+mean(input_mat)
     }
-    input_scale <- scale(input[gene_subset,])
+
+    if(log){
+      input_mat <- log2(input_mat[gene_subset,]+2)-1
+    } else {
+      input_mat <- input_mat[gene_subset,]
+    }
+    gini_scores <- edgeR::gini(t(input_mat))
+
+    ind <- match(names(gini_scores), rownames(fData(input)))
+
+    fData(input)$gini <- 0
+    fData(input)$gini[ind] <- as.vector(gini_scores)
+
+    gini_thresh <- quantile(gini_scores,cutoff)
+    gene_subset_gini <- names(which(gini_scores>gini_thresh))
+
+    ind <- match(gene_subset_gini, rownames(fData(input)))
+
+    fData(input)$gini_selected <- F
+    fData(input)$gini_selected[ind] <- T
+
+    gene_subset <- gene_subset_gini
+
+
+  }
+
+  if(method == "PCA"){
+
+    if(fudge){
+      input_mat <- input_mat+mean(input_mat)
+    }
+
+    if(log){
+      input_mat <- log2(input_mat[gene_subset,]+2)-1
+    }
+    input_scale <- scale(input_mat[gene_subset,])
     pc <- irlba::prcomp_irlba(t(input_scale), nComp, center = F)
     rownames(pc$rotation) <- gene_subset
     d <- mahalanobis(pc$rotation[,1:nComp], center=rep(0, nComp), cov = cov(pc$rotation[,1:nComp]))
+
+    ind <- match(names(d), rownames(fData(input)))
+
+    fData(input)$malhanobis_d <- 0
+    fData(input)$malhanobis_d[ind] <- as.vector(d)
+
     dThresh <- quantile(d,cutoff)
-    gene_subset <- names(which(d>dThresh))
+    gene_subset_malhanobis <- names(which(d>dThresh))
+
+    ind <- match(gene_subset_malhanobis, rownames(fData(input)))
+
+    fData(input)$malhanobis_selected <- F
+    fData(input)$malhanobis_selected[ind] <- T
+
+    gene_subset <- gene_subset_malhanobis
+
   }
-  return(gene_subset)
+  if(output == "simple"){
+    return(gene_subset)
+  }
+  if(output == "ex_sc"){
+    return(input)
+  }
 }
 
 

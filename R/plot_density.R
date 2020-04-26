@@ -13,7 +13,7 @@
 #' @examples
 #' draw_density(input = ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 
-plot_density <- function(input, val, title = "", color_by = "NA", statistic = "mean"){
+plot_density <- function(input, val, title = "", color_by = "NA", statistic = "mean", log = T, type = "density"){
   gg_color_hue <- function(n) { #ggplot color selection tool. For the mean line
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
@@ -21,7 +21,7 @@ plot_density <- function(input, val, title = "", color_by = "NA", statistic = "m
   dat <- pData(input)
   ind1 <- grep(val, colnames(dat))
   if(length(ind1) == 0){
-    dat <- cbind(dat, log2(exprs(input)[val,]+2)-1)
+    dat <- cbind(dat, exprs(input)[val,])
     colnames(dat) <- c(colnames(dat[2:ncol(dat)-1]), val)
   }
   if(color_by == "NA"){
@@ -48,8 +48,15 @@ plot_density <- function(input, val, title = "", color_by = "NA", statistic = "m
   } else {
     g <- g + ggtitle(title)
   }
-  g <- g + geom_density(alpha=0.1, lwd=1)
-  g <- g + scale_x_log10()
+  if(type == "density"){
+    g <- g + geom_density(alpha=0.1, lwd=1)
+  }
+  if(type == "cdf"){
+    g <- g + stat_ecdf()
+  }
+  if(log){
+    g <- g + scale_x_log10()
+  }
   g <- g + xlab(val)
   if(color_by == "NA"){
     g <- g + annotate("text",x=clustermean$x, y=0.1,label=clustermean$x, angle = 45)

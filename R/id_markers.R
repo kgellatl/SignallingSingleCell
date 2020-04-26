@@ -20,16 +20,16 @@ id_markers <- function(input, id_by = "Cluster", print_progress = TRUE, overwrit
   cols <- (unique(pData(input)[,id_by]))
   cols <- as.character(cols)
   cols <- sort(cols)
+  fData(marker_input)$tmp <- "tmp"
   ind <- grep("marker_score_", colnames(fData(marker_input)))
   if(length(ind) > 0){
     if(overwrite == FALSE){
       stop("Markers already calculated. Set overwrite to TRUE to recalculate")
     }
     if(overwrite == TRUE){
-      fData(marker_input) <- fData(marker_input)[,-ind]
+      fData(marker_input) <- as.data.frame(fData(marker_input)[,-ind])
     }
   }
-  fData(marker_input)$tmp <- "tmp"
   if(print_progress == TRUE){
     print("Finding markers based on fraction expressing")
   }
@@ -135,6 +135,6 @@ id_markers <- function(input, id_by = "Cluster", print_progress = TRUE, overwrit
     fData(marker_input)$name <- val
     colnames(fData(marker_input))[grep("name", colnames(fData(marker_input)))] <- paste0(cluster,"_marker_score_", id_by) #HERE BE THE BUG!!!
   }
-  fData(marker_input) <- fData(marker_input)[,-grep("tmp", colnames(fData(marker_input)))]
+  fData(marker_input) <- fData(marker_input)[,-match("tmp", colnames(fData(marker_input)))]
   return(marker_input)
 }

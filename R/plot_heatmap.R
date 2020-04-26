@@ -12,6 +12,7 @@
 #' @param cluster_type "kmeans" or "hierarchical"
 #' @param k if cluster type is kmeans must provide k
 #' @param text_angle The desired angle for text on the group labels
+#' @param text_sizes a vector of title_size, axis_title, axis_text, legend_title, legend_text, facet_text, faults too c(20,10,5,10,5,5)
 #' @param group_names whether groups should be labelled
 #' @param gene_names whether genes should be labelled
 #' @param facet_by will create breaks in the heatmap by some pData Variable
@@ -26,11 +27,31 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row", cluster_by = "row",
-                         cluster_type = "hierarchical", k = NULL, show_k = F, ceiling = FALSE,
-                         color_pal = viridis::magma(256), facet_by = FALSE,color_facets = FALSE,
-                         group_names = TRUE, gene_names = TRUE, text_angle = 90,
-                         pdf_format = "tile", interactive = FALSE, text_sizes = c(20,10,5,10,5,5), gene_labels = NULL){
+plot_heatmap <- function(input,
+                         genes,
+                         type,
+                         facet_by = FALSE,
+                         scale_group = F,
+                         title = "Heatmap",
+                         scale_by = "row",
+                         cluster_by = "row",
+                         cluster_type = "hierarchical",
+                         k = NULL,
+                         show_k = F,
+                         ceiling = FALSE,
+                         color_pal = viridis::magma(256),
+                         color_facets = FALSE,
+                         group_names = TRUE,
+                         gene_names = TRUE,
+                         text_angle = 90,
+                         pdf_format = "tile",
+                         interactive = FALSE,
+                         text_sizes = c(20,10,5,10,5,5),
+                         gene_labels = NULL,
+                         gene_labels_size = 2,
+                         gene_labels_nudge  = -0.5,
+                         gene_labels_col = 1,
+                         gene_labels_force = 1){
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
@@ -54,10 +75,27 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
   }
   #####
   if(scale_by == "row"){
-    heat_dat_2 <- t(apply(heat_dat,1,scale))
-    colnames(heat_dat_2) <- colnames(heat_dat)
-    heat_dat <- heat_dat_2
+    if(scale_group != F){
+      groups <- unique(pData(input)[,scale_group])
+
+      for (i in 1:length(groups)) {
+        int_group <- groups[i]
+        ind <- grep(int_group, colnames(heat_dat))
+        if(length(ind) == 0){
+          stop("scale_group was not used to calculate aggregate bulk")
+        }
+        heat_dat[,ind] <- t(apply(heat_dat[,ind],1,scale))
+
+      }
+
+
+    } else {
+      heat_dat_2 <- t(apply(heat_dat,1,scale))
+      colnames(heat_dat_2) <- colnames(heat_dat)
+      heat_dat <- heat_dat_2
+    }
   }
+
   #####
   if(scale_by == "col"){
     heat_dat_2 <- apply(heat_dat,2,scale)
@@ -153,15 +191,16 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     if(type == "bulk"){
       for (i in 1:length(facs)) {
         int <- facs[i]
-        vals <- strsplit(as.character(heat_dat_lng$group), split = "_")
-        vals <- matrix(unlist(vals), ncol = length(vals[[1]]), byrow = T)
-        for (j in 1:nrow(vals)) {
-          int2 <- vals[j,]
-          ind <- match(int, int2)
-          if(!is.na(ind)){
-            heat_dat_lng$facet[j] <- int
-          }
-        }
+        heat_dat_lng$facet[grep(paste0(int, "$"), as.character(heat_dat_lng$group))] <- int
+        # vals <- strsplit(as.character(heat_dat_lng$group), split = "_")
+        # vals <- matrix(unlist(vals), ncol = length(vals[[1]]), byrow = T)
+        # for (j in 1:nrow(vals)) {
+        #   int2 <- vals[j,]
+        #   ind <- match(int, int2)
+        #   if(!is.na(ind)){
+        #     heat_dat_lng$facet[j] <- int
+        #   }
+        # }
       }
       heat_dat_lng$facet <- factor(heat_dat_lng$facet)
       colnames(heat_dat_lng)[ncol(heat_dat_lng)] <- facet_by
@@ -204,11 +243,15 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     g <- g + theme(axis.text.x=element_blank())
   }
   if(!is.null(gene_labels)){
-    ligs_reorder_label <- genes
-    ind <- match(gene_labels, genes)
-    ligs_reorder_label[-ind] <- ""
-    g <- g + scale_y_discrete(labels= ligs_reorder_label)
-  }
+    # ligs_reorder_label <- genes
+    # ind <- match(gene_labels, genes)
+    # ligs_reorder_label[-ind] <- ""
+    g <- g + theme(axis.text.y=element_blank())
+    heat_dat_lng$label[heat_dat_lng$genes %in% gene_labels] <- as.character(heat_dat_lng$genes[heat_dat_lng$genes %in% gene_labels])
+    rows_lab <- seq(from = (gene_labels_col-1)*nrow(heat_dat)+1, to = (gene_labels_col-1)*nrow(heat_dat)+1+nrow(heat_dat)-1)
+    g <- g + ggrepel::geom_text_repel(data = heat_dat_lng[rows_lab,], mapping = ggplot2::aes(label = label), na.rm = T, nudge_x = gene_labels_nudge, direction = "y", min.segment.length = 0, size = gene_labels_size, force = gene_labels_force, max.iter = 10000)
+
+    }
   if(gene_names == FALSE){
     g <- g + theme(axis.text.y=element_blank())
   }
@@ -265,7 +308,11 @@ plot_heatmap <- function(input, genes, type, title = "Heatmap", scale_by = "row"
     return_result[[2]] <-  kmean_res
     return(return_result)
   } else {
-    return(g)
+    hc_res <- hc1
+    return_result <- vector(mode = "list", length = 2)
+    return_result[[1]] <-  g
+    return_result[[2]] <-  hc_res
+    return(return_result)
   }
   if(interactive == TRUE){
     ggplotly(g, source = "master")

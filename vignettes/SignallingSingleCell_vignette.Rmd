@@ -48,6 +48,20 @@ ex_sc # Note that phenoData and featureData are empty right now!
 rm(mDC_0hr_1hr_4hr_CLEAN)
 ```
 
+## Data Annotation
+
+Often we have metadata about the experiment that can be valuable in the analysis! Writing that information now may be appropriate. Our experiment consists of a time course with LPS stimulation. Now we can begin to take advantage of our faceting!
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+pData(ex_sc)$Timepoint <- NA # initialize a new pData column
+
+pData(ex_sc)[grep("0hr", rownames(pData(ex_sc))),"Timepoint"] <- "0hr"
+pData(ex_sc)[grep("1hr", rownames(pData(ex_sc))),"Timepoint"] <- "1hr"
+pData(ex_sc)[grep("4hr", rownames(pData(ex_sc))),"Timepoint"] <- "4hr"
+
+head(pData(ex_sc))
+```
+
 ## Filtering
 
 The first step is to filter your data to remove low quality cells. Often creating a histogram of the values and assigning cutoffs is simple and effective. Typically we remove all cells lower than 500-1000 UMIs / cell.
@@ -57,8 +71,8 @@ ex_sc <- calc_libsize(ex_sc, suffix = "raw") # sums counts for each cell
 plot_density(ex_sc, title = "UMI Density", val = "UMI_sum_raw", statistic = "mean") # Density function. Note how many low UMI count cells are in the data!
 
 ex_sc <- pre_filter(ex_sc, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10,  print_progress = TRUE) # filters cells and genes
-ex_sc <- calc_libsize(ex_sc, suffix = "raw")
-plot_density(ex_sc, title = "UMI Density",  val = "UMI_sum_raw", statistic = "mean")  
+ex_sc <- calc_libsize(ex_sc, suffix = "raw_filtered")
+plot_density(ex_sc, title = "UMI Density",  val = "UMI_sum_raw_filtered", statistic = "mean")  
 
 # save_ggplot(filename = "Density", format = "pdf") # Plots can be quickly and easily saved!
 ```
@@ -70,7 +84,7 @@ Before normalization dimensionality reduction is necessary to form preliminary c
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 gene_subset <- subset_genes(ex_sc, method = "PCA", threshold = 1, minCells = 30, nComp = 10, cutoff = 0.85) # 3 available methods for selecting genes
 
-ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "iPCA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  # 3 available methods for dimensionality reduction
+ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "iPCA", nComp = 10, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  # 3 available methods for dimensionality reduction
 
 colnames(pData(ex_sc))
 
@@ -122,7 +136,7 @@ ex_sc_norm <- cluster_sc(ex_sc_norm, dimension = "Comp", method = "spectral", nu
 
 plot_tsne_metadata(ex_sc_norm, color_by = "Cluster", title = "Spectral Cluster on iPCA components")
 
-plot_density_ridge(ex_sc_norm, color_by = "Cluster", title = "UMIs per cluster", val = "UMI_sum")
+plot_density_ridge(ex_sc_norm, color_by = "Cluster", title = "UMIs per cluster", val = "UMI_sum_raw")
 
 plot_tsne_metadata(ex_sc_norm, color_by = "UMI_sum_raw", title = "Total UMIs per cell") 
 
@@ -138,21 +152,6 @@ plot_tsne_metadata(ex_sc_norm, color_by = "iPC_Comp3", title = "PC3 cell loading
 
 # Basic Analysis
 
-## Data Annotation
-
-Often we have metadata about the experiment that can be valuable in the analysis! Writing that information now may be appropriate. Our experiment consists of a time course with LPS stimulation. Now we can begin to take advantage of our faceting!
-
-```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-pData(ex_sc_norm)$Timepoint <- NA # initialize a new pData column
-
-pData(ex_sc_norm)[grep("0hr", rownames(pData(ex_sc_norm))),"Timepoint"] <- "0hr"
-pData(ex_sc_norm)[grep("1hr", rownames(pData(ex_sc_norm))),"Timepoint"] <- "1hr"
-pData(ex_sc_norm)[grep("4hr", rownames(pData(ex_sc_norm))),"Timepoint"] <- "4hr"
-
-plot_tsne_metadata(ex_sc_norm, color_by = "Timepoint", title = "Clusters over Time", facet_by = "Cluster")
-# Notice that now we are including a facet that will break the tSNE plot into smaller plots, one each for the variable. From this we can see that some clusters are forming based on timepoint, while others contain multiple timepoints.
-```
-
 ## Identify markers and reference genes
 
 As a quick and easy way to ID cells a marker id function is provided.
@@ -167,7 +166,7 @@ plot_scatter(input = ex_sc_norm, title = "Correlation Plot", gene1 = "Ccr7", gen
 
 marker_facet <- c("Emr1", "Lcn2", "Ccr7")
 
-plot_tsne_gene(input = ex_sc_norm, genes = marker_facet, title = "Marker Genes",  ncol = 3, density = FALSE)
+plot_tsne_gene(input = ex_sc_norm, gene = marker_facet, title = "Marker Genes",  ncol = 3, density = FALSE)
 
 plot_violin(ex_sc_norm, title = "Ccr7 across clusters", gene = "Ccr7", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
 ```

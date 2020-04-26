@@ -4,9 +4,17 @@
 \alias{plot_go_heatmap}
 \title{Construct Expression Set Class}
 \usage{
-plot_go_heatmap(input, sig_val = "p.adjust", cutoff = 0.1,
-  max_categories = 30, color_by = "sig", subset_group = F,
-  prune = F, cutoff_jaccard = 1, word_similarity = 0.5)
+plot_go_heatmap(
+  input,
+  sig_val = "p.adjust",
+  cutoff = 0.1,
+  max_categories = 30,
+  color_by = "sig",
+  subset_group = F,
+  prune = F,
+  cutoff_jaccard = 1,
+  word_similarity = 0.5
+)
 }
 \arguments{
 \item{input}{the input Go result from clusterProfiler}
@@ -31,9 +39,9 @@ plot_go_heatmap(input, sig_val = "p.adjust", cutoff = 0.1,
 This function will take an input expression matrix and make an Expression Set Class
 }
 \details{
-This will take an input matrix and create the expression set class that further analysis
-will be written to
+This will take the output of a GO enrichment analysis or GSEA object from clusterProfiler
+and merge terms based on the overlap between the enriched genes
 }
 \examples{
-construct_ex_sc(input = sc_dat)
+plot_go_heatmap(input = gsea_result)
 }

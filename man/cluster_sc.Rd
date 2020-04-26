@@ -4,8 +4,15 @@
 \alias{cluster_sc}
 \title{Cluster Single Cell}
 \usage{
-cluster_sc(input, dimension, method, num_clust = NA, s = 2,
-  xcol = "x", ycol = "y")
+cluster_sc(
+  input,
+  dimension,
+  method,
+  num_clust = NA,
+  s = 2,
+  xcol = "x",
+  ycol = "y"
+)
 }
 \arguments{
 \item{input}{the input ex_sc}
