@@ -5,7 +5,7 @@
 #' @param input Input expression set
 #' @param pd pData, optional, by default set to pData of input
 #' @param DEgroup a pData variable
-#' @param contrastID the pData group to set as reference
+#' @param contrastID the condition value from DEgroup to be used as the contrast
 #' @param sizefactor a pData column containing the scran reported size factor for each cell
 #' @param lib_size a pData column containing the library size for each cell
 #' @param facet_by a pData variable to iterate through and perform DE for a condition within each group
