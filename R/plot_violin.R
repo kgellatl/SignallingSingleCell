@@ -84,8 +84,8 @@ plot_violin <- function(input, title = "", gene, color_by, log_scale = F, colors
   }
   g <- g + geom_violin(aes_string(x=color_by, y=gene, fill = color_by), col= "black", trim = T, scale = "width", alpha = alpha)
   if(number_labels == T){
-    g <- g + stat_summary(aes_string(x = color_by, y = gene), fun.data = label.n, fun.y = "mean", colour = "black", geom = "text", size=1)
-    g <- g + stat_summary(aes_string(x = color_by, y = frac_cells), fun.data = fracSC, fun.y = "mean", colour = "black", geom = "text", size=1)
+    g <- g + stat_summary(aes_string(x = color_by, y = gene), fun.data = label.n, fun.y = "mean", colour = "black", geom = "text", size=2)
+    g <- g + stat_summary(aes_string(x = color_by, y = frac_cells), fun.data = fracSC, fun.y = "mean", colour = "black", geom = "text", size=2)
   }
 
   #####
