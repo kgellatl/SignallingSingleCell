@@ -50,10 +50,10 @@ plot_violin <- function(input, title = "", gene, color_by, log_scale = F, colors
   }
   cols <- gg_color_hue(length(unique(pData(input)[,color_by])))
   label.n = function(x) {
-    return(c(y=-0.1, label=length(x)))
+    return(c(y=-0.15, label=length(x)))
   }
   fracSC = function(x){
-    return(c(y = -.2, label = round(mean(x), sig)))
+    return(c(y = -.3, label = round(mean(x), sig)))
   }
   colnames(geneColored1) <- gsub("-", "", colnames(geneColored1))
   gene <- gsub("-", "", gene)
