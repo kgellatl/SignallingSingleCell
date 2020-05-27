@@ -11,6 +11,7 @@ plot_tsne_metadata(
   facet_by = NA,
   ncol = "NA",
   size = 1.5,
+  alpha = 1,
   colors = NA,
   theme = "classic",
   legend_dot_size = 1.5,
@@ -32,6 +33,8 @@ plot_tsne_metadata(
 \item{ncol}{How many columns if faceting}
 
 \item{size}{The size of the points}
+
+\item{alpha}{The transparency of the points}
 
 \item{colors}{What colors to utilize for categorial data. Be sure it is of the proper length!}
 
