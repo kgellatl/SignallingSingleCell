@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_violin.R
 \name{plot_violin}
 \alias{plot_violin}
-\title{This will create a violin plot}
+\title{plot_violin}
 \usage{
 plot_violin(
   input,
@@ -10,11 +10,11 @@ plot_violin(
   gene,
   color_by,
   log_scale = F,
-  colors = NA,
-  facet_by = "NA",
-  ncol = "NA",
+  colors = NULL,
+  facet_by = NULL,
+  spread = NULL,
   jitter_pts = T,
-  plot_mean = TRUE,
+  plot_mean = T,
   size = 1,
   sig = 3,
   number_labels = T,
@@ -24,44 +24,41 @@ plot_violin(
 )
 }
 \arguments{
-\item{input}{The input data}
+\item{input}{Bioconductor’s ExpressionSet Class with unlogged values in exprs().}
 
-\item{title}{The title}
+\item{title}{Title of the graph. Would be the gene name if not specificed.}
 
-\item{gene}{if provided will color_by the gene}
+\item{gene}{to plot the expression level of.}
 
-\item{color_by}{a pData variable}
+\item{color_by}{a pData variable.}
 
-\item{log_scale}{if true will log2(values)}
+\item{log_scale}{If true, transform UMIs by log2(UMI + 1).}
 
-\item{colors}{What colors to utilize for categorial data. Be sure it is of the proper length!}
+\item{colors}{What colors to utilize for categorial data. Be sure it is of the proper length.}
 
-\item{facet_by}{a pData variable}
+\item{facet_by}{a vector with one or two pData variables. If two, the first variable as columns and the second as rows.}
 
-\item{ncol}{How many columns if faceting}
+\item{spread}{e.g. Healthy catagory is unique in Disease and Skin. To use Healthy only as skin but not Disease, that is adding Healthy skin to each disease, spread = c("Disease", "Healthy").}
 
-\item{jitter_pts}{if true adds jitter points}
+\item{plot_mean}{plot the mean value as black dot with second y-axis on the right.}
 
-\item{plot_mean}{If true will create a secondary axis to plot the mean expression value}
+\item{size}{the size of dots.}
 
-\item{size}{The size of the points}
+\item{sig}{the number of digits after the decimal point for cell fraction value.}
 
-\item{sig}{Number of sig figs in fraction expression text}
-
-\item{number_labels}{if true will add number of cells and fraction expressing}
+\item{number_labels}{show the total cell numbers and cell fraction with non-zero expression values under each bar.}
 
 \item{text_sizes}{a vector of title_size, axis_title, axis_text, legend_title, legend_text, facet_text, faults too c(20,10,5,10,5,5)}
 
-\item{alpha}{for the transparency of jitter points}
-
-\item{theme}{the plot theme}
+\item{theme}{the plot theme. Default to be "classic" if not set to "bw".}
 }
 \description{
-This will plot a given gene via violin plot
+Create violin plot.
 }
 \details{
-Utilize information stored in pData to control the plot display.
+Utilize information stored in pData to control the plot display. Each point_by as a dot with a bar showing the weighted mean of all point_by dots.
 }
 \examples{
-plot_violin(input, title = "Actb across clusters", gene = "Actb", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
+plot_violin(ex_sc, gene = "CXCL13", color_by = "Skin", facet_by = c("Disease", "CellType"), log_scale = T)
+plot_violin(ex_sc, gene = "CXCL13", color_by = "Skin", facet_by = c("CellType", "Disease"), spread = T, log_scale = T)
 }
