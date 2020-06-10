@@ -47,7 +47,7 @@ findDEgenes = function(input,
         # if lib_size is null sum up UMI counts
         lib_size = colSums(exprs(input))
       } else {
-        lib_size = pd[,lib_size]
+        lib_size = pd[idx,lib_size]
       }
       if (is.null(batchID)) {
         # if batchID is null all cells are in the same batch
@@ -71,6 +71,8 @@ findDEgenes = function(input,
         DEtablecntr = tab[['contrast_1']]
         outfile = paste(name, contrastID, outsuffix, sep = "_")
         write.table(DEtablecntr, paste(outdir, outfile, sep = ""), sep = "\t")
+      } else {
+        stop("Only one group in comparison")
       }
     }
   }
