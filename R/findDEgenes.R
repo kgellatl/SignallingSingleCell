@@ -5,7 +5,7 @@
 #' @param input Input expression set
 #' @param pd pData, optional, by default set to pData of input
 #' @param DEgroup a pData variable
-#' @param contrastID the pData group to set as reference
+#' @param contrastID the condition value from DEgroup to be used as the contrast
 #' @param sizefactor a pData column containing the scran reported size factor for each cell
 #' @param lib_size a pData column containing the library size for each cell
 #' @param facet_by a pData variable to iterate through and perform DE for a condition within each group
@@ -45,16 +45,23 @@ findDEgenes = function(input,
     if(ncol(z) > 2){
       if (is.null(lib_size)) {
         # if lib_size is null sum up UMI counts
-        lib_size = colSums(exprs(input))
-      } else {
-        lib_size = pd[idx,lib_size]
+        libsize = colSums(z)
+        pd$lib_size = libsize
+        lib_size = "lib_size"
       }
       if (is.null(batchID)) {
         # if batchID is null all cells are in the same batch
-        batch = as.factor(rep(1,ncol(input)))
+        batch = as.factor(rep(1,ncol(z)))
       } else {
-        # get batch factors from batchID column in pData
-        batch = as.factor(pd[idx,batchID])
+        # check if there are cells of each DEgroup per batch
+        batch_table = as.matrix(table(pd[idx,batchID],pd[idx,DEgroup]))
+        if (length(batch_table[batch_table==0])<2) {
+          # get batch factors from batchID column in pData
+          batch = as.factor(pd[idx,batchID])
+        } else {
+          message(sprintf('Warning: not enough cells to include batch in model, setting batches to 1'));flush.console()
+          batch = as.factor(rep(1,ncol(z)))
+        }
       }
       # create reference group
       groupList = rep(0, times=ncol(z))
@@ -71,8 +78,6 @@ findDEgenes = function(input,
         DEtablecntr = tab[['contrast_1']]
         outfile = paste(name, contrastID, outsuffix, sep = "_")
         write.table(DEtablecntr, paste(outdir, outfile, sep = ""), sep = "\t")
-      } else {
-        stop("Only one group in comparison")
       }
     }
   }
