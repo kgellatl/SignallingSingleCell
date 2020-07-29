@@ -42,16 +42,22 @@ findDEmarkers = function(input,
   ###
   if (is.null(lib_size)) {
     # if lib_size is null sum up UMI counts
-    lib_size = colSums(exprs(z))
-  } else {
-    lib_size = pd[,lib_size]
+    z$lib_size = colSums(exprs(z))
+    lib_size = "lib_size"
   }
   if (is.null(batchID)) {
     # if batchID is null all cells are in the same batch
     batch = as.factor(rep(1,ncol(z)))
   } else {
-    # get batch factors from batchID column in pData
-    batch = as.factor(pd[,batchID])
+    # check if there are cells of each DEgroup per batch
+    batch_table = as.matrix(table(pd[colnames(z),batchID],pd[colnames(z),DEgroup]))
+    if (length(batch_table[batch_table==0])<2) {
+      # get batch factors from batchID column in pData
+      batch = as.factor(pd[colnames(z),batchID])
+    } else {
+      message(sprintf('Warning: not enough cells to include batch in model, setting batches to 1'));flush.console()
+      batch = as.factor(rep(1,ncol(z)))
+    }
   }
   ###
   for (i in 1:length(unique(pd[,DEgroup]))) {
