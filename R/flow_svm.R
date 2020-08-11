@@ -11,15 +11,19 @@
 #' @examples
 #' flow_svm(input = sc_dat)
 
-flow_svm <- function(input){
+flow_svm <- function(input, pcnames){
+  # add if to test on PC or expression matrix
   training <- rownames(pData(input))[which(!is.na(pData(input)$"Pass_Gate"))]
-  training <- pData(input)[training,c(grep("Pass_Gate", colnames(pData(input))), grep("Comp", colnames(pData(input))))]
+  training <- pData(input)[training,c(grep("Pass_Gate", colnames(pData(input))), grep(pcnames, colnames(pData(input))))]
+  ###
   trctrl <- caret::trainControl(method = "repeatedcv", number = 10, repeats = 5)
   set.seed(3233)
   svm_Linear <- caret::train(Pass_Gate ~., data = training, method = "svmLinear",
                       trControl=trctrl,
                       tuneLength = 10)
-  prediction <- predict(svm_Linear, newdata = pData(input)[,grep("Comp", colnames(pData(input)))])
+  # add if to test on all cells or only unclassified
+  prediction <- predict(svm_Linear, newdata = pData(input)[,grep(pcnames, colnames(pData(input)))])
   pData(input)$SVM_Classify <- as.character(prediction)
+  ###
   return(input)
 }

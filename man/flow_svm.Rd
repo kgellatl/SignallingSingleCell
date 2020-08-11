@@ -4,7 +4,7 @@
 \alias{flow_svm}
 \title{Flow Support Vector Machine}
 \usage{
-flow_svm(input)
+flow_svm(input, pcnames)
 }
 \arguments{
 \item{input}{the input data ex_sc}
