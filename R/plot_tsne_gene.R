@@ -36,7 +36,8 @@ plot_tsne_gene <- function(input,
                            xcol="x",
                            ycol="y",
                            text_sizes = c(20,10,5,10,5,5),
-                           density_scale = 1){
+                           density_scale = 1,
+                           background_sample = F){
   kde2d_weighted <- function (x, y, w, h, n , lims = c(range(x), range(y))) {
     nx <- length(x)
     if (length(y) != nx)
@@ -108,6 +109,17 @@ plot_tsne_gene <- function(input,
     } else {
       geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,3])), ]
     }
+
+    if(background_sample){
+      ind <- which(geneColored1$vals == 0)
+      geneColored1_0 <- geneColored1[-ind,]
+      set.seed(100)
+      ind <- sample(ind, background_sample, replace = F)
+      geneColored1 <- rbind(geneColored1_0, geneColored1[ind,])
+    }
+
+    geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,3])), ]
+
     g <- ggplot(geneColored1)
     if(theme == "bw") {
       g <- g + theme_bw();

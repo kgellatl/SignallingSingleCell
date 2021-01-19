@@ -84,7 +84,10 @@ plot_heatmap <- function(input,
         if(length(ind) == 0){
           stop("scale_group was not used to calculate aggregate bulk")
         }
-        heat_dat[,ind] <- t(apply(heat_dat[,ind],1,scale))
+        mat <- heat_dat[,ind]
+        mat <- t(apply(mat,1,scale))
+        mat[is.na(mat)] <- 0
+        heat_dat[,ind] <- mat
 
       }
 
