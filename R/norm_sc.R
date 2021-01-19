@@ -84,8 +84,7 @@ norm_sc <- function(input, genelist = NULL, gene_selection = "gini", num_gini = 
 
   SCE <- SingleCellExperiment::SingleCellExperiment(list(counts = exprs(input)))
   SCE <- scran::computeSumFactors(SCE, cluster=clusters, subset.row = genelist, sizes=pool_sizes, positive = positive, min.mean = 0)
-  SCE <-  scater::normalise(SCE)
-  norm_counts <- exprs(SCE)
+  norm_counts <- scater::normalizeCounts(SCE)
   norm_counts[!is.finite(norm_counts)] <- 0
   norm_counts <- norm_counts[apply(norm_counts, 1, function(x) !all(x==0)),]
   norm_counts <- norm_counts[,colSums(norm_counts)>0]
