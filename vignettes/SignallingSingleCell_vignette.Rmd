@@ -1,14 +1,13 @@
 ---
-title: "SignallingSingleCell"
+title: "Biocore_scRNAseq"
 geometry: margin=0.5cm
 author: "Kyle Gellatly"
-date: "`r Sys.Date()`"
 output:
-html_document:
-  highlight: tango
-  theme: cerulean
-  toc: yes
-  toc_float : yes
+  html_document:
+    toc: true
+    toc_float : yes
+    toc_depth : 3
+    theme : cerulean
 ---
 
 ```{r setup, include=FALSE, warning=FALSE, error=FALSE}
@@ -35,6 +34,12 @@ fData(ex_sc) is gene information, where rows are genes and columns are metadata
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc <- construct_ex_sc(mDC_UMI_Table) # sc_dat == Input expression matrix
 ex_sc # Note that phenoData and featureData are empty right now!
+
+ex_sc_skin
+
+exprs(ex_sc)[1:5,1:5]
+pData(ex_sc)[1:5,]
+fData(ex_sc)[1:5,]
 rm(mDC_UMI_Table)
 ```
 
@@ -58,13 +63,12 @@ The first step is to filter your data to remove low quality cells. Often creatin
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc <- calc_libsize(ex_sc, suffix = "raw") # sums counts for each cell
-plot_density(ex_sc, title = "UMI Density", val = "UMI_sum_raw", statistic = "mean") # Density function. Note how many low UMI count cells are in the data!
+plot_density(ex_sc, title = "UMI Density", val = "UMI_sum_raw", statistic = "mean")
 
 ex_sc <- pre_filter(ex_sc, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10,  print_progress = TRUE) # filters cells and genes
 ex_sc <- calc_libsize(ex_sc, suffix = "raw_filtered")
 plot_density(ex_sc, title = "UMI Density",  val = "UMI_sum_raw_filtered", statistic = "mean")  
 
-# save_ggplot(filename = "Density", format = "pdf") # Plots can be quickly and easily saved!
 ```
 
 # Basic scRNA-seq analysis  
@@ -80,7 +84,7 @@ ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "iPCA", nComp = 
 
 colnames(pData(ex_sc))
 
-plot_tsne_metadata(ex_sc, color_by = "UMI_sum_raw", title = "Total UMIs per cell") 
+plot_tsne_metadata(ex_sc, color_by = "Timepoint") 
 
 plot_tsne_metadata(ex_sc, color_by = "iPC_Comp1", title = "PC1 cell loadings") 
 
@@ -89,38 +93,61 @@ plot_tsne_metadata(ex_sc, color_by = "iPC_Comp2", title = "PC2 cell loadings")
 plot_tsne_metadata(ex_sc, color_by = "iPC_Comp3", title = "PC3 cell loadings") 
 
 ```
-### Dimension reduction - Skin Data
 
-Now let us try dimension for the skin data!!
+### Excersise 1 : Dimension reduction on Skin Data
+
+Now let us try dimension for the skin data!! First we can inspect the skin data to get a sense of what we are working with. Once we get a sense for the data we can then use the same functions as above to perform gene selection and dimension reduction.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 
-# gene_subset <- subset_genes(ex_sc_skin) 
+dim(ex_sc_skin)
 
-# ex_sc_skin <- dim_reduce(ex_sc_skin) 
+colnames(pData(ex_sc_skin))
+colnames(fData(ex_sc_skin))
+
+plyr::count(pData(ex_sc_skin))
+
+# Use the subset_genes function to find variable genes in the skin data. Be sure to provide the input argument and method argument. Use ?subset_genes() to view help pages for functions. Try different methods and compare the number of genes you get out for each method.
+
+gene_subset <- subset_genes(ex_sc_skin, method = "PCA", threshold = 1, minCells = 30)
+
+# Use the dim_reduce function to create a 2D representation of the skin data. Be sure to provide the input argument and a gene list.
+
+ex_sc_skin <- dim_reduce(ex_sc_skin, genelist = gene_subset, pre_reduce = "iPCA", nComp = 10, iterations = 500)
+
+# Now you can plot metadata from pData() or genes of interest, onto the tSNE mapping.
+
+plot_tsne_metadata(ex_sc_skin, color_by = "Patient", facet_by = "Skin")
 
 ```
-
 
 ## Clustering
 
-Now that we have dimension reduced data we can try clustering it!
+Now that we have dimension reduced data we can try clustering it! For dimensions, both Comp and 2d are supported. There will determine if the clustering is done on principal components, or on the 2D representation. There are also 2 clustering algorithms available, density and spectral. Typically we recommend spectral clustering on PCA components, or density clustering on the 2d representation. Try both!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 5) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
 
-plot_tsne_metadata(ex_sc, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
+ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 4) 
+ex_sc$cluster_spectral <- ex_sc$Cluster
 
-plot_tsne_metadata(ex_sc, color_by = "Timepoint", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
+ex_sc <- cluster_sc(ex_sc, dimension = "2d", method = "density", num_clust = 4) 
+ex_sc$cluster_density <- ex_sc$Cluster
+
+plot_tsne_metadata(ex_sc, color_by = "cluster_spectral")
+plot_tsne_metadata(ex_sc, color_by = "cluster_density")
+
 ```
 
-### Clustering - Skin Data
+### Excercise 2 : Clustering on the Skin Data
 
-Now let us try clustering for the skin data!! For dimensions, both Comp and 2d are supported. There will determine if the clustering is done on principal components, or on the 2D representation. There are also 2 clustering algorithms available, density and spectral. Typically we recommend spectral clustering on PCA components, or density clustering on the 2d representation. Try both!
+Now let us try clustering for the skin data!! Try both density based and spectral clustering!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 
-# ex_sc_skin <- cluster_sc(ex_sc_skin) 
+ex_sc_skin <- cluster_sc(ex_sc_skin, dimension = "Comp", method = "spectral", num_clust = 4) 
+
+plot_tsne_metadata(ex_sc_skin, color_by = "Cluster")
+
 
 ```
 
@@ -131,23 +158,26 @@ There are many possible ways to identify cell types based on their gene expressi
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc <- id_markers(ex_sc, print_progress = TRUE) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
 
-markers <- return_markers(ex_sc, num_markers = 10) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
-
 ex_sc <- calc_agg_bulk(ex_sc, aggregate_by = "Cluster")
+
+markers <- return_markers(ex_sc, num_markers = 15) 
 
 plot_heatmap(ex_sc, genes = unique(unlist(markers)), type = "bulk")
 ```
-### Clustering + Cell Type identification Skin Data
 
-Now let us try clustering for the skin data!! For dimensions, both Comp and 2d are supported. There will determine if the clustering is done on principal components, or on the 2D representation. There are also 2 clustering algorithms available, density and spectral. Typically we recommend spectral clustering on PCA components, or density clustering on the 2d representation. Try both!
+### Excercise 3 : Cell Type identification Skin Data
+
+Now try to identify the cell types in the skin data!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 
-# gene_subset <- cluster_sc(ex_sc_skin) 
-# ex_sc_skin <- id_markers(ex_sc_skin)
-# markers <- return_markers(ex_sc_skin) 
-# ex_sc_skin <- calc_agg_bulk(ex_sc_skin)
-# plot_heatmap(ex_sc_skin)
+# ex_sc_skin <- id_markers()
+
+# markers <- return_markers() 
+
+# ex_sc_skin <- calc_agg_bulk()
+
+# plot_heatmap()
 
 ```
 
@@ -167,9 +197,9 @@ ex_sc_norm <- construct_ex_sc(x)
 pData(ex_sc_norm) <- pData(ex_sc)
 ```
 
-## Post Normalization Pre-processing
+### Excercise 4 : Process the normalized mouse data!
 
-Now that we have normalized, it is time to reprocess the data as before, this time on the normalized counts!
+Now that we have normalized, it is time to reprocess the data as before, this time on the normalized counts! Use the ex_sc_norm normalized counts from above to run through the same processing steps as before.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 
@@ -193,7 +223,7 @@ From the above analysis, it is clear that some clusters are formed based on thei
 
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
 
-panel1 <- c("S100a9", "Chil1") # Neutrophil Markers
+panel1 <- c("S100a9", "Lcn2") # Neutrophil Markers
 panel2 <- c("Ccr7", "Fscn1") # DC
 panel3 <- c("Csf1r", "Mertk") # Mac
 
@@ -207,7 +237,7 @@ ex_sc_norm <- flow_filter(ex_sc_norm, panels = panels, title = "Flow Pass Cells"
 
 ex_sc_norm <- flow_svm(ex_sc_norm, pcnames = "Comp")
 
-plot_tsne_metadata(ex_sc_norm, color_by = "Cluster", title = "Spectral Cluster on PCA components")
+plot_tsne_metadata(ex_sc_norm, color_by = "cluster_spectral", title = "Spectral Cluster on PCA components")
 plot_tsne_metadata(ex_sc_norm, color_by = "SVM_Classify", title = "Spectral Cluster on PCA components")
 
 ```
@@ -222,13 +252,32 @@ It should be noted that DE should always be run on raw counts, not on the normal
 
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
 
-### Subsettting data is performed by providing a pData variable on which to subset, and the values you wish to select!
+ex_sc_norm_0_4 <- subset_ex_sc(ex_sc_norm, variable = "Timepoint", select = c("0hr", "4hr"))
 
-findDEgenes2(input = ex_sc,
-            contrastID = "0hr",
-            pd = pData(ex_sc_norm),
+findDEgenes(input = ex_sc,
+            pd = pData(ex_sc_norm_0_4),
             DEgroup = "Timepoint",
-            facet_by = "SVM_Classify")
+            contrastID = "0hr",
+            facet_by = "SVM_Classify",
+            outdir = "~/Downloads/")
 
+plot_volcano(de_path = "~/Downloads/", de_file = "Macrophage_0hr_DEresults.tsv", fdr_cut = 0.000001, logfc_cut = 2)
+
+plot_violin(ex_sc_norm_0_4, color_by = "Timepoint", facet_by = "SVM_Classify", gene = "Cxcl9")
+plot_violin(ex_sc_norm_0_4, color_by = "Timepoint", facet_by = "SVM_Classify", gene = "Rsad2")
+
+```
+
+### Homework
+
+Now try to run DE between the 0hr and 1hr timepoints on the mouse data. Then make a volcano plot of the genes that are significantly changed (FDR < 0.001, logfc_cut >= 2) within Dendritic cells.
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+
+# ex_sc_norm_0_1 <- subset_ex_sc()
+
+# findDEgenes() 
+
+# plot_volcano()
 
 ```
