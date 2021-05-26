@@ -105,7 +105,7 @@ dim(ex_sc_skin)
 colnames(pData(ex_sc_skin))
 colnames(fData(ex_sc_skin))
 
-plyr::count(pData(ex_sc_skin))
+table(pData(ex_sc_skin))
 
 # Use the subset_genes function to find variable genes in the skin data. Be sure to provide the input argument and method argument. Use ?subset_genes() to view help pages for functions. Try different methods and compare the number of genes you get out for each method.
 
