@@ -9,16 +9,6 @@ html_document:
   theme: cerulean
   toc: yes
   toc_float : yes
-# pdf_document:
-#   highlight: tango
-#   theme: cerulean
-#   toc: yes
-#   toc_float : yes
-# output: rmarkdown::html_vignette
-# vignette: >
-#   %\VignetteIndexEntry{Vignette Title}
-#   %\VignetteEngine{knitr::rmarkdown}
-#   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE, warning=FALSE, error=FALSE}
@@ -60,11 +50,6 @@ pData(ex_sc)[grep("1hr", rownames(pData(ex_sc))),"Timepoint"] <- "1hr"
 pData(ex_sc)[grep("4hr", rownames(pData(ex_sc))),"Timepoint"] <- "4hr"
 
 head(pData(ex_sc))
-
-### Subsettting data is performed by providing a pData variable on which to subset, and the values you wish to select!
-
-mDC_0hr <- subset_ex_sc(ex_sc, variable = "Timepoint", select = c("0hr"))
-
 ```
 
 ## Filtering
@@ -135,7 +120,7 @@ Now let us try clustering for the skin data!! For dimensions, both Comp and 2d a
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 
-# gene_subset <- cluster_sc(ex_sc_skin) 
+# ex_sc_skin <- cluster_sc(ex_sc_skin) 
 
 ```
 
@@ -194,15 +179,17 @@ Now that we have normalized, it is time to reprocess the data as before, this ti
 
 # ex_sc_norm <- cluster_sc()
 
-# plot_tsne_metadata(ex_sc_norm)
+# plot_tsne_metadata()
 
-# plot_tsne_gene(ex_sc_norm)
+# plot_tsne_gene()
 
 ```
 
 # Advanced scRNA-seq analysis  
 
 ## Supervised Analysis
+
+From the above analysis, it is clear that some clusters are formed based on their cell type, while others are based on their experimental condition. In these cases it can be useful to incorporate prior information in order to obtain clusters and annotations that are grounded in biological significance. Below, we can assign "panels" similar to flow cytometry, that will enable cell groupings based on the expression of genes that you believe to signify biologically relevenant cell types.
 
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
 
@@ -212,21 +199,36 @@ panel3 <- c("Csf1r", "Mertk") # Mac
 
 panels <- list(panel1, panel2, panel3)
 
-plot_tsne_gene(ex_sc_norm, gene = unlist(panels), title = "")
+plot_tsne_gene(ex_sc_norm, gene = unlist(panels), title = "", log_scale = T)
 
 names(panels) <- c("Neutrophil", "Dendritic", "Macrophage")
 
-mDC_0hr <- flow_filter(mDC_0hr, panels = panels, title = "Flow Pass Cells")
+ex_sc_norm <- flow_filter(ex_sc_norm, panels = panels, title = "Flow Pass Cells")
 
-mDC_0hr <- flow_svm(mDC_0hr)
+ex_sc_norm <- flow_svm(ex_sc_norm, pcnames = "Comp")
 
-plot_tsne_metadata(mDC_0hr, color_by = "Cluster", title = "Spectral Cluster on PCA components")
-plot_tsne_metadata(mDC_0hr, color_by = "SVM_Classify", title = "Spectral Cluster on PCA components")
+plot_tsne_metadata(ex_sc_norm, color_by = "Cluster", title = "Spectral Cluster on PCA components")
+plot_tsne_metadata(ex_sc_norm, color_by = "SVM_Classify", title = "Spectral Cluster on PCA components")
 
 ```
 
-# DE analysis
+## DE analysis
+
+Now that cells are grouped by their cell type, we can run DE in order to determine which genes are change in association with our experimental conditions. 
+
+For simplicity we can subset to 0hr and 4hr, to  find the genes that change between these conditions.
+
+It should be noted that DE should always be run on raw counts, not on the normalized counts!
 
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+
+### Subsettting data is performed by providing a pData variable on which to subset, and the values you wish to select!
+
+findDEgenes2(input = ex_sc,
+            contrastID = "0hr",
+            pd = pData(ex_sc_norm),
+            DEgroup = "Timepoint",
+            facet_by = "SVM_Classify")
+
 
 ```
