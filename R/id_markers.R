@@ -20,7 +20,6 @@ id_markers <- function(input, id_by = "Cluster", print_progress = TRUE, overwrit
   cols <- (unique(pData(input)[,id_by]))
   cols <- as.character(cols)
   cols <- sort(cols)
-  fData(marker_input)$tmp <- "tmp"
   ind <- grep("marker_score_", colnames(fData(marker_input)))
   if(length(ind) > 0){
     if(overwrite == FALSE){
@@ -30,6 +29,7 @@ id_markers <- function(input, id_by = "Cluster", print_progress = TRUE, overwrit
       fData(marker_input) <- as.data.frame(fData(marker_input)[,-ind])
     }
   }
+  fData(marker_input)$tmp <- "tmp"
   if(print_progress == TRUE){
     print("Finding markers based on fraction expressing")
   }

@@ -26,7 +26,8 @@ plot_go_heatmap <- function(input,
                             subset_group = F,
                             prune = F,
                             cutoff_jaccard = 1,
-                            word_similarity = 0.5) {
+                            word_similarity = 0.5,
+                            select_GO = NULL) {
 
   if (class(input)[1] == "enrichResult") {
     genes <- input@result$geneID
@@ -64,17 +65,25 @@ plot_go_heatmap <- function(input,
     }
     sig <- which(sig_vals < cutoff)
   }
+
+  if(!is.null(select_GO)){
+    sig_des <- descriptions[sig]
+    keep_sig <- match(select_GO, sig_des)
+    sig <- sig[keep_sig]
+  }
+
   if (length(sig) > max_categories) {
     sig <- sig[1:max_categories]
   }
+
   top_genes <- unique(unlist(strsplit(genes[sig], split = "/")))
   go_matrix <- matrix(0, nrow = length(top_genes), ncol = length(sig))
   rownames(go_matrix) <- top_genes
   colnames(go_matrix) <- descriptions[sig]
   go_matrix <- as.data.frame(go_matrix)
   for (i in 1:ncol(go_matrix)) {
-    desc <- descriptions[i]
-    gset <- genes[i]
+    desc <- colnames(go_matrix)[i]
+    gset <- genes[sig][i]
     gset <- unlist(strsplit(gset, split = "/"))
     ind <- match(gset, rownames(go_matrix))
     go_matrix[ind, i] <- 1

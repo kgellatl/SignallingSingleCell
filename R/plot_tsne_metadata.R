@@ -61,7 +61,7 @@ plot_tsne_metadata <- function(input,
   }
   if(class(pData(input)[,color_by]) == "double" || class(pData(input)[,color_by]) == "integer" || class(pData(input)[,color_by]) == "numeric" ){
     g <- g +  geom_point(aes_string(x = xcol, y = ycol, col = color_by), shape = 20, size = size, alpha = alpha)
-    g <- g +  scale_color_gradientn(colours=c('blue', 'red', 'yellow'))
+    g <- g +  scale_color_gradientn(colours=c('gray', 'blue', 'red', 'yellow'))
   } else {
     g <- g +  geom_point(aes_string(x = xcol, y = ycol, col = color_by), shape = 20, size = size, alpha = alpha)
     if(all(is.na(colors)) == FALSE){

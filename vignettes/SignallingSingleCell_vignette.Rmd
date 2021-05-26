@@ -28,29 +28,29 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 
 ```{r, include=FALSE, cache=FALSE, warning=FALSE, error=FALSE}
 library("SignallingSingleCell")
-# https://www.dropbox.com/s/g5zuomw9mg4q4vn/mDC_0hr_1hr_4hr_CLEAN.Rdata?dl=0
-load("~/Dropbox (UMass Medical School)/Lab_inDrop/mDC_vignette_data/mDC_0hr_1hr_4hr_CLEAN.Rdata")
+load(url("https://galaxyweb.umassmed.edu/pub/class/mDC_UMI_Table.Rdata"))
+load(url("https://galaxyweb.umassmed.edu/pub/class/ex_sc_skin.Rdata"))
 ```
 
 # Preprocessing  
 
 ## Constructing the ExpressionSet Class  
 
-The ExpressionSet class (ex_sc) is an extremely convienient data structure that contains 3 dataframes. These dataframes contain expression data, cell information, and gene information respectivelty. 
+The ExpressionSet class (ex_sc) is a convenient data structure that contains 3 dataframes. These dataframes contain expression data, cell information, and gene information respectively. 
 
 exprs(ex_sc) is the expression data, where rows are genes and columns are cells  
 pData(ex_sc) is cell information, where rows are cells and columns are metadata  
 fData(ex_sc) is gene information, where rows are genes and columns are metadata
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-ex_sc <- construct_ex_sc(mDC_0hr_1hr_4hr_CLEAN) # sc_dat == Input expression matrix
+ex_sc <- construct_ex_sc(mDC_UMI_Table) # sc_dat == Input expression matrix
 ex_sc # Note that phenoData and featureData are empty right now!
-rm(mDC_0hr_1hr_4hr_CLEAN)
+rm(mDC_UMI_Table)
 ```
 
 ## Data Annotation
 
-Often we have metadata about the experiment that can be valuable in the analysis! Writing that information now may be appropriate. Our experiment consists of a time course with LPS stimulation. Now we can begin to take advantage of our faceting!
+Often we have metadata about the experiment that can be valuable in the analysis! Writing that information now may be appropriate. Our experiment consists of a time course with LPS stimulation.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 pData(ex_sc)$Timepoint <- NA # initialize a new pData column
@@ -60,6 +60,11 @@ pData(ex_sc)[grep("1hr", rownames(pData(ex_sc))),"Timepoint"] <- "1hr"
 pData(ex_sc)[grep("4hr", rownames(pData(ex_sc))),"Timepoint"] <- "4hr"
 
 head(pData(ex_sc))
+
+### Subsettting data is performed by providing a pData variable on which to subset, and the values you wish to select!
+
+mDC_0hr <- subset_ex_sc(ex_sc, variable = "Timepoint", select = c("0hr"))
+
 ```
 
 ## Filtering
@@ -77,54 +82,104 @@ plot_density(ex_sc, title = "UMI Density",  val = "UMI_sum_raw_filtered", statis
 # save_ggplot(filename = "Density", format = "pdf") # Plots can be quickly and easily saved!
 ```
 
+# Basic scRNA-seq analysis  
+
 ## Dimension reduction
 
-Before normalization dimensionality reduction is necessary to form preliminary clusters. These clusters are used to normalize internal to a cluster before normalizing across clusters. First we can subset the genes, and then use these feature selected genes for dimension reduction.
+Dimensionality reduction is necessary in order to bring the cells from a high dimensional gene expression space (~10k dimensions) down to a more reasonable number. Typically this is done first with PCA ~5-15 dimensions, before a final embedding is done using tSNE or UMAP to bring it down to 2 dimensions. 
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-gene_subset <- subset_genes(ex_sc, method = "PCA", threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85) # 3 available methods for selecting genes
+gene_subset <- subset_genes(ex_sc, method = "PCA", threshold = 1, minCells = 20, nComp = 10, cutoff = 0.85) 
 
-ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "iPCA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=TRUE)  # 3 available methods for dimensionality reduction
+ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "iPCA", nComp = 10, tSNE_perp = 30, iterations = 500, print_progress=TRUE) 
 
 colnames(pData(ex_sc))
 
 plot_tsne_metadata(ex_sc, color_by = "UMI_sum_raw", title = "Total UMIs per cell") 
 
+plot_tsne_metadata(ex_sc, color_by = "iPC_Comp1", title = "PC1 cell loadings") 
+
+plot_tsne_metadata(ex_sc, color_by = "iPC_Comp2", title = "PC2 cell loadings") 
+
+plot_tsne_metadata(ex_sc, color_by = "iPC_Comp3", title = "PC3 cell loadings") 
+
+```
+### Dimension reduction - Skin Data
+
+Now let us try dimension for the skin data!!
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+# gene_subset <- subset_genes(ex_sc_skin) 
+
+# ex_sc_skin <- dim_reduce(ex_sc_skin) 
+
 ```
 
-## Initial Clustering
+
+## Clustering
 
 Now that we have dimension reduced data we can try clustering it!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-set.seed(100)
-ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 6) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
-# ex_sc <- cluster_sc(ex_sc, dimension = "2d", method = "density", num_clust = 7) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
+ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 5) # 2 clustering algorithms can be performed on 2d plots or PCA / ICA components
 
 plot_tsne_metadata(ex_sc, color_by = "Cluster", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
 
 plot_tsne_metadata(ex_sc, color_by = "Timepoint", title = "Spectral Cluster on iPCA components") # this function is flexible for plotting any data onto a 2d tsne mapping
+```
 
-plot_tsne_gene(ex_sc, gene = c("Emr1", "Ccr7", "S100a9"), log_scale = T)
+### Clustering - Skin Data
 
+Now let us try clustering for the skin data!! For dimensions, both Comp and 2d are supported. There will determine if the clustering is done on principal components, or on the 2D representation. There are also 2 clustering algorithms available, density and spectral. Typically we recommend spectral clustering on PCA components, or density clustering on the 2d representation. Try both!
 
-plot_density(ex_sc, title = "UMIs per cluster", val = "UMI_sum_raw", color_by = "Cluster", statistic = "mean")
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 
-# plot_density_ridge(ex_sc, title = "UMIs per cluster", val = "UMI_sum_raw", color_by = "Cluster")
+# gene_subset <- cluster_sc(ex_sc_skin) 
 
+```
+
+## Cell Type Identification
+
+There are many possible ways to identify cell types based on their gene expression. The id_markers function will identify genes that are highly expressed in a high proportion of a given cluster, relative to the other clusters.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc <- id_markers(ex_sc, print_progress = TRUE) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
 
 markers <- return_markers(ex_sc, num_markers = 10) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
+
+ex_sc <- calc_agg_bulk(ex_sc, aggregate_by = "Cluster")
+
+plot_heatmap(ex_sc, genes = unique(unlist(markers)), type = "bulk")
+```
+### Clustering + Cell Type identification Skin Data
+
+Now let us try clustering for the skin data!! For dimensions, both Comp and 2d are supported. There will determine if the clustering is done on principal components, or on the 2D representation. There are also 2 clustering algorithms available, density and spectral. Typically we recommend spectral clustering on PCA components, or density clustering on the 2d representation. Try both!
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+# gene_subset <- cluster_sc(ex_sc_skin) 
+# ex_sc_skin <- id_markers(ex_sc_skin)
+# markers <- return_markers(ex_sc_skin) 
+# ex_sc_skin <- calc_agg_bulk(ex_sc_skin)
+# plot_heatmap(ex_sc_skin)
+
 ```
 
 ## Normalization
 
-Now that the data has preliminary clusters, we can normalize. SCRAN normalization will first normalize internally in clusters, before normalizing across clusters. Once the data is normalized we can run the same steps as above before visualization. The first step is to select the genes to be used for normalization. One method would be to first only use genes expressed in more than n cells, and then remove the most variable genes.
+Now that the data has preliminary clusters, we can normalize. SCRAN normalization will first normalize internally in clusters, before normalizing across clusters. Once the data is normalized we can run the same steps as above before visualization. The first step is to select the genes to be used for normalization. One method would be to first only use genes expressed in more than n cells, and then remove the most variable genes. This method can be computationally expensive, and is currently commented out. A simpler approach, counts per million, is also provided below.
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 table(pData(ex_sc)$Cluster)
 
-ex_sc_norm <- norm_sc(ex_sc, pool_sizes = c(20,25,30,35,40))
+# ex_sc_norm <- norm_sc(ex_sc, pool_sizes = c(20,25,30,35,40))
+
+x <- exprs(ex_sc)
+cSum <- apply(x,2,sum)    # recompute for remaining cells
+x <- as.matrix(sweep(x,2,cSum,FUN='/'))*1e6    # normalize to UMIs per million
+ex_sc_norm <- construct_ex_sc(x)
+pData(ex_sc_norm) <- pData(ex_sc)
 ```
 
 ## Post Normalization Pre-processing
@@ -132,68 +187,22 @@ ex_sc_norm <- norm_sc(ex_sc, pool_sizes = c(20,25,30,35,40))
 Now that we have normalized, it is time to reprocess the data as before, this time on the normalized counts!
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
-plot_density(ex_sc_norm, title = "size_factors", val = "size_factor", statistic = "mean") 
 
-gene_subset <- subset_genes(ex_sc_norm, method = "PCA", threshold = 1, minCells = 30, nComp = 10, cutoff = 0.85)
+# gene_subset <- subset_genes()
 
-ex_sc_norm <- dim_reduce(ex_sc_norm, genelist = gene_subset, pre_reduce = "iPCA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
+# ex_sc_norm <- dim_reduce()
 
-ex_sc_norm <- cluster_sc(ex_sc_norm, dimension = "Comp", method = "spectral", num_clust = 6)
+# ex_sc_norm <- cluster_sc()
 
-plot_tsne_metadata(ex_sc_norm, color_by = "Cluster", title = "Spectral Cluster on iPCA components")
+# plot_tsne_metadata(ex_sc_norm)
 
-plot_density_ridge(ex_sc_norm, color_by = "Cluster", title = "UMIs per cluster", val = "UMI_sum_raw")
-
-plot_tsne_metadata(ex_sc_norm, color_by = "UMI_sum_raw", title = "Total UMIs per cell") 
-
-plot_tsne_metadata(ex_sc_norm, color_by = "size_factor", title = "Size Factor per cell") 
-
-plot_tsne_metadata(ex_sc_norm, color_by = "iPC_Comp1", title = "PC1 cell loadings") 
-
-plot_tsne_metadata(ex_sc_norm, color_by = "iPC_Comp2", title = "PC2 cell loadings") 
-
-plot_tsne_metadata(ex_sc_norm, color_by = "iPC_Comp3", title = "PC3 cell loadings") 
+# plot_tsne_gene(ex_sc_norm)
 
 ```
 
-# Basic Analysis
+# Advanced scRNA-seq analysis  
 
-## Identify markers and reference genes
-
-As a quick and easy way to ID cells a marker id function is provided.
-
-```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
-ex_sc_norm <- id_markers(ex_sc_norm, print_progress = TRUE) # This is a quick method to find good markers genes for cell identification. These gene scores get written to fData()
-head(fData(ex_sc_norm))
-
-marker_list <- return_markers(ex_sc_norm, num_markers = 5) # However returning the genes as a list can be helpful
-
-plot_scatter(input = ex_sc_norm, title = "Correlation Plot", gene1 = "Ccr7", gene2 = "Ccl22", facet_by = "Cluster", color_by = "Timepoint", logscale = FALSE) # A scater plotting function. Note the correlation of the marker genes.
-
-marker_facet <- c("Emr1", "Lcn2", "Ccr7")
-
-plot_tsne_gene(input = ex_sc_norm, gene = marker_facet, title = "Marker Genes",  ncol = 3, density = FALSE)
-
-plot_violin(ex_sc_norm, title = "Ccr7 across clusters", gene = "Ccr7", color_by = "Timepoint", facet_by = "Cluster", size = 1, ncol = 3)
-```
-
-# Advanced Analysis
-
-# Subsetting Data
-
-```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
-mDC_0hr <- subset_ex_sc(ex_sc_norm, variable = "Timepoint", select = c("0hr"))
-
-gene_subset <- subset_genes(mDC_0hr, method = "PCA", threshold = 1, minCells = 30, nComp = 10, cutoff = 0.85)
-
-mDC_0hr <- dim_reduce(mDC_0hr, genelist = gene_subset, pre_reduce = "iPCA", nComp = 10, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
-
-mDC_0hr <- cluster_sc(mDC_0hr, dimension = "Comp", method = "spectral", num_clust = 4)
-
-plot_tsne_metadata(mDC_0hr, title = "", color_by = "Cluster")
-```
-
-## Flow Gating
+## Supervised Analysis
 
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
 
@@ -203,7 +212,7 @@ panel3 <- c("Csf1r", "Mertk") # Mac
 
 panels <- list(panel1, panel2, panel3)
 
-plot_tsne_gene(mDC_0hr, gene = unlist(panels), title = "")
+plot_tsne_gene(ex_sc_norm, gene = unlist(panels), title = "")
 
 names(panels) <- c("Neutrophil", "Dendritic", "Macrophage")
 
@@ -216,8 +225,8 @@ plot_tsne_metadata(mDC_0hr, color_by = "SVM_Classify", title = "Spectral Cluster
 
 ```
 
-```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
 # DE analysis
-# Network Analysis
-# Heatmap
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+
 ```

@@ -148,7 +148,7 @@ plot_tsne_gene <- function(input,
       stop("You cannot facet multiple gene")
     }
     geneColored1 <- pData(input)[,c(xcol, ycol, facet_by)]
-    geneColored1 <- pData(input)[,c(xcol, ycol)]
+    # geneColored1 <- pData(input)[,c(xcol, ycol)]
     LinMap <- function(x, from, to) {
       # Shifting the vector so that min(x) == 0
       x <- x - min(x)
@@ -186,7 +186,7 @@ plot_tsne_gene <- function(input,
       geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,4])), ]
       colnames(final_dfdens_norm) <- c(xcol, ycol, "z", facet_by)
     } else {
-      geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,4])), ]
+      geneColored1 <- geneColored1[with(geneColored1, order(geneColored1[,"vals"])), ]
     }
     tmp <- pData(input)[c(xcol, ycol)]
     g <- ggplot(geneColored1)
