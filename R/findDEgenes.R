@@ -35,6 +35,12 @@ findDEgenes = function(input,
                        pVal = 1,
                        contrast = list(c(-1,1))) {
   # select cells to perform DE
+  if (is.null(lib_size)) {
+    # if lib_size is null sum up UMI counts
+    libsize = colSums(exprs(input)[,rownames(pd)])
+    pd$lib_size = libsize
+    lib_size = "lib_size"
+  }
   for (i in 1:length(unique(pd[,facet_by]))) {
     name = sort(unique(as.character(pd[,facet_by])))[i]
     print(paste0("Performing DE for ", name))
@@ -43,12 +49,6 @@ findDEgenes = function(input,
     # select cells
     z = as.matrix(exprs(input))[,idx]
     if(ncol(z) > 2){
-      if (is.null(lib_size)) {
-        # if lib_size is null sum up UMI counts
-        libsize = colSums(z)
-        pd$lib_size = libsize
-        lib_size = "lib_size"
-      }
       if (is.null(batchID)) {
         # if batchID is null all cells are in the same batch
         batch = as.factor(rep(1,ncol(z)))
