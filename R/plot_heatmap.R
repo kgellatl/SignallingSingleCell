@@ -51,7 +51,8 @@ plot_heatmap <- function(input,
                          gene_labels_size = 2,
                          gene_labels_nudge  = -0.5,
                          gene_labels_col = 1,
-                         gene_labels_force = 1){
+                         gene_labels_force = 1,
+                         return_results = F){
   gg_color_hue <- function(n) {
     hues = seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1:n]
@@ -304,18 +305,20 @@ plot_heatmap <- function(input,
       #####
     }
   }
-  if(cluster_type == "kmeans"){
-    kmean_res <- res
-    return_result <- vector(mode = "list", length = 2)
-    return_result[[1]] <-  g
-    return_result[[2]] <-  kmean_res
-    return(return_result)
-  } else {
-    hc_res <- hc1
-    return_result <- vector(mode = "list", length = 2)
-    return_result[[1]] <-  g
-    return_result[[2]] <-  hc_res
-    return(return_result)
+  if(return_results){
+    if(cluster_type == "kmeans"){
+      kmean_res <- res
+      return_result <- vector(mode = "list", length = 2)
+      return_result[[1]] <-  g
+      return_result[[2]] <-  kmean_res
+      return(return_result)
+    } else {
+      hc_res <- hc1
+      return_result <- vector(mode = "list", length = 2)
+      return_result[[1]] <-  g
+      return_result[[2]] <-  hc_res
+      return(return_result)
+    }
   }
   if(interactive == TRUE){
     ggplotly(g, source = "master")

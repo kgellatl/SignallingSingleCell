@@ -6,7 +6,7 @@ output:
   html_document:
     toc: true
     toc_float : yes
-    toc_depth : 3
+    toc_depth : 4
     theme : cerulean
 ---
 
@@ -63,9 +63,9 @@ The first step is to filter your data to remove low quality cells. Often creatin
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 ex_sc <- calc_libsize(ex_sc, suffix = "raw") # sums counts for each cell
-plot_density(ex_sc, title = "UMI Density", val = "UMI_sum_raw", statistic = "mean")
 
 ex_sc <- pre_filter(ex_sc, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10,  print_progress = TRUE) # filters cells and genes
+
 ex_sc <- calc_libsize(ex_sc, suffix = "raw_filtered")
 plot_density(ex_sc, title = "UMI Density",  val = "UMI_sum_raw_filtered", statistic = "mean")  
 
