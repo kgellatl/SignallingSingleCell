@@ -21,6 +21,7 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 ```{r, cache=FALSE, warning=FALSE, error=FALSE}
 
 # devtools::install_github("kgellatl/SignallingSingleCell")
+
 library("SignallingSingleCell")
 
 # https://rpubs.com/kgellatl729/774488
