@@ -20,11 +20,14 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 
 ```{r, cache=FALSE, warning=FALSE, error=FALSE}
 
+# https://github.com/UMMS-Biocore/bootcamp/blob/master/session8/session8.md
+# https://github.com/kgellatl/SignallingSingleCell
+# https://rpubs.com/kgellatl729/774488
+
 # devtools::install_github("kgellatl/SignallingSingleCell")
 
 library("SignallingSingleCell")
 
-# https://rpubs.com/kgellatl729/774488
 
 load(url("https://galaxyweb.umassmed.edu/pub/class/mDC_UMI_Table.Rdata"))
 load(url("https://galaxyweb.umassmed.edu/pub/class/ex_sc_skin.Rdata"))
