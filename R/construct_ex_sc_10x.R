@@ -9,7 +9,7 @@
 #' @examples
 #' ex_sc_example <- calc_libsize(input = ex_sc_example)
 
-construct_ex_sc_10x <- function(bc_path, long_genes = T, feature_assay = F){
+construct_ex_sc_10x <- function(bc_path, long_genes = T, feature_assay = T){
 
   samples <- list.files(bc_path)
 
@@ -19,10 +19,12 @@ construct_ex_sc_10x <- function(bc_path, long_genes = T, feature_assay = F){
     barcode.path <- paste0(matrix_dir, "barcodes.tsv")
     features.path <- paste0(matrix_dir, "features.tsv")
     matrix.path <- paste0(matrix_dir, "matrix.mtx")
-    mat <- readMM(file = matrix.path)
+    mat <- Matrix::readMM(file = matrix.path)
+    print(dim(mat))
     feature.names = read.delim(features.path,
                                header = FALSE,
                                stringsAsFactors = FALSE)
+    feature.names$V2 <- make.unique(feature.names$V2)
     barcode.names = read.delim(barcode.path,
                                header = FALSE,
                                stringsAsFactors = FALSE)
@@ -36,29 +38,28 @@ construct_ex_sc_10x <- function(bc_path, long_genes = T, feature_assay = F){
     }
   }
 
-  #####
-  dups <- names(which(table(rownames(master_data)) > 1))
-  for (i in 1:length(dups)) {
-    int_dup <- dups[i]
-    ind <- grep(paste0("^",int_dup,"$"), rownames(master_data))
-    master_data[ind[1],] <- apply(master_data[ind,],2,sum)
-    master_data <- master_data[-ind[2],]
-  }
+  master_data <- as.matrix(master_data)
 
-  ex_sc <- construct_ex_sc(master_data)
+  if(feature_assay){
+
+    ind_fd <- which(feature.names$V3 != "Gene Expression")
+    ind_exp <- which(feature.names$V3 == "Gene Expression")
+
+    expr_mat <- master_data[ind_exp,]
+    fDat <- master_data[ind_fd,]
+    ex_sc <- construct_ex_sc(expr_mat)
+    ex_sc$Sample <- matrix(unlist(strsplit(colnames(ex_sc), split = "-")),byrow = T, ncol = 2)[,2]
+    pData(ex_sc) <- cbind(as.data.frame(t(fDat)), pData(ex_sc))
+
+  } else {
+    ex_sc <- construct_ex_sc(master_data)
+    ex_sc$Sample <- matrix(unlist(strsplit(colnames(ex_sc), split = "-")),byrow = T, ncol = 2)[,2]
+  }
 
   if(long_genes){
     ind <- match(rownames(ex_sc), feature.names$V2)
     fData(ex_sc)$"gene_long" <- feature.names$V1[ind]
   }
-
-  if(feature_assay){
-    ind <- match(rownames(ex_sc), feature.names$V2)
-    fData(ex_sc)$"feature_type" <- feature.names$V3[ind]
-
-  }
-
-  ex_sc$Sample <- matrix(unlist(strsplit(colnames(ex_sc), split = "-")),byrow = T, ncol = 2)[,2]
 
   return(ex_sc)
 }
