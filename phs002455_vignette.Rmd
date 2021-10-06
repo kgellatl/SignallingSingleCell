@@ -24,6 +24,10 @@ The data contained in these files are described in detail in,
 
 https://www.science.org/doi/10.1126/scitranslmed.abd8995
 
+The knitted output of this vignette can be downloaded from the link below,
+
+https://www.dropbox.com/s/qlddebze6pd5pfy/phs002455_vignette.html?dl=0
+
 For convenience we are providing 3 processed data tables here. One is a raw sparse matrix, that is the output of our processing pipeline with no further manipulation. We are also providing a fully processed UMI table that has been filtered, dimension reduced, clustered, and normalized. The processed UMI table is provided in the expression set class format  (https://www.bioconductor.org/packages/devel/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf). We are also providing a separate processed UMI table for the T Cells.
 
 The raw .fastq files have been deposited through dbGAP.
