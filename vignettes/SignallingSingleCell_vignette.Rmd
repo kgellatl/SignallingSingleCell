@@ -28,7 +28,6 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 
 library("SignallingSingleCell")
 
-
 load(url("https://galaxyweb.umassmed.edu/pub/class/mDC_UMI_Table.Rdata"))
 load(url("https://galaxyweb.umassmed.edu/pub/class/ex_sc_skin.Rdata"))
 
@@ -48,6 +47,7 @@ fData(ex_sc) is gene information, where rows are genes and columns are metadata.
 
 ex_sc <- construct_ex_sc(input = mDC_UMI_Table) # mDC_UMI_Table == Digital Gene Expression Matrix
 
+class(mDC_UMI_Table)
 class(ex_sc) 
 
 ex_sc # pData() and fData() are empty
@@ -68,11 +68,15 @@ rownames(pData(ex_sc))[c(1,2000,3000)]
 
 pData(ex_sc)$Timepoint <- NA # initialize a new pData column
 
+table(pData(ex_sc)$Timepoint)
+
 pData(ex_sc)[grep("0hr", rownames(pData(ex_sc))),"Timepoint"] <- "0hr"
 pData(ex_sc)[grep("1hr", rownames(pData(ex_sc))),"Timepoint"] <- "1hr"
 pData(ex_sc)[grep("4hr", rownames(pData(ex_sc))),"Timepoint"] <- "4hr"
 
 head(pData(ex_sc))
+
+table(ex_sc$Timepoint)
 
 ```
 
@@ -86,7 +90,11 @@ ex_sc <- calc_libsize(ex_sc, suffix = "raw") # sums counts for each cell
 ex_sc <- pre_filter(ex_sc, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10,  print_progress = TRUE) # filters cells and genes
 
 ex_sc <- calc_libsize(ex_sc, suffix = "raw_filtered")
+
 plot_density(ex_sc, title = "UMI Density",  val = "UMI_sum_raw_filtered", statistic = "mean")  
+
+head(pData(ex_sc))
+
 plot_density_ridge(ex_sc, title = "UMI Density",  val = "UMI_sum_raw_filtered", color_by = "Timepoint")  
 
 ```
@@ -99,7 +107,12 @@ Dimensionality reduction is necessary in order to bring the cells from a high di
 
 ```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
 
-gene_subset <- subset_genes(ex_sc, method = "PCA", threshold = 1, minCells = 20, nComp = 10, cutoff = 0.85) 
+?subset_genes
+
+gene_subset <- subset_genes(ex_sc, method = "PCA", threshold = 1, minCells = 20, nComp = 10, cutoff = 0.85)
+
+dim(ex_sc)
+length(gene_subset)
 
 ex_sc <- dim_reduce(ex_sc, genelist = gene_subset, pre_reduce = "vPCA", nVar = .9, nComp = 30, iterations = 500, print_progress=TRUE) 
 

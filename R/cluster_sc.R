@@ -23,7 +23,8 @@ cluster_sc <- function(input,
                        num_clust = NA,
                        s=2,
                        xcol="x",
-                       ycol="y") {
+                       ycol="y",
+                       set.seed = F) {
   if(dimension == "Comp"){
     tocluster = pData(input)[,grep("Comp", colnames(pData(input)))]
   }
@@ -31,6 +32,9 @@ cluster_sc <- function(input,
     tocluster = pData(input)[,c(xcol, ycol)]
   }
   if(method == "spectral"){
+    if(set.seed != F){
+      set.seed(set.seed)
+    }
     spec <- kknn::specClust(tocluster, centers = num_clust, method = 'random-walk')
     cluster <- spec$cluster
     cluster <- paste0("Cluster", cluster)

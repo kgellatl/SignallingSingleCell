@@ -109,7 +109,9 @@ filter_rl_network <- function(input, filter_by, filter_type = "network", DEfolde
             result <- eval(call)
             result
           } # ENDS F DEFINITION
-          tmp <- read.table(int, sep = "\t", row.names = 1, header = T)
+          # tmp <- read.table(int, sep = "\t", row.names = 1, header = T)
+          tmp <- read.csv(int, row.names = 1, header = T)
+
           vec <- tmp[,int_filt]
 
           if(absol[l] == TRUE){
