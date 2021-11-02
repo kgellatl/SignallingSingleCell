@@ -13,8 +13,13 @@
 #' @examples
 #' ex_sc_example <- id_rl(input = ex_sc_example)
 
-id_rl <- function(input){
-  Receptor_Ligand_Data <- SignallingSingleCell:::Receptor_Ligand_Data
+id_rl <- function(input, database = "helft"){
+  if(database == "helft"){
+    Receptor_Ligand_Data <- SignallingSingleCell:::Receptor_Ligand_Data
+  }
+  else {
+    Receptor_Ligand_Data <- database
+  }
   ligs <- unique(Receptor_Ligand_Data$Ligand.ApprovedSymbol)
   recs <- unique(Receptor_Ligand_Data$Receptor.ApprovedSymbol)
   ind <- grep("bulk", colnames(fData(input)))

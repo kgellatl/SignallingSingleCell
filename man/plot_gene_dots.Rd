@@ -4,7 +4,7 @@
 \alias{plot_gene_dots}
 \title{Plot of genes by pData variable}
 \usage{
-plot_gene_dots(input, genes, break_by, title = "", scale_by = FALSE)
+plot_gene_dots(input, genes, break_by, title = "", scale_by = FALSE, log = F)
 }
 \arguments{
 \item{input}{the input ex_sc.}

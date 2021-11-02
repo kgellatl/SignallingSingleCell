@@ -4,7 +4,7 @@
 \alias{id_rl}
 \title{identify receptors and ligands}
 \usage{
-id_rl(input)
+id_rl(input, database = "helft")
 }
 \arguments{
 \item{input}{the input ex_sc}
