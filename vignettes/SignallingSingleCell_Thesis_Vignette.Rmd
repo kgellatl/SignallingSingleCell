@@ -1,5 +1,5 @@
 ---
-title: "Kyle_Gellatly_BMDC_Thesis_Vignette"
+title: "SignallingSingleCell_Thesis_Vignette"
 geometry: margin=0.5cm
 author: "Kyle Gellatly"
 output:
