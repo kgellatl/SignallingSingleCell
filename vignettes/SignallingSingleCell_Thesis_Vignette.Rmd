@@ -1,0 +1,638 @@
+---
+title: "BMDC_analysis"
+geometry: margin=0.5cm
+author: "Kyle Gellatly"
+output:
+  html_document:
+    toc: true
+    toc_float : yes
+    toc_depth : 4
+    theme : cerulean
+---
+
+```{r setup, include=FALSE, warning=FALSE, error=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, comment = "")
+
+```
+
+# Package and Data Loading  
+
+```{r, cache=FALSE, warning=FALSE, error=FALSE}
+
+# devtools::install_github("kgellatl/SignallingSingleCell")
+
+library(SignallingSingleCell)
+library(org.Mm.eg.db)
+library(GO.db)
+
+load(url("https://www.dropbox.com/s/lj2g37r3l3vyt53/mDC_0hr_1hr_4hr_CLEAN.Rdata?dl=1"))
+
+```
+
+# Preprocessing  
+
+## Constructing the ExpressionSet Class  
+
+The ExpressionSet class (ex_sc) is a convenient data structure that contains 3 dataframes. These dataframes contain expression data, cell information, and gene information respectively. 
+
+exprs(ex_sc) is the expression data, where rows are genes and columns are cells. 
+pData(ex_sc) is cell information, where rows are cells and columns are metadata.
+fData(ex_sc) is gene information, where rows are genes and columns are metadata.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+ex_sc <- construct_ex_sc(input = mDC_0hr_1hr_4hr_CLEAN) # mDC_0hr_1hr_4hr_CLEAN == Digital Gene Expression Matrix
+
+class(mDC_0hr_1hr_4hr_CLEAN)
+class(ex_sc) 
+
+ex_sc # pData() and fData() are empty
+
+exprs(ex_sc)[1:5,1:5]
+pData(ex_sc)[1:5,]
+fData(ex_sc)[1:5,]
+rm(mDC_UMI_Table)
+```
+
+## Data Annotation
+
+Often we have metadata about the experiment that can be valuable in the analysis! Writing that information now may be appropriate. Our experiment consists of a time course with LPS stimulation. The cell names in the DGE Matrix contain a substring encoding this information.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+pData(ex_sc)$Sample <- matrix(unlist(strsplit(colnames(ex_sc), split = "_")), ncol = 2, byrow = T)[,1]
+
+pData(ex_sc)$Timepoint <- NA # initialize a new pData column
+
+pData(ex_sc)[grep("0hr", rownames(pData(ex_sc))),"Timepoint"] <- "0hr"
+pData(ex_sc)[grep("1hr", rownames(pData(ex_sc))),"Timepoint"] <- "1hr"
+pData(ex_sc)[grep("4hr", rownames(pData(ex_sc))),"Timepoint"] <- "4hr"
+
+head(pData(ex_sc))
+
+table(ex_sc$Timepoint)
+
+```
+
+## Filtering
+
+Often you will want to filter your data to remove low quality cells. There are many ways to do this, often using the number of captured transcripts, unique genes per cell, or the percent of mitochrondrial genes to remove low quality cells.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+ex_sc <- pre_filter(ex_sc, minUMI = 1000, maxUMI = 10000, threshold = 1, minCells = 10,  print_progress = TRUE) # filters cells and genes
+
+```
+
+## Basic QC Metrics
+
+Simple metric such as the total number of cells, total genes detected, average UMI / cell, and average number of genes detected per cell.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+dim(ex_sc)
+mean(ex_sc$UMI_sum_raw)
+
+table(ex_sc$Sample)
+
+ex_sc <- calc_libsize(ex_sc, suffix = "raw")
+ex_sc <- calc_genestats(ex_sc)
+
+pData(ex_sc) %>%
+  dplyr::group_by(Sample) %>%
+  dplyr::summarise(mean(UMI_sum_raw), median(UMI_sum_raw))
+
+pData(ex_sc) %>%
+  dplyr::group_by(Sample) %>%
+  dplyr::summarise(mean(genes_expressed), median(genes_expressed))
+
+plot_density_ridge(ex_sc, title = "UMI capture per cell",  val = "UMI_sum_raw", color_by = "Sample", data = "pD", log_scale = T)
+# save_ggplot("UMI capture per cell", h = 6, w = 4)
+
+plot_density_ridge(ex_sc, title = "Genes detected per cell",  val = "genes_expressed", color_by = "Sample", data = "pD", log_scale = T)  
+# save_ggplot("Genes Detected per cell", h = 6, w = 4)
+
+
+plot_density_ridge(ex_sc, title = "Tnf Expression",  val = "Tnf", color_by = "Timepoint", data = "exprs", log_scale = T)  
+# save_ggplot("TNF expression", h = 6, w = 4)
+
+
+plot_density_ridge(ex_sc, title = "Cxcl10 Expression",  val = "Cxcl10", color_by = "Timepoint", data = "exprs", log_scale = T)  
+# save_ggplot("CXCL10 expression", h = 6, w = 4)
+
+
+head(pData(ex_sc))
+
+```
+
+
+# Basic scRNA-seq analysis  
+
+## Gene Selection 
+
+There are a variety of gene selection methods available. Given that we have information about the system, we can query some of these genes to determine whether or not each gene selection method has selected them.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+return_go_genes <- function(go_term){
+  go_id = GOID( GOTERM[ Term(GOTERM) == go_term])
+  go_id
+  
+  allegs = get(go_id, org.Mm.egGO2ALLEGS)
+  
+  genes = unlist(mget(allegs,org.Mm.egSYMBOL))
+  return(genes)
+  
+}
+
+lps_response_genes <- as.vector(return_go_genes("response to lipopolysaccharide"))
+lps_response_genes <- sort(lps_response_genes)
+lps_response_genes <- unique(lps_response_genes)
+
+```
+  
+  
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+# First calculate the genewise scores
+
+## CV
+
+ex_sc <- subset_genes(ex_sc, method = "CV", threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85, output = "ex_sc", log = T)
+
+
+## PCA
+
+ex_sc <- subset_genes(ex_sc, method = "PCA", threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85, output = "ex_sc", log = T)
+
+
+## Gini
+
+ex_sc <- subset_genes(ex_sc, method = "Gini", threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85, output = "ex_sc", log = T)
+
+fData(ex_sc)$Gini_nofudge <- fData(ex_sc)$gini
+
+ex_sc <- subset_genes(ex_sc, method = "Gini", threshold = 1, minCells = 10, nComp = 10, cutoff = 0.85, output = "ex_sc", log = T, fudge = T)
+
+fData(ex_sc)$Gini_fudge <- fData(ex_sc)$gini
+
+fD <- fData(ex_sc)[,c("CV", "malhanobis_d", "Gini_nofudge", "Gini_fudge" )]
+
+not_expressed <- names(which(apply(fD,1,sum) == 0))
+fD <- fD[-match(not_expressed, rownames(fD)),]
+
+fD$malhanobis_d <- log10(fD$malhanobis_d)
+fD$malhanobis_d <- fD$malhanobis_d + abs(min(fD$malhanobis_d))
+
+fD$mean_expression <- apply(exprs(ex_sc)[rownames(fD),], 1, mean)
+
+fD$mean_expression <- log10(fD$mean_expression)
+fD$mean_expression <- fD$mean_expression + abs(min(fD$mean_expression))
+
+fD$Gini_nofudge <- -fD$Gini_nofudge
+
+colnames(fD) <- c("CV", "PCA", "Gini Index", "Gini Norm", "Mean")
+
+
+```
+
+Gene score correlations
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+
+fD_pairs <- fD
+
+fD_pairs$LPS_gene <- "Other Gene"
+fD_pairs$LPS_gene[rownames(fD_pairs) %in% lps_response_genes] <- "LPS Gene"
+
+table(fD_pairs$LPS_gene)
+
+fD_pairs$LPS_gene <- factor(fD_pairs$LPS_gene, levels = c("Other Gene", "LPS Gene"))
+
+fD_pairs <- fD_pairs[(order(fD_pairs$LPS_gene)),]
+
+GGally::ggpairs(fD_pairs, aes(col = LPS_gene)) 
+# save_ggplot("ggally_pairs", h = 12, w = 12)
+
+corr <- round(cor(fD, method = "spearman"),2)
+
+ggcorrplot::ggcorrplot(corr, lab = T, type = "upper")
+
+# save_ggplot("Spearman_gene_score_correlation", h = 4, w = 4)
+
+ks_res <- matrix(ncol = 3, nrow = 5)
+ks_res <- as.data.frame(ks_res)
+
+for (i in 1:5) {
+  ks_input <- fD_pairs[,c(i,6)]
+  kres <- ks.test(ks_input[which(ks_input$LPS_gene == "Other Gene"),1], ks_input[which(ks_input$LPS_gene == "LPS Gene"),1])
+  ks_res[i,1] <- colnames(ks_input)[1]
+  ks_res[i,2] <- as.vector(kres$statistic)
+  ks_res[i,3] <- as.vector(kres$p.value)
+
+}
+
+```
+
+Find the Jaccard overlap between methods
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+num_gene <- c(100, 250, 500, 1000)
+
+for (p in 1:length(num_gene)) {
+  int_num_gene <- num_gene[p]
+  
+  gene_set <- lapply(fD, function(x) rownames(fD)[which(rank(-x) < int_num_gene)])
+  all_scores_jaccard <- fD
+  all_scores_jaccard[] <- 0
+  
+  for (i in 1:length(gene_set)) {
+    int_set <- gene_set[i]
+    ind_col <- match(names(int_set), colnames(all_scores_jaccard))
+    int_set <- as.vector(unlist(int_set))
+    ind_row <- match(int_set, rownames(all_scores_jaccard))
+    all_scores_jaccard[ind_row,ind_col] <- 1
+  }
+  
+  jaccard_grid <- expand.grid(colnames(corr), colnames(corr),
+                              stringsAsFactors = F)
+  jaccard_grid <- as.data.frame(jaccard_grid)
+  jaccard_grid$similarity <- 0
+  
+  jaccard <- function(M) {
+    sums = rowSums(M)
+    similarity = length(sums[sums == 2])
+    total = length(sums[sums == 1]) + similarity
+    return(similarity/total)
+  }
+  for (i in 1:nrow(jaccard_grid)) {
+    int_terms <- jaccard_grid[i, ]
+    M <- all_scores_jaccard[, c(int_terms$Var1, int_terms$Var2)]
+    jaccard_val <- jaccard(M)
+    jaccard_grid$similarity[i] <- jaccard_val
+  }
+  
+  jaccard_matrix <- matrix(jaccard_grid$similarity, ncol = ncol(corr),
+                           nrow = ncol(corr))
+  colnames(jaccard_matrix) <- colnames(corr)
+  rownames(jaccard_matrix) <- colnames(corr)
+  
+  head(jaccard_matrix)
+  
+  g <- ggcorrplot::ggcorrplot(jaccard_matrix, lab = T, type = "upper", colors = c("gray", "blue", "red", "yellow"))
+  
+  g <- g + scale_fill_gradient(limit = c(0,1), low = "blue", high =  "red")
+  
+  g
+  
+  
+  # save_ggplot(paste0("jaccard_similarity_", int_num_gene))
+}
+
+
+```
+
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+# Test for enrichment of each gene type
+### Get LPS genes
+
+num_gene <- c(100, 250, 500, 1000)
+
+matrix_phyper <- matrix(nrow = length(num_gene)*length(gene_set), ncol = 4)
+colnames(matrix_phyper) <- c("N_selected", "method", "successes", "pval")
+matrix_phyper <- as.data.frame(matrix_phyper)
+
+pop_size <- nrow(fD) # phyper parameter
+pop_successes <- sum(lps_response_genes %in% rownames(fD))# phyper parameter
+
+for (i in 1:length(num_gene)) {
+  if(i == 1)(
+    row_ind <- 1
+  )
+  int_num_gene <- num_gene[i] # phyper parameter
+  gene_set <- lapply(fD, function(x) rownames(fD)[which(rank(-x) < int_num_gene)])
+  
+  for (j in 1:length(gene_set)) {
+    test_set_name <- names(gene_set)[j]
+    int_test_genes <- gene_set[[j]]
+    
+    sample_successes <- sum(int_test_genes %in% lps_response_genes) # phyper parameter
+    
+    p.val.hyp <- phyper(sample_successes,pop_successes,pop_size-pop_successes,int_num_gene, lower.tail = F)
+    
+    matrix_phyper[row_ind,1] <- int_num_gene
+    matrix_phyper[row_ind,2] <- test_set_name
+    matrix_phyper[row_ind,3] <- sample_successes
+    matrix_phyper[row_ind,4] <- p.val.hyp
+    
+    row_ind <- row_ind +1
+  }
+}
+
+matrix_phyper$logp <-  -log10(matrix_phyper$pval) 
+matrix_phyper$N_selected <- as.factor(matrix_phyper$N_selected)
+
+matrix_phyper$sig <- "NS"
+matrix_phyper$sig[which(matrix_phyper$logp > 3)] <- "p < 1e-3"
+matrix_phyper$sig[which(matrix_phyper$logp > 10)] <- "p < 1e-10"
+matrix_phyper$sig[which(matrix_phyper$logp > 15)] <- "p < 1e-15"
+
+
+table(matrix_phyper$sig)
+
+matrix_phyper$sig <- factor(matrix_phyper$sig, levels = c( "NS", "p < 1e-3","p < 1e-10","p < 1e-15"))
+
+ggplot(matrix_phyper) +
+  geom_col(aes(x = N_selected, y = logp, fill = sig)) + 
+  facet_grid(~method) + 
+  scale_fill_viridis(option="pasma", discrete = T)
+
+# save_ggplot("hypergeometric_enrichment_gene_selection")
+
+
+```
+
+## Dimension reduction
+
+Dimensionality reduction is necessary in order to bring the cells from a high dimensional gene expression space (~10k dimensions, one dimension per gene) down to a more reasonable number. Typically this is done first with PCA to bring it down to ~5-15 dimensions, before a final embedding is done using tSNE or UMAP to bring it down to 2 dimensions. 
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+gene_sets <- lapply(fD, function(x) rownames(fD)[which(rank(-x) < 250)])
+gene_sets <- gene_sets[1:4]
+
+for (i in 1:length(gene_sets)) {
+  int_set <- gene_sets[[i]]
+  print(length(int_set))
+  
+  ex_sc <- dim_reduce(ex_sc, genelist = int_set, pre_reduce = "iPCA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=FALSE, log = T) 
+  
+plot_tsne_gene(ex_sc, gene = c("Itgax", "Flt3", "Csf1r", "Rsad2"), log_scale = T)
+save_ggplot(paste0(names(gene_sets)[i], "_iPCA_Figure_250"))
+plot_tsne_metadata(ex_sc, color_by = "Timepoint")
+save_ggplot(paste0(names(gene_sets)[i], "_iPCA_Timepoint_250"))
+
+plot_tsne_gene(ex_sc, gene = c("Lcn2", "S100a9"), log_scale = T)
+save_ggplot(paste0(names(gene_sets)[i], "_iPCA_neut_250"))
+
+ex_sc <- dim_reduce(ex_sc, genelist = int_set, pre_reduce = "ICA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=FALSE, log = T) 
+
+plot_tsne_gene(ex_sc, gene = c("Itgax", "Flt3", "Csf1r", "Rsad2"), log_scale = T)
+save_ggplot(paste0(names(gene_sets)[i], "_ICA_Figure_250"))
+plot_tsne_metadata(ex_sc, color_by = "Timepoint")
+save_ggplot(paste0(names(gene_sets)[i], "_ICA_Timepoint_250"))
+
+plot_tsne_gene(ex_sc, gene = c("Lcn2", "S100a9"), log_scale = T)
+save_ggplot(paste0(names(gene_sets)[i], "_ICA_neut_250"))
+  
+}
+
+gene_sets <- lapply(fD, function(x) rownames(fD)[which(rank(-x) < 1000)])
+gene_sets <- gene_sets[1:4]
+
+for (i in 1:length(gene_sets)) {
+  
+    int_set <- gene_sets[[i]]
+  print(length(int_set))
+  
+  ex_sc <- dim_reduce(ex_sc, genelist = int_set, pre_reduce = "iPCA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=FALSE, log = T) 
+  
+plot_tsne_gene(ex_sc, gene = c("Itgax", "Flt3", "Csf1r", "Rsad2"), log_scale = T)
+save_ggplot(paste0(names(gene_sets)[i], "_iPCA_Figure_1000"))
+plot_tsne_metadata(ex_sc, color_by = "Timepoint")
+save_ggplot(paste0(names(gene_sets)[i], "_iPCA_Timepoint_1000"))
+
+plot_tsne_gene(ex_sc, gene = c("Lcn2", "S100a9"), log_scale = T)
+save_ggplot(paste0(names(gene_sets)[i], "_iPCA_neut_1000"))
+
+ex_sc <- dim_reduce(ex_sc, genelist = int_set, pre_reduce = "ICA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=FALSE, log = T) 
+
+plot_tsne_gene(ex_sc, gene = c("Itgax", "Flt3", "Csf1r", "Rsad2"), log_scale = T)
+save_ggplot(paste0(names(gene_sets)[i], "_ICA_Figure_1000"))
+plot_tsne_metadata(ex_sc, color_by = "Timepoint")
+save_ggplot(paste0(names(gene_sets)[i], "_ICA_Timepoint_1000"))
+
+plot_tsne_gene(ex_sc, gene = c("Lcn2", "S100a9"), log_scale = T)
+save_ggplot(paste0(names(gene_sets)[i], "_ICA_neut_1000"))
+  
+}
+
+gene_sets <- lapply(fD, function(x) rownames(fD)[which(rank(-x) < 1000)])
+gene_sets <- gene_sets[[4]]
+
+# Top 1000 genes from Gini normalized
+
+ex_sc <- dim_reduce(ex_sc, genelist = int_set, pre_reduce = "iPCA", nComp = 12, tSNE_perp = 30, iterations = 500, print_progress=FALSE, log = T) 
+
+
+
+```
+
+## Clustering
+
+Now that we have dimension reduced data we can try clustering it! For dimensions, both Comp and 2d are supported. There will determine if the clustering is done on principal components, or on the 2D representation. There are also 2 clustering algorithms available, density and spectral. Typically we recommend spectral clustering on PCA components, or density clustering on the 2d representation. Try both!
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+c_num <- c(5:8)
+for (i in 1:length(c_num)) {
+  ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = c_num[i]) 
+  plot_tsne_metadata(ex_sc, color_by = "Cluster")
+  save_ggplot(filename = paste0("spectral_", c_num[i]))
+  
+    ex_sc <- cluster_sc(ex_sc, dimension = "2d", method = "density", num_clust = c_num[i]) 
+  plot_tsne_metadata(ex_sc, color_by = "Cluster")
+  save_ggplot(filename = paste0("density_", c_num[i]))
+  
+  
+}
+
+ex_sc <- cluster_sc(ex_sc, dimension = "Comp", method = "spectral", num_clust = 5)
+
+
+plot_tsne_metadata(ex_sc, color_by = "Timepoint", facet_by = "Cluster")
+save_ggplot("Cluster_facet")
+
+# save(ex_sc, file = "ex_sc_clustered.Rdata")
+
+```
+
+## Cell Type identification
+
+There are many possible ways to identify cell types based on their gene expression. The id_markers function will identify genes that are highly expressed in a high proportion of a given cluster, relative to the other clusters.
+
+```{r, include=TRUE, cache=FALSE, warning=FALSE, error=FALSE}
+
+ex_sc <- id_markers(ex_sc, print_progress = TRUE) 
+
+return_markers(ex_sc)
+
+plot_violin(ex_sc, gene = "S100a9", color_by = "Cluster")
+save_ggplot("S100a9", h = 3, w = 4)
+
+ex_sc <- calc_agg_bulk(ex_sc, aggregate_by = "Cluster")
+
+markers <- return_markers(ex_sc, num_markers = 15) 
+
+plot_gene_dots(ex_sc, break_by = "Cluster", log = T,
+               genes = c("Lcn2", "S100a9", "Mmp9", 
+                                "Itgax", "Csf1r",
+                                "Il1b", "Cxcl1", "Ccl4",
+                                "Rsad2", "Ifit2", "Il6",
+                                "Flt3", "Ccr7", "Ccl22"))
+
+save_ggplot("gene_dots_cluster")
+
+
+plot_violin(ex_sc, gene = c("Lcn2"), color_by = "Cluster", log_scale = T)
+save_ggplot("Lcn1")
+
+h2 <- search_gene(ex_sc, search = "H2-")
+
+plot_violin(ex_sc, gene = h2[4], color_by = "Cluster", log_scale = T)
+save_ggplot("H2DMa")
+
+plot_violin(ex_sc, gene = c("Itgax"), color_by = "Cluster", log_scale = T)
+save_ggplot("Itgax")
+
+```
+
+# Advanced scRNA-seq analysis  
+
+## Supervised Analysis
+
+From the above analysis, it is clear that some clusters are formed based on their cell type, while others are based on their experimental condition. In these cases it can be useful to incorporate prior information in order to obtain clusters and annotations that are grounded in biological significance. Below, we can assign "panels" similar to flow cytometry, that will enable cell groupings based on the expression of genes that you believe to signify biologically relevant cell types.
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+
+### SHALEK
+
+panel1 <- c("Lcn2", "Mmp9", "S100a9") # Neutrophil Markers
+panel2 <- c("H2-DMa", "Lyz1") # Mac
+panel3 <- c("Serpinb6b" ,"Ccr7") # DC
+
+panels <- list(panel1, panel2, panel3)
+
+names(panels) <- c("Neutrophil", "Undisrupted", "Cluster Disrupted")
+
+ex_sc <- flow_filter(ex_sc, panels = panels, title = "Flow Pass Cells")
+# save_ggplot("flow_filter_shalek")
+
+
+ex_sc <- flow_svm(ex_sc, pcnames = "Comp")
+
+plot_tsne_metadata(ex_sc, color_by = "Cluster", facet_by = "SVM_Classify")
+# save_ggplot("classify_Shalek", h = 4, w = 7)
+
+### HELFT
+
+panel1 <- c("Lcn2", "Mmp9", "S100a9") # Neutrophil Markers
+panel2 <- c("Mertk", "Csf1r") # Mac
+panel3 <- c("H2-DMa" ,"Flt3") # DC
+
+panels <- list(panel1, panel2, panel3)
+
+names(panels) <- c("Neutrophil", "Macrophage", "Denritic")
+
+ex_sc <- flow_filter(ex_sc, panels = panels, title = "Flow Pass Cells")
+# save_ggplot("flow_filter_helft")
+
+
+ex_sc <- flow_svm(ex_sc, pcnames = "Comp")
+
+plot_tsne_metadata(ex_sc, color_by = "Cluster", facet_by = "SVM_Classify")
+# save_ggplot("classify_helft", h = 4, w = 7)
+
+
+```
+Aggregate bulk and marker identification
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+
+ex_sc <- calc_agg_bulk(ex_sc,  aggregate_by = c("Timepoint", "SVM_Classify"))
+
+ex_sc$Type_Time <- apply(pData(ex_sc)[,c("SVM_Classify","Timepoint")],1,paste0, collapse = "_")
+
+ex_sc <- id_markers(ex_sc, id_by = "Type_Time", overwrite = T)
+
+markers <- return_markers(ex_sc, return_by = "Type_Time", num_markers = 20)
+
+plot_heatmap(ex_sc, genes = unique(unlist(markers)), type = "bulk", cluster_by = "row", facet_by = "SVM_Classify", cluster_type = "k-means", k = 8)
+
+# save_ggplot("bulk_heatmap", h =12, w = 6)
+
+```
+
+
+### Network analysis
+
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+
+
+```
+
+## DE analysis
+
+Now that cells are grouped by their cell type, we can run DE in order to determine which genes are change in association with our experimental conditions. 
+
+For simplicity we can subset to 0hr and 4hr, to  find the genes that change between these conditions.
+
+It should be noted that DE should always be run on raw counts, not on the normalized counts!
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+
+ex_sc_0_4 <- subset_ex_sc(ex_sc, variable = "Timepoint", select = c("0hr", "4hr"))
+
+table(pData(ex_sc_0_4)[,c("SVM_Classify", "Timepoint")])
+
+findDEgenes(input = ex_sc,
+            pd = pData(ex_sc_0_4),
+            DEgroup = "Timepoint",
+            contrastID = "4hr",
+            facet_by = "SVM_Classify",
+            outdir = "~/Downloads/")
+
+# Macrophages
+
+g <- plot_volcano(de_path = "~/Downloads/", de_file = "Macrophage_0hr_DEresults.tsv", fdr_cut = 1E-150, logfc_cut = 1)
+plot(g)
+mac_de <- unique(g$data$label)
+mac_de <- mac_de[-which(mac_de == "")]
+
+plot_violin(ex_sc_0_4, color_by = "Timepoint", facet_by = "SVM_Classify", gene = "Rsad2")
+
+# DCs
+
+g <- plot_volcano(de_path = "~/Downloads/", de_file = "Dendritic_0hr_DEresults.tsv", fdr_cut = 0.0001, logfc_cut = 2)
+plot(g)
+dc_de <- unique(g$data$label)
+dc_de <- dc_de[-which(dc_de == "")]
+
+plot_violin(ex_sc_0_4, color_by = "Timepoint", facet_by = "SVM_Classify", gene = "Ifit1")
+
+# Neutrophils
+
+g <- plot_volcano(de_path = "~/Downloads/", de_file = "Neutrophil_0hr_DEresults.tsv", fdr_cut = 1E-5, logfc_cut = 3)
+plot(g)
+neut_de <- unique(g$data$label)
+neut_de <- neut_de[-which(neut_de == "")]
+
+plot_violin(ex_sc_0_4, color_by = "Timepoint", facet_by = "SVM_Classify", gene = "Mmp9")
+
+# Heatmap of these DE genes
+
+all_de <- c(mac_de, dc_de, neut_de)
+unique(all_de)
+
+ex_sc <- calc_agg_bulk(ex_sc, aggregate_by = c("Timepoint", "SVM_Classify"))
+
+plot_heatmap(ex_sc, genes = c(mac_de, dc_de, neut_de), type = "bulk", facet_by = "SVM_Classify", gene_names = F)
+
+```
