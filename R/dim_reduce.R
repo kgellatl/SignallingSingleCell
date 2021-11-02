@@ -19,7 +19,7 @@
 #' @examples
 #' ex_sc_example <- dim_reduce(input = ex_sc_example, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 500, print_progress=TRUE)
 #'
-dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 1000, print_progress=TRUE, nVar=NA, log = F, scale = T){
+dim_reduce <- function(input, genelist, pre_reduce = "iPCA", nComp = 15, tSNE_perp = 30, iterations = 1000, print_progress=TRUE, nVar=NA, log = F, scale = T){
   input_exp <- exprs(input)[genelist,]
   if(log){
     input_exp <- log2(input_exp[,]+2)-1
@@ -36,7 +36,7 @@ dim_reduce <- function(input, genelist = gene_subset, pre_reduce = "iPCA", nComp
       print("Starting ICA")
     }
     ica <- fastICA::fastICA(t(input_exp), n.comp=(nComp), alg.typ = 'parallel', fun='logcosh', alpha = 1.0, method = 'C', verbose = print_progress)
-    colnames(ica$A) <- gene_subset
+    colnames(ica$A) <- genelist
     rownames(ica$S) <- colnames(input)
     set.seed(100)
     if(print_progress == TRUE){
