@@ -13,7 +13,7 @@
 #' @examples
 #' plot_tsne_metadata(ex_sc_example, color_by = "UMI_sum", title = "UMI_sum across clusters", facet_by = "Cluster", ncol = 3)
 
-plot_gene_dots <- function(input, genes, break_by, title = "", scale_by = FALSE){
+plot_gene_dots <- function(input, genes, break_by, title = "", scale_by = FALSE, log = F){
   vars <- unique(pData(input)[,break_by])
   vars <- sort(vars)
   plot_dat <- matrix(nrow = length(vars), ncol = length(genes))
@@ -36,6 +36,9 @@ plot_gene_dots <- function(input, genes, break_by, title = "", scale_by = FALSE)
   }
   plot_dat <- as.data.frame(plot_dat)
   plot_dat_lng <- tidyr::gather(plot_dat, key = "gene", "Expression", 1:ncol(plot_dat), factor_key = "TRUE")
+  if(log){
+    plot_dat_lng$Expression <- log2(plot_dat_lng$Expression+2)-1
+  }
   plot_dat_lng$celltype <- rep(vars, length(genes))
   plot_dat_lng$x <- rep(seq(1:length(vars)), length(genes))
   plot_dat_lng$y <- as.numeric(as.factor(plot_dat_lng$gene))
