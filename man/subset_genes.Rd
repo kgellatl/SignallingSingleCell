@@ -13,7 +13,7 @@ subset_genes(
   cutoff = 0.85,
   log = F,
   output = "simple",
-  fudge = T
+  fudge = F
 )
 }
 \arguments{

@@ -4,7 +4,14 @@
 \alias{plot_density_ridge}
 \title{Plot Density}
 \usage{
-plot_density_ridge(input, val, title = "", color_by)
+plot_density_ridge(
+  input,
+  val,
+  title = "",
+  color_by,
+  data = "pD",
+  log_scale = F
+)
 }
 \arguments{
 \item{input}{the input ex_sc}

@@ -13,7 +13,8 @@ plot_go_heatmap(
   subset_group = F,
   prune = F,
   cutoff_jaccard = 1,
-  word_similarity = 0.5
+  word_similarity = 0.5,
+  select_GO = NULL
 )
 }
 \arguments{

@@ -20,7 +20,8 @@ plot_tsne_gene(
   xcol = "x",
   ycol = "y",
   text_sizes = c(20, 10, 5, 10, 5, 5),
-  density_scale = 1
+  density_scale = 1,
+  background_sample = F
 )
 }
 \arguments{

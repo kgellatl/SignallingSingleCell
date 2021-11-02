@@ -27,7 +27,7 @@ findDEgenes(
 
 \item{DEgroup}{a pData variable}
 
-\item{contrastID}{the pData group to set as reference}
+\item{contrastID}{the condition value from DEgroup to be used as the contrast}
 
 \item{sizefactor}{a pData column containing the scran reported size factor for each cell}
 

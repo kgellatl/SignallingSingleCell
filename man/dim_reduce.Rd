@@ -6,14 +6,14 @@
 \usage{
 dim_reduce(
   input,
-  genelist = gene_subset,
+  genelist,
   pre_reduce = "iPCA",
   nComp = 15,
   tSNE_perp = 30,
   iterations = 1000,
   print_progress = TRUE,
   nVar = NA,
-  log = T,
+  log = F,
   scale = T
 )
 }

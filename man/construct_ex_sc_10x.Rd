@@ -4,7 +4,7 @@
 \alias{construct_ex_sc_10x}
 \title{Calculate Library Size}
 \usage{
-construct_ex_sc_10x(bc_path, long_genes = T, feature_assay = F)
+construct_ex_sc_10x(bc_path, long_genes = T, feature_assay = T)
 }
 \arguments{
 \item{input}{the input DIRECTORY}

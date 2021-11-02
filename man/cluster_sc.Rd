@@ -11,7 +11,8 @@ cluster_sc(
   num_clust = NA,
   s = 2,
   xcol = "x",
-  ycol = "y"
+  ycol = "y",
+  set.seed = F
 )
 }
 \arguments{

@@ -29,7 +29,8 @@ plot_heatmap(
   gene_labels_size = 2,
   gene_labels_nudge = -0.5,
   gene_labels_col = 1,
-  gene_labels_force = 1
+  gene_labels_force = 1,
+  return_results = F
 )
 }
 \arguments{

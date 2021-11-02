@@ -37,6 +37,6 @@ Imports:
     scater
 biocViews: Single Cell, Networking
 VignetteBuilder: knitr
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 Suggests: knitr,
     rmarkdown
