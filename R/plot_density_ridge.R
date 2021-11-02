@@ -13,11 +13,19 @@
 #' @examples
 #' draw_density(input = ex_sc_example, val = "UMI_sum", color_by = "Cluster", statistic = "mean")
 
-plot_density_ridge <- function(input, val, title = "", color_by){
-  dat <- pData(input)
-  ind1 <- grep(val, colnames(dat))
-  if(length(ind1) == 0){
-    dat <- cbind(dat, log2(exprs(input)[val,]+2)-1)
+plot_density_ridge <- function(input, val, title = "", color_by, data = "pD", log_scale = F){
+  if(data == "pD"){
+    dat <- pData(input)
+  }
+  if(data == "fD"){
+    dat <- fData(input)
+  }
+  if(data == "exprs"){
+    if(log_scale){
+      dat <- cbind(pData(input), log2(exprs(input)[val,]+2)-1)
+    }else {
+      dat <- cbind(pData(input), exprs(input)[val,])
+    }
     colnames(dat) <- c(colnames(dat[2:ncol(dat)-1]), val)
   }
   g <- ggplot(dat, aes_string(x = val, y = color_by, col = color_by, fill = color_by))
@@ -32,7 +40,7 @@ plot_density_ridge <- function(input, val, title = "", color_by){
     g <- g + ggtitle(title)
   }
   g <- g + xlab(val)
-  if(length(ind1) == 1){
+  if(log_scale && data != "exprs"){
     g <- g + scale_x_log10()
   }
   return(g)
