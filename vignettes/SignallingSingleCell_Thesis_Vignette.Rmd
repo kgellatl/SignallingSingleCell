@@ -1,5 +1,5 @@
 ---
-title: "BMDC_analysis"
+title: "Kyle_Gellatly_BMDC_Thesis_Vignette"
 geometry: margin=0.5cm
 author: "Kyle Gellatly"
 output:
@@ -572,8 +572,157 @@ plot_heatmap(ex_sc, genes = unique(unlist(markers)), type = "bulk", cluster_by =
 
 ### Network analysis
 
+# First we need to convert from human to mouse
 
 ```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+library(nichenetr)
+
+RL_Dat <- SignallingSingleCell:::Receptor_Ligand_Data
+colnames(RL_Dat)
+
+ligs <- as.character(RL_Dat$Ligand.ApprovedSymbol)
+recs <- as.character(RL_Dat$Receptor.ApprovedSymbol)
+
+ligs_mouse <- nichenetr::convert_human_to_mouse_symbols(ligs)
+recs_mouse <- nichenetr::convert_human_to_mouse_symbols(recs)
+
+length(ligs_mouse)
+
+RL_Dat$Ligand.ApprovedSymbol <- ligs_mouse
+RL_Dat$Receptor.ApprovedSymbol <- recs_mouse
+
+RL_Dat <- RL_Dat[-which(is.na(RL_Dat$Ligand.ApprovedSymbol)),]
+RL_Dat <- RL_Dat[-which(is.na(RL_Dat$Receptor.ApprovedSymbol)),] # not needed
+
+table(RL_Dat$Ligand.ApprovedSymbol)
+RL_Dat$Ligand.ApprovedSymbol[grep("^a$", RL_Dat$Ligand.ApprovedSymbol)] <- "Asip"
+
+table(RL_Dat$Receptor.ApprovedSymbol)
+
+```
+# Now can start network analysis
+
+```{r, error=FALSE, warning=FALSE, cache=FALSE, include=TRUE}
+
+ex_sc <- id_rl(ex_sc, database = RL_Dat)
+
+vals <- which(fData(ex_sc)[,"networks_ligands"])
+ligs <- rownames(fData(ex_sc))[vals]
+length(ligs)
+
+kres_ligs <- plot_heatmap(ex_sc, genes = ligs, 
+             type = "bulk",  
+             pdf_format = "tile", 
+             scale_by = "row", 
+             cluster_by = "row",
+             cluster_type = "kmeans",
+             k = 10, 
+             show_k = T,
+             return_results = T)
+
+
+int_ligs <- c(6,9,5,8,7,3,4,10,2)
+int_ligs <- rev(int_ligs)
+ligs_reorder <- c()
+
+for (i in 1:length(int_ligs)) {
+  int1 <- int_ligs[i]
+  ind <- grep(paste0("^", int1, "$"), kres_ligs[[2]]$cluster)
+  reorder <- names(kres_ligs[[2]]$cluster)[ind]
+  ligs_reorder <- c(ligs_reorder, reorder)
+}
+
+plot_heatmap(ex_sc, genes = ligs_reorder, type = "bulk", cluster_by = FALSE, facet_by = "SVM_Classify", pdf_format = "tile", scale_by = "row", gene_names = T, group_names = FALSE, title = "Ligands")
+# save_ggplot("heatmap_ligands", h = 12 , w = 4)
+
+Cxcl <- grep("Cxcl", ligs_reorder, value = T)
+Ccl <- grep("Cxcl", ligs_reorder, value = T)
+Tnf <- grep("Tnf", ligs_reorder, value = T)
+Il <- grep("^Il", ligs_reorder, value = T)
+
+
+interested_ligands <- c(Cxcl, Ccl, Tnf, Il)
+
+plot_heatmap(ex_sc, 
+             genes = ligs_reorder, 
+             type = "bulk", 
+             cluster_by = FALSE, 
+             facet_by = "SVM_Classify", 
+             pdf_format = "tile", 
+             scale_by = "row", 
+             gene_names = T, 
+             group_names = FALSE, 
+             title = "Ligands", 
+             gene_labels = interested_ligands,  
+             gene_labels_col = 3, 
+             gene_labels_nudge = -1, 
+             gene_labels_force = 1)
+# save_ggplot("heatmap_ligands_labelled", h = 8, w = 4)
+
+
+
+####
+####
+####
+
+vals <- which(fData(ex_sc)[,"networks_Receptors"])
+recs <- rownames(fData(ex_sc))[vals]
+length(recs)
+
+kres_rec <- plot_heatmap(ex_sc, genes = recs, 
+             type = "bulk",  
+             pdf_format = "tile", 
+             scale_by = "row", 
+             cluster_by = "row",
+             cluster_type = "kmeans",
+             k = 9, 
+             show_k = T,
+             return_results = T)
+
+
+int_rec <- c(5,4,7,3,8,9,6,2,1)
+int_rec <- rev(int_rec)
+rec_reorder <- c()
+
+for (i in 1:length(int_rec)) {
+  int1 <- int_rec[i]
+  ind <- grep(paste0("^", int1, "$"), kres_rec[[2]]$cluster)
+  reorder <- names(kres_rec[[2]]$cluster)[ind]
+  rec_reorder <- c(rec_reorder, reorder)
+}
+
+plot_heatmap(ex_sc, genes = rec_reorder, type = "bulk", cluster_by = FALSE, facet_by = "SVM_Classify", pdf_format = "tile", scale_by = "row", gene_names = T, group_names = FALSE, title = "Ligands")
+# save_ggplot("heatmap_recs", h = 15 , w = 4)
+
+
+Flt <- grep("^Flt", rec_reorder, value = T)
+Tnf <- grep("^Tnf", rec_reorder, value = T)
+IL <- grep("^Il", rec_reorder, value = T)
+Ccr <- grep("^Ccr", rec_reorder, value = T)
+# Cd <- grep("^Cd", rec_reorder, value = T)
+# itg <- grep("^Itg", rec_reorder, value = T)
+mert <- grep("^Mer", rec_reorder, value = T)
+
+interested_recs <- c(Flt, Tnf,IL, Ccr,  mert)
+
+
+plot_heatmap(ex_sc, 
+             genes = rec_reorder, 
+             type = "bulk", 
+             cluster_by = FALSE, 
+             facet_by = "SVM_Classify", 
+             pdf_format = "tile", 
+             scale_by = "row", 
+             gene_names = T, 
+             group_names = FALSE, 
+             title = "Receptors", 
+             gene_labels = interested_recs,  
+             gene_labels_col = 7, 
+             gene_labels_nudge = 1, 
+             gene_labels_force = 1)
+# save_ggplot("heatmap_recs_labelled", h = 8, w = 4)
+
+
 
 
 ```
