@@ -343,7 +343,7 @@ findDEgenes(input = ex_sc,
 
 # Macrophages
 
-g <- plot_volcano(de_path = "~/Downloads/", de_file = "Macrophage_0hr_DEresults.tsv", fdr_cut = 1E-150, logfc_cut = 1)
+g <- plot_volcano(de_path = "~/Downloads/", de_file = "Macrophage_4hr_DEresults.tsv", fdr_cut = 1E-150, logfc_cut = 1)
 plot(g)
 mac_de <- unique(g$data$label)
 mac_de <- mac_de[-which(mac_de == "")]
